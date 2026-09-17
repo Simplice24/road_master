@@ -1,0 +1,387 @@
+{
+  "info": {
+    "name": "Road Master API (RBAC)",
+    "description": "Exercises the CASL/Spatie-style dynamic RBAC system: auth, roles, permissions, user-role assignment, effective permissions, and the accessibleBy-scoped exam-attempts endpoint.\n\nRun order matters for a full top-to-bottom Collection Runner pass:\n1. Auth — registers the first user (becomes SuperAdmin) and a second user (becomes the seeded `client` role via DefaultRole), then logs in.\n2. Permissions — creates a permission, captures {{permissionId}}.\n3. Roles — creates a role, captures {{roleId}}, attaches the permission.\n4. Users — assigns the new role to the client user, reads their roles and effective permissions.\n5. Exam Attempts — calls the accessibleBy-scoped endpoint as the client.\n6. App — public health check.\n7. Cleanup — detaches/unassigns/deletes what was created.\n8. Advanced (use with care) — sets a role as the platform default; kept separate so a normal run never clobbers the seeded `client` default.\n\nRequests that need SuperAdmin (Roles/Permissions/Users management) use {{superAdminToken}}; the exam-attempts request uses {{clientToken}} to demonstrate row-level scoping.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "superAdminToken", "value": "" },
+    { "key": "superAdminUserId", "value": "" },
+    { "key": "clientToken", "value": "" },
+    { "key": "clientUserId", "value": "" },
+    { "key": "roleId", "value": "" },
+    { "key": "permissionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register - First User (becomes SuperAdmin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Ada Admin\",\n  \"email\": \"admin@example.com\",\n  \"phone\": \"0700000001\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "description": "Only produces a SuperAdmin if the database is completely empty of users. If you've already registered a user, this becomes an ordinary client-role registration instead."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('registered', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('superAdminToken', body.accessToken);",
+                  "function decodeJwtPayload(token) {",
+                  "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
+                  "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
+                  "  return JSON.parse(atob(padded));",
+                  "}",
+                  "pm.collectionVariables.set('superAdminUserId', decodeJwtPayload(body.accessToken).sub);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register - Second User (becomes default client role)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Chris Client\",\n  \"email\": \"client@example.com\",\n  \"phone\": \"0700000002\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "description": "Requires prisma/seed.ts to have been run first so a DefaultRole row exists — otherwise registration throws."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('registered', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('clientToken', body.accessToken);",
+                  "function decodeJwtPayload(token) {",
+                  "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
+                  "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
+                  "  return JSON.parse(atob(padded));",
+                  "}",
+                  "pm.collectionVariables.set('clientUserId', decodeJwtPayload(body.accessToken).sub);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "Re-login helper, e.g. after the SuperAdmin token expires. Refreshes {{superAdminToken}}/{{superAdminUserId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('logged in', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('superAdminToken', body.accessToken);",
+                  "function decodeJwtPayload(token) {",
+                  "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
+                  "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
+                  "  return JSON.parse(atob(padded));",
+                  "}",
+                  "pm.collectionVariables.set('superAdminUserId', decodeJwtPayload(body.accessToken).sub);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Permissions",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Create Permission",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"update\",\n  \"subject\": \"ExamAttempt\",\n  \"conditions\": { \"userId\": \"${user.id}\" },\n  \"description\": \"Update own exam attempts (row-level, via ${user.id} interpolation)\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/permissions", "host": ["{{baseUrl}}"], "path": ["permissions"] },
+            "description": "action/subject/conditions/fields are the CASL rule stored as data — see CaslAbilityFactory for how `conditions` gets interpolated against the real user at ability-build time."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('permissionId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Permissions",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/permissions", "host": ["{{baseUrl}}"], "path": ["permissions"] }
+          }
+        },
+        {
+          "name": "Get Permission by Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/permissions/{{permissionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "{{permissionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Permission",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Update own exam attempts (edited via Postman)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions/{{permissionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "{{permissionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"exam-marker\",\n  \"description\": \"Can review and grade exam attempts\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('roleId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Roles",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] }
+          }
+        },
+        {
+          "name": "Get Role by Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles", "{{roleId}}"] }
+          }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Can review, grade, and annotate exam attempts\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles", "{{roleId}}"] }
+          }
+        },
+        {
+          "name": "Attach Permission to Role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"permissionId\": \"{{permissionId}}\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}/permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "{{roleId}}", "permissions"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "List User Roles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{clientUserId}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{clientUserId}}", "roles"]
+            }
+          }
+        },
+        {
+          "name": "Assign Role to User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"roleId\": \"{{roleId}}\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{clientUserId}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{clientUserId}}", "roles"]
+            },
+            "description": "Gives the client user the extra 'exam-marker' role — from here on their ability is the union of the seeded 'client' role's permissions and this one, with zero code changes."
+          }
+        },
+        {
+          "name": "Get Effective Permissions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{clientUserId}}/effective-permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{clientUserId}}", "effective-permissions"]
+            },
+            "description": "Returns the caller's fully resolved CASL rule set (union of every attached role's permissions) — the same thing a frontend would call to conditionally render UI."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exam Attempts",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+      "item": [
+        {
+          "name": "List Accessible Exam Attempts (as client)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
+            "description": "Runs as the client user. Uses @casl/prisma's accessibleBy() to turn their permission conditions into a Prisma `where` clause — with only the seeded 'client' role they should see just their own exam attempts, never other users'."
+          }
+        }
+      ]
+    },
+    {
+      "name": "App",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/", "host": ["{{baseUrl}}"], "path": [""] },
+            "description": "@Public() route — no Authorization header needed."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Unassign Role from User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{clientUserId}}/roles/{{roleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{clientUserId}}", "roles", "{{roleId}}"]
+            }
+          }
+        },
+        {
+          "name": "Detach Permission from Role",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}/permissions/{{permissionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "{{roleId}}", "permissions", "{{permissionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles", "{{roleId}}"] }
+          }
+        },
+        {
+          "name": "Delete Permission",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/permissions/{{permissionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "{{permissionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Advanced (use with care)",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Set Role as Platform Default",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}/default",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "{{roleId}}", "default"]
+            },
+            "description": "⚠️ Repoints the singleton DefaultRole at {{roleId}} — every user registered after this runs gets that role instead of the seeded 'client' role. Kept out of the main run order on purpose; run only when you mean it."
+          }
+        }
+      ]
+    }
+  ]
+}

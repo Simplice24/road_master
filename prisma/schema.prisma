@@ -1,0 +1,315 @@
+// ==========================================================
+// Provisional License Online Exam Platform — Prisma Schema
+// Stack: Nest.js (API) + Next.js (client) + Prisma ORM
+// ==========================================================
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// -----------------------------
+// ENUMS
+// -----------------------------
+
+enum QuestionType {
+  TEXT
+  TEXT_IMAGE
+}
+
+enum TransactionType {
+  TOPUP
+  EXAM_FEE
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum ExamAttemptStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+// -----------------------------
+// USER & WALLET
+// -----------------------------
+
+model User {
+  id               String   @id @default(uuid())
+  fullName         String
+  email            String?   @unique
+  phone            String
+  passwordHash     String
+  userRoles        UserRole[]
+
+  walletBalance    Decimal  @default(0) @db.Decimal(10, 2)
+  hasUsedFreeExam  Boolean  @default(false)
+
+  transactions     Transaction[]
+  examAttempts     ExamAttempt[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("users")
+}
+
+// -----------------------------
+// RBAC (dynamic, DB-driven — pure role -> permission model)
+// -----------------------------
+
+model Role {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  isSuperAdmin  Boolean  @default(false)
+  guardName     String?
+
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+  defaultRole     DefaultRole?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("roles")
+}
+
+// Singleton row: id is pinned to 1, so a second row can never be inserted —
+// the primary key itself is the uniqueness guarantee. No partial index needed.
+model DefaultRole {
+  id     Int    @id @default(1)
+  roleId String @unique
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@map("default_role")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  action      String   // e.g. "create", "read", "update", "delete", "manage"
+  subject     String   // e.g. "Question", "ExamAttempt", "Transaction", "all"
+  conditions  Json?    // CASL-style conditions, e.g. { "userId": "${user.id}" }
+  fields      Json?    // MySQL has no native array type — store as a JSON array of strings
+  description String?
+
+  rolePermissions RolePermission[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // No DB-level unique constraint on (action, subject): legitimate rows
+  // intentionally share an action+subject with different `conditions`
+  // (e.g. unconditioned "update ExamAttempt" for admins alongside
+  // owner-scoped "update ExamAttempt" for clients). Json columns can't be
+  // part of a unique index on MySQL via Prisma anyway, so exact-duplicate
+  // detection (same action + subject + deep-equal conditions) is enforced
+  // in PermissionsService before insert, not by the database.
+  @@index([action, subject])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId       String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permissionId String
+
+  createdAt    DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId    String
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model Transaction {
+  id            String             @id @default(uuid())
+  user          User               @relation(fields: [userId], references: [id])
+  userId        String
+
+  type          TransactionType
+  status        TransactionStatus  @default(PENDING)
+  amount        Decimal            @db.Decimal(10, 2)
+  isReversed    Boolean            @default(false)
+
+  provider      String?            // e.g. MTN_MOMO, CARD, AIRTEL_MONEY
+  providerRef   String?            // gateway transaction reference
+
+  examAttempt   ExamAttempt?       // if this transaction paid for an exam
+
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([userId])
+  @@map("transactions")
+}
+
+// -----------------------------
+// QUESTION BANK
+// -----------------------------
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+
+  questions   Question[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("categories")
+}
+
+model Question {
+  id           String        @id @default(uuid())
+  category     Category      @relation(fields: [categoryId], references: [id])
+  categoryId   String
+
+  type         QuestionType  @default(TEXT)
+  text         String
+  imageUrl     String?       // populated when type = TEXT_IMAGE
+  explanation  String?       // shown when client reviews answers
+
+  isActive     Boolean       @default(true)
+
+  options      Option[]
+  attemptLinks ExamAttemptQuestion[]
+  answers      ExamAttemptAnswer[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@map("questions")
+}
+
+model Option {
+  id           String     @id @default(uuid())
+  question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId   String
+
+  text         String?
+  imageUrl     String?
+  isCorrect    Boolean    @default(false)
+
+  selectedIn   ExamAttemptAnswer[]
+
+  @@index([questionId])
+  @@map("options")
+}
+
+// -----------------------------
+// EXAM CONFIG
+// -----------------------------
+
+model ExamConfig {
+  id                 String   @id @default(uuid())
+  name               String   @default("Standard Provisional Exam")
+  numberOfQuestions  Int      @default(20)
+  price              Decimal  @default(0) @db.Decimal(10, 2)
+  passMarkPercent    Int      @default(80)
+  durationMinutes    Int      @default(30)
+  isActive           Boolean  @default(true)
+
+  examAttempts       ExamAttempt[]
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("exam_configs")
+}
+
+// -----------------------------
+// EXAM ATTEMPTS (results live here)
+// -----------------------------
+
+model ExamAttempt {
+  id              String              @id @default(uuid())
+  user            User                @relation(fields: [userId], references: [id])
+  userId          String
+
+  examConfig      ExamConfig          @relation(fields: [examConfigId], references: [id])
+  examConfigId    String
+
+  transaction     Transaction?        @relation(fields: [transactionId], references: [id])
+  transactionId   String?             @unique
+
+  isFree          Boolean             @default(false)
+  status          ExamAttemptStatus   @default(IN_PROGRESS)
+
+  totalQuestions  Int
+  score           Int                 @default(0)
+  percentage      Decimal             @default(0) @db.Decimal(5, 2)
+  passed          Boolean             @default(false)
+
+  questions       ExamAttemptQuestion[]
+  answers         ExamAttemptAnswer[]
+
+  startedAt       DateTime            @default(now())
+  completedAt     DateTime?
+
+  @@index([userId])
+  @@map("exam_attempts")
+}
+
+// Snapshot of which questions (and in what order) made up this attempt
+model ExamAttemptQuestion {
+  id             String       @id @default(uuid())
+  examAttempt    ExamAttempt  @relation(fields: [examAttemptId], references: [id], onDelete: Cascade)
+  examAttemptId  String
+
+  question       Question     @relation(fields: [questionId], references: [id])
+  questionId     String
+
+  order          Int          // 1..20 display order
+
+  @@unique([examAttemptId, questionId])
+  @@index([examAttemptId])
+  @@map("exam_attempt_questions")
+}
+
+// The client's selected answer per question, per attempt
+model ExamAttemptAnswer {
+  id                String       @id @default(uuid())
+  examAttempt       ExamAttempt  @relation(fields: [examAttemptId], references: [id], onDelete: Cascade)
+  examAttemptId     String
+
+  question          Question     @relation(fields: [questionId], references: [id])
+  questionId        String
+
+  selectedOption    Option?      @relation(fields: [selectedOptionId], references: [id])
+  selectedOptionId  String?
+
+  isCorrect         Boolean      @default(false)
+  answeredAt        DateTime     @default(now())
+
+  @@unique([examAttemptId, questionId])
+  @@index([examAttemptId])
+  @@map("exam_attempt_answers")
+}
