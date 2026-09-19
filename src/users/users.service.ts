@@ -5,8 +5,9 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { CaslAbilityFactory, AppAbility } from '../casl/casl-ability.factory';
 import { Prisma, User } from '../../generated/prisma/client';
+import { accessibleBy } from '@casl/prisma';
 
 export interface CreateUserInput {
   fullName: string;
@@ -106,15 +107,40 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async listRoles(userId: string) {
+  findByPhone(phone: string) {
+    return this.prisma.user.findFirst({ where: { phone } });
+  }
+
+  async userProfile(id:string, ability: AppAbility) {
+    const where: Prisma.UserWhereInput = {
+      AND: [{ id }, accessibleBy(ability, 'read').ofType('User')],
+    };
+    const user = await this.prisma.user.findFirst({ where });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async listUsers(ability: AppAbility) {
+    const where: Prisma.UserWhereInput = accessibleBy(ability, 'read').ofType(
+      'User',
+    );
+    return this.prisma.user.findMany({ where, include: { userRoles: true } });
+  }
+
+  async listRoles(userId: string, ability: AppAbility) {
     await this.ensureExists(userId);
+    const where: Prisma.UserRoleWhereInput = {
+      AND: [{ userId }, accessibleBy(ability, 'read').ofType('Role')],
+    };
     return this.prisma.userRole.findMany({
-      where: { userId },
+      where,
       include: { role: true },
     });
   }
 
-  async assignRole(userId: string, roleId: string) {
+  async assignRole(userId: string, roleId: string, ability: AppAbility) {
     await this.ensureExists(userId);
     return this.prisma.userRole.upsert({
       where: { userId_roleId: { userId, roleId } },
@@ -123,7 +149,7 @@ export class UsersService {
     });
   }
 
-  async unassignRole(userId: string, roleId: string) {
+  async unassignRole(userId: string, roleId: string, ability: AppAbility) {
     await this.prisma.userRole
       .delete({ where: { userId_roleId: { userId, roleId } } })
       .catch(() => undefined);

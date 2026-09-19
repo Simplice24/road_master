@@ -11,6 +11,10 @@ import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ExamAttemptsModule } from './exam-attempts/exam-attempts.module';
+import { CategoryModule } from './category/category.module';
+import { QuestionModule } from './question/question.module';
+import { ExamConfigModule } from './exam-config/exam-config.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -20,7 +24,11 @@ import { ExamAttemptsModule } from './exam-attempts/exam-attempts.module';
     UsersModule,
     RolesModule,
     PermissionsModule,
+    TransactionsModule,
     ExamAttemptsModule,
+    CategoryModule,
+    QuestionModule,
+    ExamConfigModule,
   ],
   controllers: [AppController],
   providers: [

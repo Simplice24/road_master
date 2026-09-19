@@ -178,7 +178,8 @@ model Category {
   name        String     @unique
   description String?
 
-  questions   Question[]
+  questions    Question[]
+  examAttempts ExamAttempt[]
 
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -187,23 +188,24 @@ model Category {
 }
 
 model Question {
-  id           String        @id @default(uuid())
-  category     Category      @relation(fields: [categoryId], references: [id])
-  categoryId   String
+  id            String        @id @default(uuid())
+  category      Category      @relation(fields: [categoryId], references: [id])
+  categoryId    String
 
-  type         QuestionType  @default(TEXT)
-  text         String
-  imageUrl     String?       // populated when type = TEXT_IMAGE
-  explanation  String?       // shown when client reviews answers
+  type          QuestionType  @default(TEXT)
+  text          String
+  imageUrl      String?       // populated when type = TEXT_IMAGE
+  explanation   String?       // shown when client reviews answers
 
-  isActive     Boolean       @default(true)
+  isActive      Boolean       @default(true)
+  allowMultiple Boolean      @default(false)
 
-  options      Option[]
-  attemptLinks ExamAttemptQuestion[]
-  answers      ExamAttemptAnswer[]
+  options       Option[]
+  attemptLinks  ExamAttemptQuestion[]
+  answers       ExamAttemptAnswer[]
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@index([categoryId])
   @@map("questions")
@@ -218,7 +220,7 @@ model Option {
   imageUrl     String?
   isCorrect    Boolean    @default(false)
 
-  selectedIn   ExamAttemptAnswer[]
+  selectedIn   ExamAttemptAnswerOption[] 
 
   @@index([questionId])
   @@map("options")
@@ -233,8 +235,8 @@ model ExamConfig {
   name               String   @default("Standard Provisional Exam")
   numberOfQuestions  Int      @default(20)
   price              Decimal  @default(0) @db.Decimal(10, 2)
-  passMarkPercent    Int      @default(80)
-  durationMinutes    Int      @default(30)
+  passMarkPercent    Int      @default(60)
+  durationMinutes    Int      @default(20)
   isActive           Boolean  @default(true)
 
   examAttempts       ExamAttempt[]
@@ -256,6 +258,11 @@ model ExamAttempt {
 
   examConfig      ExamConfig          @relation(fields: [examConfigId], references: [id])
   examConfigId    String
+
+  // When set, the exam draws only from this category's questions (e.g. a client drilling
+  // "Traffic Signs"). When null, questions are balanced across every active category.
+  category        Category?           @relation(fields: [categoryId], references: [id])
+  categoryId      String?
 
   transaction     Transaction?        @relation(fields: [transactionId], references: [id])
   transactionId   String?             @unique
@@ -296,20 +303,32 @@ model ExamAttemptQuestion {
 
 // The client's selected answer per question, per attempt
 model ExamAttemptAnswer {
-  id                String       @id @default(uuid())
-  examAttempt       ExamAttempt  @relation(fields: [examAttemptId], references: [id], onDelete: Cascade)
+  id                String                     @id @default(uuid())
+  examAttempt       ExamAttempt                @relation(fields: [examAttemptId], references: [id], onDelete: Cascade)
   examAttemptId     String
 
-  question          Question     @relation(fields: [questionId], references: [id])
+  question          Question                   @relation(fields: [questionId], references: [id])
   questionId        String
 
-  selectedOption    Option?      @relation(fields: [selectedOptionId], references: [id])
-  selectedOptionId  String?
+  selectedOptions   ExamAttemptAnswerOption[]   // CHANGED — replaces selectedOption/selectedOptionId
 
-  isCorrect         Boolean      @default(false)
-  answeredAt        DateTime     @default(now())
+  isCorrect         Boolean                    @default(false)
+  answeredAt        DateTime                   @default(now())
 
   @@unique([examAttemptId, questionId])
   @@index([examAttemptId])
   @@map("exam_attempt_answers")
+}
+
+model ExamAttemptAnswerOption {
+  id         String             @id @default(uuid())
+  answer     ExamAttemptAnswer  @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  answerId   String
+
+  option     Option             @relation(fields: [optionId], references: [id])
+  optionId   String
+
+  @@unique([answerId, optionId])
+  @@index([optionId])
+  @@map("exam_attempt_answer_options")
 }

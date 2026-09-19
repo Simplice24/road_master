@@ -36,6 +36,12 @@ const CLIENT_PERMISSIONS: SeedPermission[] = [
     conditions: { userId: '${user.id}' },
     description: 'View own transactions',
   },
+  {
+    action: 'create',
+    subject: 'Transaction',
+    conditions: { userId: '${user.id}' },
+    description: 'Top up own wallet',
+  },
   { action: 'read', subject: 'User', conditions: { id: '${user.id}' }, description: 'View own profile' },
   { action: 'update', subject: 'User', conditions: { id: '${user.id}' }, description: 'Update own profile' },
 ];

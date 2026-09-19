@@ -45,6 +45,8 @@ export default tseslint.config(
       'src/casl/**/*.ts',
       'src/users/users.service.ts',
       'src/exam-attempts/**/*.ts',
+      'src/category/**/*.ts',
+      'src/question/**/*.ts',
       'test/rbac-bootstrap.e2e-spec.ts',
     ],
     rules: {
