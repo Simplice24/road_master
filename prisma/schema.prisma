@@ -193,9 +193,11 @@ model Question {
   categoryId    String
 
   type          QuestionType  @default(TEXT)
-  text          String
+  text          String        @db.Text // unannotated String maps to VARCHAR(191) on MySQL —
+                                        // too short for a real question sentence; MySQL silently
+                                        // truncates instead of erroring unless strict SQL mode is on
   imageUrl      String?       // populated when type = TEXT_IMAGE
-  explanation   String?       // shown when client reviews answers
+  explanation   String?       @db.Text // shown when client reviews answers
 
   isActive      Boolean       @default(true)
   allowMultiple Boolean      @default(false)
@@ -216,7 +218,7 @@ model Option {
   question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   String
 
-  text         String?
+  text         String?    @db.Text // see Question.text above — same VARCHAR(191) truncation risk
   imageUrl     String?
   isCorrect    Boolean    @default(false)
 

@@ -1,17 +1,11 @@
 {
   "info": {
-    "name": "Road Master API (RBAC)",
-    "description": "Exercises the CASL/Spatie-style dynamic RBAC system: auth, roles, permissions, user-role assignment, effective permissions, and the accessibleBy-scoped exam-attempts endpoint.\n\nRun order matters for a full top-to-bottom Collection Runner pass:\n1. Auth — registers the first user (becomes SuperAdmin) and a second user (becomes the seeded `client` role via DefaultRole), then logs in.\n2. Permissions — creates a permission, captures {{permissionId}}.\n3. Roles — creates a role, captures {{roleId}}, attaches the permission.\n4. Users — assigns the new role to the client user, reads their roles and effective permissions.\n5. Exam Attempts — calls the accessibleBy-scoped endpoint as the client.\n6. App — public health check.\n7. Cleanup — detaches/unassigns/deletes what was created.\n8. Advanced (use with care) — sets a role as the platform default; kept separate so a normal run never clobbers the seeded `client` default.\n\nRequests that need SuperAdmin (Roles/Permissions/Users management) use {{superAdminToken}}; the exam-attempts request uses {{clientToken}} to demonstrate row-level scoping.",
+    "name": "Road Master API (RBAC + Exams)",
+    "description": "Full exercise of every implemented endpoint: auth, dynamic CASL/Spatie-style RBAC (roles/permissions/user-role assignment/effective-permissions), question-bank content management (categories/questions), exam configuration, wallet top-ups, and the complete exam-attempt lifecycle (free attempt, paid attempt, insufficient-balance rejection, scoring, pass/fail, and the one-attempt-at-a-time guard) — plus a dedicated Edge Cases folder for the negative paths (403/401/404/409/400) that a happy-path-only run never touches.\n\n**Before running:** import `RoadMaster.postman_environment.json` and select it in the environment dropdown (top right). Every token/id captured during the run is written there — nothing needs to be copy-pasted between requests.\n\nRun order for a full top-to-bottom Collection Runner pass:\n1. **Auth** — registers the first user (becomes SuperAdmin) and a second user (becomes the seeded `client` role via DefaultRole). The first request also stamps a fresh `{{runId}}` so re-running the whole collection never collides on unique fields (emails/phones/category name).\n2. **Categories** / **Questions** / **Exam Config** — SuperAdmin builds a 2-question category and an exam config priced at 500, pass mark 60%.\n3. **Transactions** — client tops up their wallet.\n4. **Exam Attempts** — client sits the exam 5 times back-to-back, exercising: the free first attempt, a paid attempt with a wrong answer (fails the pass mark), a paid attempt with the exact remaining balance, a paid attempt that correctly gets rejected for insufficient balance, and a final attempt left deliberately `IN_PROGRESS` so the Edge Cases folder has something to submit answers against.\n5. **Permissions** / **Roles** / **Users** — the original dynamic-RBAC demo: create a permission + role, attach it, grant it to the client user, read back their effective permissions, then detach everything.\n6. **App** — public health check.\n7. **Advanced (use with care)** — repoints the singleton `DefaultRole`; kept out of the main run so a normal pass never changes what new registrants land in.\n8. **Edge Cases & Validation** — every negative path found while wiring this up: wrong password, duplicate email, no-token 401, RBAC 403s, invalid option submission, double-complete, deleting content that's still referenced (409, by design — see the service's `mapPrismaError`), and the in-progress guard.\n9. **Cleanup** — detaches/unassigns/deletes the Permissions/Roles demo data. Category/Question/ExamConfig created in this run are *not* deleted here — once an ExamAttempt references them they're FK-protected (that's exactly what the 409 tests in Edge Cases confirm), so leftover exam content across runs is expected.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:3000" },
-    { "key": "superAdminToken", "value": "" },
-    { "key": "superAdminUserId", "value": "" },
-    { "key": "clientToken", "value": "" },
-    { "key": "clientUserId", "value": "" },
-    { "key": "roleId", "value": "" },
-    { "key": "permissionId", "value": "" }
+    { "key": "baseUrl", "value": "http://localhost:3000" }
   ],
   "item": [
     {
@@ -19,17 +13,17 @@
       "item": [
         {
           "name": "Register - First User (becomes SuperAdmin)",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Ada Admin\",\n  \"email\": \"admin@example.com\",\n  \"phone\": \"0700000001\",\n  \"password\": \"password123\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
-            "description": "Only produces a SuperAdmin if the database is completely empty of users. If you've already registered a user, this becomes an ordinary client-role registration instead."
-          },
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Fresh run id so email/phone/category-name collisions never happen across reruns.",
+                  "pm.environment.set('runId', Date.now());"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -37,30 +31,32 @@
                 "exec": [
                   "pm.test('registered', () => pm.response.to.have.status(201));",
                   "const body = pm.response.json();",
-                  "pm.collectionVariables.set('superAdminToken', body.accessToken);",
+                  "pm.environment.set('superAdminToken', body.accessToken);",
+                  "pm.environment.set('superAdminPhone', pm.environment.get('runId') + '01');",
+                  "pm.environment.set('superAdminEmail', 'admin' + pm.environment.get('runId') + '@example.com');",
                   "function decodeJwtPayload(token) {",
                   "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
                   "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
                   "  return JSON.parse(atob(padded));",
                   "}",
-                  "pm.collectionVariables.set('superAdminUserId', decodeJwtPayload(body.accessToken).sub);"
+                  "pm.environment.set('superAdminUserId', decodeJwtPayload(body.accessToken).sub);"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Ada Admin\",\n  \"email\": \"admin{{runId}}@example.com\",\n  \"phone\": \"{{runId}}01\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "description": "Only produces a SuperAdmin if the database is completely empty of users. If you've already registered a user against this database, this becomes an ordinary client-role registration instead — wipe the users/roles tables (or point at a fresh DB) if you need a real SuperAdmin bootstrap."
+          }
         },
         {
           "name": "Register - Second User (becomes default client role)",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Chris Client\",\n  \"email\": \"client@example.com\",\n  \"phone\": \"0700000002\",\n  \"password\": \"password123\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
-            "description": "Requires prisma/seed.ts to have been run first so a DefaultRole row exists — otherwise registration throws."
-          },
           "event": [
             {
               "listen": "test",
@@ -69,30 +65,32 @@
                 "exec": [
                   "pm.test('registered', () => pm.response.to.have.status(201));",
                   "const body = pm.response.json();",
-                  "pm.collectionVariables.set('clientToken', body.accessToken);",
+                  "pm.environment.set('clientToken', body.accessToken);",
+                  "pm.environment.set('clientPhone', pm.environment.get('runId') + '02');",
+                  "pm.environment.set('clientEmail', 'client' + pm.environment.get('runId') + '@example.com');",
                   "function decodeJwtPayload(token) {",
                   "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
                   "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
                   "  return JSON.parse(atob(padded));",
                   "}",
-                  "pm.collectionVariables.set('clientUserId', decodeJwtPayload(body.accessToken).sub);"
+                  "pm.environment.set('clientUserId', decodeJwtPayload(body.accessToken).sub);"
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Login",
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"fullName\": \"Chris Client\",\n  \"email\": \"client{{runId}}@example.com\",\n  \"phone\": \"{{runId}}02\",\n  \"password\": \"password123\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
-            "description": "Re-login helper, e.g. after the SuperAdmin token expires. Refreshes {{superAdminToken}}/{{superAdminUserId}}."
-          },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "description": "Requires prisma/seed.ts to have been run first so a DefaultRole row exists — otherwise registration throws a 500 ('No default role is configured')."
+          }
+        },
+        {
+          "name": "Login - Admin (re-login helper)",
           "event": [
             {
               "listen": "test",
@@ -101,17 +99,637 @@
                 "exec": [
                   "pm.test('logged in', () => pm.response.to.have.status(201));",
                   "const body = pm.response.json();",
-                  "pm.collectionVariables.set('superAdminToken', body.accessToken);",
+                  "pm.environment.set('superAdminToken', body.accessToken);",
                   "function decodeJwtPayload(token) {",
                   "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
                   "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
                   "  return JSON.parse(atob(padded));",
                   "}",
-                  "pm.collectionVariables.set('superAdminUserId', decodeJwtPayload(body.accessToken).sub);"
+                  "pm.environment.set('superAdminUserId', decodeJwtPayload(body.accessToken).sub);"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{superAdminPhone}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "LoginDto authenticates by `phone`, not email (AuthService#login calls usersService.findByPhone). Re-login helper for after {{superAdminToken}} expires — refreshes it and {{superAdminUserId}}.\n\nNote: this endpoint's DTO had `@IsEmail()` on the `phone` field, which rejected every real phone number and made login unusable — fixed to `@IsString()` alongside this collection update (src/auth/dto/login.dto.ts)."
+          }
+        },
+        {
+          "name": "Login - Client (re-login helper)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('logged in', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('clientToken', body.accessToken);",
+                  "function decodeJwtPayload(token) {",
+                  "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
+                  "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
+                  "  return JSON.parse(atob(padded));",
+                  "}",
+                  "pm.environment.set('clientUserId', decodeJwtPayload(body.accessToken).sub);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{clientPhone}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "Refreshes {{clientToken}}/{{clientUserId}} after expiry, without re-registering (which would create a brand new user)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('categoryId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Traffic Signs {{runId}}\",\n  \"description\": \"Questions about road traffic signs and markings\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/category", "host": ["{{baseUrl}}"], "path": ["category"] },
+            "description": "Category.name is @unique in the schema — suffixed with {{runId}} so re-running this collection against the same database never 409s here."
+          }
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/category", "host": ["{{baseUrl}}"], "path": ["category"] }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Questions about road traffic signs and markings (updated)\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/category/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["category", "{{categoryId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Create Question 1 (Stop sign)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('questionId1', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"text\": \"What does a red octagonal sign mean?\",\n  \"explanation\": \"A red octagon is always a Stop sign.\",\n  \"isActive\": true,\n  \"allowMultiple\": false,\n  \"options\": [\n    { \"text\": \"Stop\", \"isCorrect\": true },\n    { \"text\": \"Yield\", \"isCorrect\": false },\n    { \"text\": \"Merge\", \"isCorrect\": false }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/question", "host": ["{{baseUrl}}"], "path": ["question"] },
+            "description": "The response doesn't include the created options (question.create has no `include`) — the next request (List Questions) captures their ids instead."
+          }
+        },
+        {
+          "name": "Create Question 2 (Solid yellow line)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('questionId2', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"text\": \"What does a solid yellow centre line mean?\",\n  \"explanation\": \"A solid yellow centre line means passing is prohibited from this side.\",\n  \"isActive\": true,\n  \"allowMultiple\": false,\n  \"options\": [\n    { \"text\": \"No passing\", \"isCorrect\": true },\n    { \"text\": \"Passing allowed\", \"isCorrect\": false }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/question", "host": ["{{baseUrl}}"], "path": ["question"] }
+          }
+        },
+        {
+          "name": "List Questions (captures option ids)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('ok', () => pm.response.to.have.status(200));",
+                  "const questions = pm.response.json();",
+                  "const q1 = questions.find((q) => q.id === pm.environment.get('questionId1'));",
+                  "const q2 = questions.find((q) => q.id === pm.environment.get('questionId2'));",
+                  "pm.test('question 1 found with options', () => pm.expect(q1 && q1.options.length).to.be.above(0));",
+                  "pm.test('question 2 found with options', () => pm.expect(q2 && q2.options.length).to.be.above(0));",
+                  "pm.environment.set('question1CorrectOptionId', q1.options.find((o) => o.isCorrect).id);",
+                  "pm.environment.set('question2CorrectOptionId', q2.options.find((o) => o.isCorrect).id);",
+                  "pm.environment.set('question2WrongOptionId', q2.options.find((o) => !o.isCorrect).id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/question", "host": ["{{baseUrl}}"], "path": ["question"] },
+            "description": "Admin listing — options come back with their real `isCorrect` flag (only the exam-attempt endpoints redact it while an attempt is IN_PROGRESS). This is how the collection learns which option id is the correct answer for each question, for the Exam Attempts folder below."
+          }
+        },
+        {
+          "name": "Update Question 2",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"explanation\": \"A solid yellow centre line means passing is prohibited from this side. (edited via Postman)\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/question/{{questionId2}}", "host": ["{{baseUrl}}"], "path": ["question", "{{questionId2}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exam Config",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Create Exam Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('examConfigId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Provisional Practice Exam {{runId}}\",\n  \"numberOfQuestions\": 2,\n  \"price\": 500,\n  \"passMarkPercent\": 60,\n  \"durationMinutes\": 20,\n  \"isActive\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-config", "host": ["{{baseUrl}}"], "path": ["exam-config"] },
+            "description": "numberOfQuestions is pinned to 2 to match the 2 questions seeded above — Exam Attempts will pass this examConfigId + categoryId together, which draws exactly from this category."
+          }
+        },
+        {
+          "name": "List Exam Configs",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/exam-config", "host": ["{{baseUrl}}"], "path": ["exam-config"] },
+            "description": "There is no GET /exam-config/:id — only this list endpoint (same for Category and Question, which also have no get-by-id route)."
+          }
+        },
+        {
+          "name": "Update Exam Config",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"durationMinutes\": 30\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-config/{{examConfigId}}", "host": ["{{baseUrl}}"], "path": ["exam-config", "{{examConfigId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+      "item": [
+        {
+          "name": "Top Up Wallet",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1000,\n  \"provider\": \"MTN_MOMO\",\n  \"providerRef\": \"TESTREF-{{runId}}-1\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/transactions/topup", "host": ["{{baseUrl}}"], "path": ["transactions", "topup"] },
+            "description": "Funds the client's wallet with 1000 — enough to cover two 500-priced exam fees below (attempt #1 is free regardless, so this really funds attempts #2 and #3)."
+          }
+        },
+        {
+          "name": "List My Transactions (before exams)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] },
+            "description": "Row-level scoped via accessibleBy — should show only the TOPUP above."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exam Attempts",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+      "item": [
+        {
+          "name": "1. Start Attempt (free — first exam)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('started', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('is the free attempt', () => pm.expect(body.isFree).to.eql(true));",
+                  "pm.environment.set('attemptId1', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examConfigId\": \"{{examConfigId}}\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
+            "description": "hasUsedFreeExam is false for a brand-new user, so this is claimed as the free attempt (compare-and-swap in ExamAttemptsService#startAttempt) regardless of the config's price — no wallet debit, no Transaction row."
+          }
+        },
+        {
+          "name": "2. Submit Answer - Q1 (correct)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{questionId1}}\",\n  \"optionIds\": [\"{{question1CorrectOptionId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId1}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId1}}", "answers"]
+            }
+          }
+        },
+        {
+          "name": "3. Submit Answer - Q2 (correct)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{questionId2}}\",\n  \"optionIds\": [\"{{question2CorrectOptionId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId1}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId1}}", "answers"]
+            }
+          }
+        },
+        {
+          "name": "4. Complete Attempt (expect 100%, passed)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('completed', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('scored 2/2', () => pm.expect(body.score).to.eql(2));",
+                  "pm.test('passed', () => pm.expect(body.passed).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId1}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId1}}", "complete"]
+            }
+          }
+        },
+        {
+          "name": "5. Get Attempt (answers now revealed)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('ok', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('isCorrect revealed post-completion', () => pm.expect(body.answers[0].isCorrect).to.not.be.undefined);",
+                  "pm.test('option isCorrect revealed', () => pm.expect(body.questions[0].question.options[0].isCorrect).to.not.be.undefined);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId1}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId1}}"]
+            },
+            "description": "While IN_PROGRESS, shapeAttempt() strips isCorrect/explanation from both answers and options. Once COMPLETED, they're revealed for review — assert that here."
+          }
+        },
+        {
+          "name": "6. List My Attempts",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] }
+          }
+        },
+        {
+          "name": "7. Start Attempt #2 (paid — one wrong answer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('started', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('is not free (fee charged)', () => pm.expect(body.isFree).to.eql(false));",
+                  "pm.environment.set('attemptId2', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examConfigId\": \"{{examConfigId}}\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
+            "description": "hasUsedFreeExam is now true, so this debits 500 from the wallet (TransactionsService#chargeExamFee) — wallet goes from 1000 to 500."
+          }
+        },
+        {
+          "name": "8. Submit Answer - Q1 (correct)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{questionId1}}\",\n  \"optionIds\": [\"{{question1CorrectOptionId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId2}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId2}}", "answers"]
+            }
+          }
+        },
+        {
+          "name": "9. Submit Answer - Q2 (deliberately wrong)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{questionId2}}\",\n  \"optionIds\": [\"{{question2WrongOptionId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId2}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId2}}", "answers"]
+            },
+            "description": "On purpose, to prove scoring/pass-mark math below (1/2 = 50%, under the 60% pass mark)."
+          }
+        },
+        {
+          "name": "10. Complete Attempt #2 (expect 50%, failed)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('completed', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('scored 1/2', () => pm.expect(body.score).to.eql(1));",
+                  "pm.test('percentage is 50', () => pm.expect(Number(body.percentage)).to.eql(50));",
+                  "pm.test('did not pass (below 60% pass mark)', () => pm.expect(body.passed).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId2}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId2}}", "complete"]
+            }
+          }
+        },
+        {
+          "name": "11. Start Attempt #3 (paid — exact remaining balance)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('started', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('attemptId3', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examConfigId\": \"{{examConfigId}}\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
+            "description": "Wallet is exactly 500 and the fee is 500 — chargeExamFee's `walletBalance: { gte: amount }` guard should allow this (>=, not >). Wallet goes to 0 after this."
+          }
+        },
+        {
+          "name": "12. Complete Attempt #3 (no answers submitted — expect 0%)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('completed', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('scored 0', () => pm.expect(body.score).to.eql(0));",
+                  "pm.test('did not pass', () => pm.expect(body.passed).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId3}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId3}}", "complete"]
+            },
+            "description": "Completing with zero submitted answers is allowed — every question is simply counted wrong. Confirms the exam can always be finalized even if abandoned mid-way."
+          }
+        },
+        {
+          "name": "13. Start Attempt #4 (paid — expect 400 insufficient balance)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('rejected for insufficient balance', () => pm.response.to.have.status(400));",
+                  "pm.test('message mentions balance', () => pm.expect(pm.response.json().message).to.match(/[Ii]nsufficient wallet balance/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examConfigId\": \"{{examConfigId}}\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
+            "description": "Wallet is 0 after attempt #3's charge — this proves TransactionsService#chargeExamFee's compare-and-swap correctly refuses to let the balance go negative, and that no ExamAttempt row is created when the charge fails (the whole thing is one transaction)."
+          }
+        },
+        {
+          "name": "14. Top Up Wallet Again (for attempt #5)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1000,\n  \"provider\": \"CARD\",\n  \"providerRef\": \"TESTREF-{{runId}}-2\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/transactions/topup", "host": ["{{baseUrl}}"], "path": ["transactions", "topup"] }
+          }
+        },
+        {
+          "name": "15. Start Attempt #5 (left IN_PROGRESS on purpose)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('started', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('attemptId5', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examConfigId\": \"{{examConfigId}}\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
+            "description": "Deliberately never completed. Feeds two things: the 'already in progress' 400 test right below, and the submit-answer validation tests in Edge Cases & Validation (which need a live IN_PROGRESS attempt to submit against)."
+          }
+        },
+        {
+          "name": "16. Start Attempt #6 while #5 in progress (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('rejected — already in progress', () => pm.response.to.have.status(400));",
+                  "pm.test('message mentions in-progress exam', () => pm.expect(pm.response.json().message).to.match(/already have an exam in progress/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examConfigId\": \"{{examConfigId}}\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
+            "description": "Proves the one-attempt-at-a-time guard — this check runs before payment, so it fires regardless of wallet balance. Leaves attempt #5 as the client's one lingering IN_PROGRESS attempt at the end of this run; that's expected."
+          }
+        },
+        {
+          "name": "17. List My Transactions (after exam fees)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] },
+            "description": "Should now show: TOPUP 1000, EXAM_FEE 500 (attempt #2), EXAM_FEE 500 (attempt #3), TOPUP 1000 — attempt #1 (free) and the rejected attempt #4 leave no Transaction row."
+          }
         }
       ]
     },
@@ -138,7 +756,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('created', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('permissionId', pm.response.json().id);"
+                  "pm.environment.set('permissionId', pm.response.json().id);"
                 ]
               }
             }
@@ -191,9 +809,10 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"exam-marker\",\n  \"description\": \"Can review and grade exam attempts\"\n}"
+              "raw": "{\n  \"name\": \"exam-marker-{{runId}}\",\n  \"description\": \"Can review and grade exam attempts\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] }
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] },
+            "description": "Role.name is @unique — suffixed with {{runId}} for the same reason as the Category name above."
           },
           "event": [
             {
@@ -202,7 +821,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('created', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('roleId', pm.response.json().id);"
+                  "pm.environment.set('roleId', pm.response.json().id);"
                 ]
               }
             }
@@ -254,6 +873,61 @@
       "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
       "item": [
         {
+          "name": "List Users (as SuperAdmin — sees everyone)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "List Users (as Client — scoped to self only)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "description": "The client role's 'read User' permission is conditioned to { id: \"${user.id}\" } — passes the @RequirePermission('read','User') type-level guard, but accessibleBy() then scopes the query down to just their own row. Same row-level pattern as the exam-attempts endpoint, applied to a different resource."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('ok', () => pm.response.to.have.status(200));",
+                  "const users = pm.response.json();",
+                  "pm.test('only sees own row', () => {",
+                  "  pm.expect(users.length).to.eql(1);",
+                  "  pm.expect(users[0].id).to.eql(pm.environment.get('clientUserId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User Profile (SuperAdmin reads Client)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{clientUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{clientUserId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Own Profile (as Client)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{clientUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{clientUserId}}"]
+            }
+          }
+        },
+        {
           "name": "List User Roles",
           "request": {
             "method": "GET",
@@ -293,20 +967,6 @@
       ]
     },
     {
-      "name": "Exam Attempts",
-      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
-      "item": [
-        {
-          "name": "List Accessible Exam Attempts (as client)",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/exam-attempts", "host": ["{{baseUrl}}"], "path": ["exam-attempts"] },
-            "description": "Runs as the client user. Uses @casl/prisma's accessibleBy() to turn their permission conditions into a Prisma `where` clause — with only the seeded 'client' role they should see just their own exam attempts, never other users'."
-          }
-        }
-      ]
-    },
-    {
       "name": "App",
       "item": [
         {
@@ -316,6 +976,286 @@
             "url": { "raw": "{{baseUrl}}/", "host": ["{{baseUrl}}"], "path": [""] },
             "description": "@Public() route — no Authorization header needed."
           }
+        }
+      ]
+    },
+    {
+      "name": "Advanced (use with care)",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+      "item": [
+        {
+          "name": "Set Role as Platform Default",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}/default",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "{{roleId}}", "default"]
+            },
+            "description": "⚠️ Repoints the singleton DefaultRole at {{roleId}} — every user registered after this runs gets that role instead of the seeded 'client' role. Kept out of the main run order on purpose; run only when you mean it."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases & Validation",
+      "item": [
+        {
+          "name": "Login - Wrong Password (expect 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{superAdminPhone}}\",\n  \"password\": \"definitely-not-the-password\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('unauthorized', () => pm.response.to.have.status(401));"] }
+            }
+          ]
+        },
+        {
+          "name": "Register - Duplicate Email (expect 409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Duplicate Admin\",\n  \"email\": \"{{superAdminEmail}}\",\n  \"phone\": \"{{runId}}99\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "description": "Reuses the SuperAdmin's email from the Auth folder — UsersService.create maps Prisma's P2002 to a 409."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('conflict', () => pm.response.to.have.status(409));"] }
+            }
+          ]
+        },
+        {
+          "name": "No Token - Access Protected Route (expect 401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "description": "JwtAuthGuard rejects before PoliciesGuard even runs — no Authorization header, no @Public() decorator on this route."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('unauthorized', () => pm.response.to.have.status(401));"] }
+            }
+          ]
+        },
+        {
+          "name": "RBAC - Client Creates Category (expect 403)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Client Should Not Be Able To Create This {{runId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/category", "host": ["{{baseUrl}}"], "path": ["category"] },
+            "description": "The seeded 'client' role only has read on Category, not create — PoliciesGuard's @RequirePermission('create','Category') check fails at the ability.can() type level."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('forbidden', () => pm.response.to.have.status(403));"] }
+            }
+          ]
+        },
+        {
+          "name": "RBAC - Client Reads Categories (expect 200, allowed)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/category", "host": ["{{baseUrl}}"], "path": ["category"] },
+            "description": "Contrast with the request above — the seeded role does grant 'read' on Category, so this succeeds."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('ok', () => pm.response.to.have.status(200));"] }
+            }
+          ]
+        },
+        {
+          "name": "RBAC - Client Manages Roles (expect 403)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] },
+            "description": "RolesController is guarded class-wide by @RequirePermission('manage','Role') — even listing roles needs it, and the client role has no Role permissions at all."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('forbidden', () => pm.response.to.have.status(403));"] }
+            }
+          ]
+        },
+        {
+          "name": "Submit Answer - Option Doesn't Belong to Question (expect 400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{questionId1}}\",\n  \"optionIds\": [\"{{question2CorrectOptionId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId5}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId5}}", "answers"]
+            },
+            "description": "Runs against attempt #5, which the Exam Attempts folder deliberately left IN_PROGRESS. Submits Question 2's correct option id against Question 1 — must be rejected."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('bad request', () => pm.response.to.have.status(400));"] }
+            }
+          ]
+        },
+        {
+          "name": "Submit Answer - Question Not in This Attempt (expect 400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"00000000-0000-0000-0000-000000000000\",\n  \"optionIds\": [\"{{question1CorrectOptionId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId5}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId5}}", "answers"]
+            },
+            "description": "Random UUID that was never snapshotted into this attempt's ExamAttemptQuestion set."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('bad request', () => pm.response.to.have.status(400));"] }
+            }
+          ]
+        },
+        {
+          "name": "Submit Answer - Multiple Options When allowMultiple=false (expect 400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{questionId1}}\",\n  \"optionIds\": [\"{{question1CorrectOptionId}}\", \"{{question2WrongOptionId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId5}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId5}}", "answers"]
+            },
+            "description": "Question 1 has allowMultiple=false; submitting 2 option ids should be rejected regardless of the second id being invalid too."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('bad request', () => pm.response.to.have.status(400));"] }
+            }
+          ]
+        },
+        {
+          "name": "Complete Already-Completed Attempt (expect 400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId1}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId1}}", "complete"]
+            },
+            "description": "Attempt #1 was already completed earlier in the Exam Attempts folder — completing it again must be rejected, not silently re-scored."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('bad request', () => pm.response.to.have.status(400));"] }
+            }
+          ]
+        },
+        {
+          "name": "Get Attempt That Belongs to Another User (expect 404)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/exam-attempts/{{attemptId1}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-attempts", "{{attemptId1}}"]
+            },
+            "description": "Counter-intuitive on purpose: the SuperAdmin token is used here, but the seeded SuperAdmin role has isSuperAdmin=true so can('manage','all') — meaning this should actually succeed (200), NOT 404. Kept as a request to sanity-check that a real SuperAdmin bypass really does see other users' rows, in contrast to the client-scoped requests elsewhere in this collection. If you swap in a token for a *non*-admin, non-owner user instead, this correctly 404s (accessibleBy excludes rows the caller's conditions don't match, and the controller's NotFoundException doesn't leak whether the row exists)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('SuperAdmin bypass sees it (200)', () => pm.response.to.have.status(200));"] }
+            }
+          ]
+        },
+        {
+          "name": "Delete Category Still Referenced by Questions (expect 409)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/category/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["category", "{{categoryId}}"] },
+            "description": "CategoryService#mapPrismaError turns Prisma's P2003 (FK violation) into 409 Conflict — this is why Category isn't deleted in the Cleanup folder."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('conflict — FK protected', () => pm.response.to.have.status(409));"] }
+            }
+          ]
+        },
+        {
+          "name": "Delete Question Already Used in an Attempt (expect 409)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/question/{{questionId1}}", "host": ["{{baseUrl}}"], "path": ["question", "{{questionId1}}"] },
+            "description": "QuestionService#mapPrismaError maps the same P2003 to a 400 here (BadRequestException, not Conflict) — an inconsistency worth noting vs. Category/ExamConfig's 409 for the identical FK-violation scenario."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('rejected — FK protected (400, not 409 — see description)', () => pm.response.to.have.status(400));"] }
+            }
+          ]
+        },
+        {
+          "name": "Delete Exam Config Already Used in an Attempt (expect 409)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/exam-config/{{examConfigId}}", "host": ["{{baseUrl}}"], "path": ["exam-config", "{{examConfigId}}"] },
+            "description": "ExamConfigService#mapPrismaError also maps P2003 to 400 here, same inconsistency as Question above."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('rejected — FK protected', () => pm.response.to.have.status(400));"] }
+            }
+          ]
         }
       ]
     },
@@ -361,24 +1301,6 @@
               "host": ["{{baseUrl}}"],
               "path": ["permissions", "{{permissionId}}"]
             }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Advanced (use with care)",
-      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
-      "item": [
-        {
-          "name": "Set Role as Platform Default",
-          "request": {
-            "method": "POST",
-            "url": {
-              "raw": "{{baseUrl}}/roles/{{roleId}}/default",
-              "host": ["{{baseUrl}}"],
-              "path": ["roles", "{{roleId}}", "default"]
-            },
-            "description": "⚠️ Repoints the singleton DefaultRole at {{roleId}} — every user registered after this runs gets that role instead of the seeded 'client' role. Kept out of the main run order on purpose; run only when you mean it."
           }
         }
       ]

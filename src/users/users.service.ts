@@ -126,7 +126,11 @@ export class UsersService {
     const where: Prisma.UserWhereInput = accessibleBy(ability, 'read').ofType(
       'User',
     );
-    return this.prisma.user.findMany({ where, include: { userRoles: true } });
+    return this.prisma.user.findMany({ where, include: { userRoles: { include: { role: {
+      select: {
+        name: true,
+      }
+    }} } } });
   }
 
   async listRoles(userId: string, ability: AppAbility) {
