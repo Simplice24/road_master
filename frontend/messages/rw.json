@@ -148,6 +148,8 @@
     "phonePlaceholder": "07XXXXXXXX",
     "password": "Ijambo ry'ibanga",
     "passwordHint": "Nibura inyuguti 8",
+    "showPassword": "Erekana ijambo ry'ibanga",
+    "hidePassword": "Hisha ijambo ry'ibanga",
     "registerCta": "Fungura konti",
     "loginCta": "Injira",
     "haveAccount": "Usanzwe ufite konti?",

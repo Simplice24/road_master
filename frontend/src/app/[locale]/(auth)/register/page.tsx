@@ -2,21 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import { User, Phone, Mail, Lock } from "lucide-react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthCard } from "@/components/auth/auth-card";
+import { AuthField } from "@/components/auth/auth-field";
 
 export default function RegisterPage() {
   const t = useTranslations("Auth");
@@ -51,84 +44,85 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-xl">{t("registerTitle")}</CardTitle>
-        <CardDescription>{t("registerSubtitle")}</CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="flex flex-col gap-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+    <AuthCard
+      title={t("registerTitle")}
+      subtitle={t("registerSubtitle")}
+      footer={
+        <>
+          {t("haveAccount")}{" "}
+          <Link href="/login" className="font-semibold text-foreground hover:underline">
+            {t("loginLink")}
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="fullName">{t("fullName")}</Label>
-            <Input
-              id="fullName"
-              value={fullName}
-              onChange={(event) => setFullName(event.target.value)}
-              placeholder={t("fullNamePlaceholder")}
-              required
-              minLength={2}
-            />
-          </div>
+        <AuthField
+          id="fullName"
+          icon={User}
+          label={t("fullName")}
+          autoComplete="name"
+          value={fullName}
+          onChange={(event) => setFullName(event.target.value)}
+          placeholder={t("fullNamePlaceholder")}
+          required
+          minLength={2}
+          autoFocus
+        />
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="phone">{t("phone")}</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder={t("phonePlaceholder")}
-              required
-            />
-          </div>
+        <AuthField
+          id="phone"
+          icon={Phone}
+          label={t("phone")}
+          type="tel"
+          autoComplete="tel"
+          value={phone}
+          onChange={(event) => setPhone(event.target.value)}
+          placeholder={t("phonePlaceholder")}
+          required
+        />
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">{t("emailOptional")}</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </div>
+        <AuthField
+          id="email"
+          icon={Mail}
+          label={t("emailOptional")}
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder={t("emailOptional")}
+        />
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password">{t("password")}</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              minLength={8}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              {t("passwordHint")}
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col items-stretch gap-4 border-t-0 bg-transparent pt-4">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="btn-primary w-full"
-          >
-            {isSubmitting ? t("registering") : t("registerCta")}
-          </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            {t("haveAccount")}{" "}
-            <Link href="/login" className="font-medium text-foreground underline underline-offset-4">
-              {t("loginLink")}
-            </Link>
-          </p>
-        </CardFooter>
+        <div className="flex flex-col gap-1">
+          <AuthField
+            id="password"
+            icon={Lock}
+            label={t("password")}
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder={t("password")}
+            minLength={8}
+            required
+          />
+          <p className="pl-4 text-xs text-muted-foreground">{t("passwordHint")}</p>
+        </div>
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="mt-2 h-12 w-full rounded-full bg-gradient-to-r from-primary to-primary-2 text-[15px] font-semibold shadow-lg shadow-primary/25 hover:opacity-90"
+        >
+          {isSubmitting ? t("registering") : t("registerCta")}
+        </Button>
       </form>
-    </Card>
+    </AuthCard>
   );
 }

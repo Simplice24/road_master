@@ -148,6 +148,8 @@
     "phonePlaceholder": "07XXXXXXXX",
     "password": "Password",
     "passwordHint": "At least 8 characters",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "registerCta": "Create account",
     "loginCta": "Log in",
     "haveAccount": "Already have an account?",
