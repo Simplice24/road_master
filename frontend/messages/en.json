@@ -1,0 +1,106 @@
+{
+  "Nav": {
+    "howItWorks": "How it works",
+    "categories": "Categories",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "login": "Log in",
+    "register": "Get started"
+  },
+  "Hero": {
+    "eyebrow": "Provisional Driving License Exam Practice",
+    "headline": "Pass your provisional driving license exam with confidence",
+    "subheadline": "Practice under real, timed conditions across Rwanda's Highway Code. Your first exam attempt is completely free.",
+    "ctaPrimary": "Start your free practice exam",
+    "ctaSecondary": "Log in"
+  },
+  "TrustStrip": {
+    "questions": "319 practice questions",
+    "categories": "5 topic areas",
+    "timed": "Timed, exam-realistic conditions"
+  },
+  "HowItWorks": {
+    "title": "How it works",
+    "step1": {
+      "title": "Register",
+      "description": "Create your account in under a minute with just your phone number."
+    },
+    "step2": {
+      "title": "Choose",
+      "description": "Pick a specific topic to drill, or sit a full provisional exam."
+    },
+    "step3": {
+      "title": "Practice",
+      "description": "Answer under real timed conditions — just like exam day."
+    },
+    "step4": {
+      "title": "Review",
+      "description": "See your score instantly, with an explanation for every question."
+    }
+  },
+  "Categories": {
+    "title": "Practice by topic",
+    "subtitle": "Five topic areas covering the provisional driving license syllabus.",
+    "cat1": {
+      "name": "Road Signs and Signals",
+      "description": "Recognize and interpret traffic signs, road markings, and signals."
+    },
+    "cat2": {
+      "name": "Right-of-Way and Priority Rules",
+      "description": "Know who moves first at intersections, roundabouts, and around emergency vehicles."
+    },
+    "cat3": {
+      "name": "Driving Maneuvers and Lane Discipline",
+      "description": "Overtaking, lane changes, turns, stopping, and parking."
+    },
+    "cat4": {
+      "name": "Speed Limits and Vehicle Dimensions",
+      "description": "Legal speed limits and size and weight rules under Rwandan law."
+    },
+    "cat5": {
+      "name": "Highway Code — General Knowledge",
+      "description": "319 questions covering the full provisional driving code."
+    }
+  },
+  "Pricing": {
+    "title": "Simple, transparent pricing",
+    "freeTitle": "Your first attempt",
+    "freeDescription": "Every new candidate gets one full practice exam, completely free — no wallet top-up required.",
+    "paidTitle": "Every attempt after that",
+    "paidDescription": "Top up your wallet and keep practicing for just {price} per attempt ({questions} questions, {minutes} minutes, {passMark}% to pass)."
+  },
+  "Faq": {
+    "title": "Frequently asked questions",
+    "q1": {
+      "question": "How much does it cost?",
+      "answer": "Your first practice exam is completely free. After that, top up your wallet and continue for a small fee per attempt."
+    },
+    "q2": {
+      "question": "What happens if I don't pass?",
+      "answer": "There's no limit on practice attempts — top up and try again as many times as you like until you feel ready."
+    },
+    "q3": {
+      "question": "Can I review my mistakes?",
+      "answer": "Yes. Once you finish an exam, you'll see your score and an explanation for every question, including the ones you got wrong."
+    },
+    "q4": {
+      "question": "What languages are supported?",
+      "answer": "The site is available in English, Kinyarwanda, and French. Exam questions themselves are currently in Kinyarwanda only."
+    }
+  },
+  "FinalCta": {
+    "title": "Ready to test your knowledge?",
+    "subtitle": "Join Road Master and take your first practice exam — free.",
+    "cta": "Get started"
+  },
+  "Footer": {
+    "poweredBy": "A product of ThinkPlus",
+    "rights": "© {year} Road Master. All rights reserved."
+  },
+  "LanguageSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "rw": "Kinyarwanda",
+    "fr": "Français"
+  }
+}

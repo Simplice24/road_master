@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  },
+  // Without an explicit include, TS defaults to scanning every .ts file under this tsconfig's
+  // directory. Pinning it to src/+test/ keeps it that way regardless of whatever else ends up
+  // alongside this backend/ folder (this bit us once already — see CLAUDE.md). test/ still
+  // needs to be included here (ESLint's type-aware linting resolves each file through this
+  // project) even though tsconfig.build.json separately excludes it from the actual build.
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

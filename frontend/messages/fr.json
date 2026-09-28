@@ -1,0 +1,106 @@
+{
+  "Nav": {
+    "howItWorks": "Comment ça marche",
+    "categories": "Catégories",
+    "pricing": "Tarifs",
+    "faq": "FAQ",
+    "login": "Se connecter",
+    "register": "Commencer"
+  },
+  "Hero": {
+    "eyebrow": "Préparation à l'examen du permis de conduire provisoire",
+    "headline": "Réussissez votre examen de permis provisoire en toute confiance",
+    "subheadline": "Entraînez-vous dans des conditions réelles et chronométrées sur l'ensemble du Code de la route rwandais. Votre premier examen est entièrement gratuit.",
+    "ctaPrimary": "Commencer votre examen gratuit",
+    "ctaSecondary": "Se connecter"
+  },
+  "TrustStrip": {
+    "questions": "319 questions d'entraînement",
+    "categories": "5 domaines thématiques",
+    "timed": "Conditions chronométrées, proches de l'examen réel"
+  },
+  "HowItWorks": {
+    "title": "Comment ça marche",
+    "step1": {
+      "title": "Inscription",
+      "description": "Créez votre compte en moins d'une minute avec simplement votre numéro de téléphone."
+    },
+    "step2": {
+      "title": "Choisissez",
+      "description": "Choisissez un thème précis à approfondir, ou passez un examen complet."
+    },
+    "step3": {
+      "title": "Entraînez-vous",
+      "description": "Répondez dans des conditions réelles chronométrées — comme le jour de l'examen."
+    },
+    "step4": {
+      "title": "Révisez",
+      "description": "Obtenez votre score instantanément, avec une explication pour chaque question."
+    }
+  },
+  "Categories": {
+    "title": "S'entraîner par thème",
+    "subtitle": "Cinq domaines thématiques couvrant le programme du permis provisoire.",
+    "cat1": {
+      "name": "Panneaux et signaux routiers",
+      "description": "Reconnaître et interpréter les panneaux, marquages et signaux routiers."
+    },
+    "cat2": {
+      "name": "Priorité et règles de priorité",
+      "description": "Savoir qui passe en premier aux intersections, ronds-points et autour des véhicules d'urgence."
+    },
+    "cat3": {
+      "name": "Manœuvres de conduite et discipline de voie",
+      "description": "Dépassement, changements de voie, virages, arrêt et stationnement."
+    },
+    "cat4": {
+      "name": "Limites de vitesse et dimensions des véhicules",
+      "description": "Limites de vitesse légales et règles de gabarit et de poids selon la loi rwandaise."
+    },
+    "cat5": {
+      "name": "Code de la route — Connaissances générales",
+      "description": "319 questions couvrant l'ensemble du code de la route provisoire."
+    }
+  },
+  "Pricing": {
+    "title": "Des tarifs simples et transparents",
+    "freeTitle": "Votre premier essai",
+    "freeDescription": "Chaque nouveau candidat reçoit un examen d'entraînement complet, entièrement gratuit — aucune recharge de portefeuille requise.",
+    "paidTitle": "Chaque essai suivant",
+    "paidDescription": "Rechargez votre portefeuille et continuez à vous entraîner pour seulement {price} par essai ({questions} questions, {minutes} minutes, {passMark}% pour réussir)."
+  },
+  "Faq": {
+    "title": "Questions fréquentes",
+    "q1": {
+      "question": "Combien ça coûte ?",
+      "answer": "Votre premier examen d'entraînement est entièrement gratuit. Ensuite, rechargez votre portefeuille et continuez pour un petit montant par essai."
+    },
+    "q2": {
+      "question": "Que se passe-t-il si je ne réussis pas ?",
+      "answer": "Il n'y a pas de limite d'essais — rechargez et réessayez autant de fois que vous le souhaitez jusqu'à ce que vous soyez prêt."
+    },
+    "q3": {
+      "question": "Puis-je revoir mes erreurs ?",
+      "answer": "Oui. Une fois l'examen terminé, vous verrez votre score et une explication pour chaque question, y compris celles auxquelles vous avez mal répondu."
+    },
+    "q4": {
+      "question": "Quelles langues sont disponibles ?",
+      "answer": "Le site est disponible en anglais, en kinyarwanda et en français. Les questions d'examen elles-mêmes sont actuellement uniquement en kinyarwanda."
+    }
+  },
+  "FinalCta": {
+    "title": "Prêt à tester vos connaissances ?",
+    "subtitle": "Rejoignez Road Master et passez votre premier examen d'entraînement — gratuitement.",
+    "cta": "Commencer"
+  },
+  "Footer": {
+    "poweredBy": "Un produit de ThinkPlus",
+    "rights": "© {year} Road Master. Tous droits réservés."
+  },
+  "LanguageSwitcher": {
+    "label": "Langue",
+    "en": "English",
+    "rw": "Kinyarwanda",
+    "fr": "Français"
+  }
+}

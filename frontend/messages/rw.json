@@ -1,0 +1,106 @@
+{
+  "Nav": {
+    "howItWorks": "Uko bikorwa",
+    "categories": "Ibyiciro",
+    "pricing": "Ibiciro",
+    "faq": "Ibibazo Bikunze Kubazwa",
+    "login": "Injira",
+    "register": "Tangira"
+  },
+  "Hero": {
+    "eyebrow": "Kwitegura Ikizamini cy'Uruhushya rw'Agateganyo",
+    "headline": "Tsinda ikizamini cy'uruhushya rw'agateganyo witonze",
+    "subheadline": "Witoze mu buryo bw'igihe nyacyo, nk'uko byaba mu kizamini nyakuri, ku mategeko yose y'umuhanda y'u Rwanda. Ikizamini cyawe cya mbere ni ubuntu rwose.",
+    "ctaPrimary": "Tangira ikizamini cyawe cy'ubuntu",
+    "ctaSecondary": "Injira"
+  },
+  "TrustStrip": {
+    "questions": "Ibibazo 319 byo kwitoza",
+    "categories": "Ibyiciro 5 by'isomo",
+    "timed": "Igihe nyacyo, nk'ikizamini nyakuri"
+  },
+  "HowItWorks": {
+    "title": "Uko bikorwa",
+    "step1": {
+      "title": "Iyandikishe",
+      "description": "Fungura konti yawe mu munota umwe gusa ukoresheje numero ya telefone yawe."
+    },
+    "step2": {
+      "title": "Hitamo",
+      "description": "Hitamo icyiciro runaka wifuza kwitoza cyane, cyangwa ukore ikizamini cyuzuye."
+    },
+    "step3": {
+      "title": "Witoze",
+      "description": "Subiza mu gihe nyacyo cy'igenzura — nk'uko byaba ku munsi w'ikizamini."
+    },
+    "step4": {
+      "title": "Suzuma",
+      "description": "Menya amanota yawe ako kanya, hamwe n'ibisobanuro kuri buri kibazo."
+    }
+  },
+  "Categories": {
+    "title": "Witoze ukurikije icyiciro",
+    "subtitle": "Ibyiciro bitanu birimo ibibazo byose byerekeye uruhushya rw'agateganyo.",
+    "cat1": {
+      "name": "Ibyapa n'Ibimenyetso byo mu Muhanda",
+      "description": "Kumenya no gusobanukirwa ibyapa, imirongo, n'ibimenyetso byo mu muhanda."
+    },
+    "cat2": {
+      "name": "Uburenganzira bwo Gutambuka Mbere",
+      "description": "Kumenya uwagombye gutambuka mbere ku masangano, ku nzibacyuho, no aho hari ibinyabiziga by'ubutabazi."
+    },
+    "cat3": {
+      "name": "Kunyuranaho no Guhindura Icyerekezo",
+      "description": "Kunyuranaho, guhindura umurongo, guhindukira, guhagarara, no guparika."
+    },
+    "cat4": {
+      "name": "Umuvuduko Ntarengwa n'Ibipimo by'Ibinyabiziga",
+      "description": "Umuvuduko ntarengwa n'amategeko y'ibipimo n'uburemere nk'uko amategeko y'u Rwanda abiteganya."
+    },
+    "cat5": {
+      "name": "Amategeko Rusange y'Umuhanda",
+      "description": "Ibibazo 319 birimo amategeko yose y'agateganyo agenga umuhanda."
+    }
+  },
+  "Pricing": {
+    "title": "Ibiciro Byoroshye kandi Bigaragara",
+    "freeTitle": "Ikizamini cyawe cya mbere",
+    "freeDescription": "Umukandida mushya wese ahabwa ikizamini cyuzuye cyo kwitoza, ku buntu rwose — nta kongeramo amafaranga muri konti bisabwa.",
+    "paidTitle": "Ikizamini cyose gikurikira",
+    "paidDescription": "Ongeramo amafaranga muri konti yawe maze ukomeze kwitoza ku giciro cya {price} gusa kuri buri kizamini (ibibazo {questions}, iminota {minutes}, {passMark}% kugira ngo utsinde)."
+  },
+  "Faq": {
+    "title": "Ibibazo Bikunze Kubazwa",
+    "q1": {
+      "question": "Bihenda angahe?",
+      "answer": "Ikizamini cyawe cya mbere cyo kwitoza ni ubuntu rwose. Nyuma, ongeramo amafaranga muri konti yawe ukomeze ku giciro gito kuri buri kizamini."
+    },
+    "q2": {
+      "question": "Ese nanze, nkora iki?",
+      "answer": "Nta n'imwe ku bwinshi bw'ibizamini wemerewe kwitoza — ongeramo amafaranga wongere ugerageze incuro nyinshi uko ushaka, kugeza ubona witeguye."
+    },
+    "q3": {
+      "question": "Nshobora gusuzuma amakosa yanjye?",
+      "answer": "Yego. Igihe ikizamini kirangiye, uzabona amanota yawe hamwe n'ibisobanuro kuri buri kibazo, harimo n'ibyo wasubijeho nabi."
+    },
+    "q4": {
+      "question": "Ni izihe ndimi zikoreshwa?",
+      "answer": "Iyi urubuga iboneka mu Cyongereza, Ikinyarwanda, n'Igifaransa. Ibibazo by'ikizamini ubwabyo kugeza ubu biri mu Kinyarwanda gusa."
+    }
+  },
+  "FinalCta": {
+    "title": "Witeguye gusuzuma ubumenyi bwawe?",
+    "subtitle": "Iyandikishe kuri Road Master maze ukore ikizamini cyawe cya mbere cyo kwitoza — ku buntu.",
+    "cta": "Tangira"
+  },
+  "Footer": {
+    "poweredBy": "Igicuruzwa cya ThinkPlus",
+    "rights": "© {year} Road Master. Uburenganzira bwose burarinzwe."
+  },
+  "LanguageSwitcher": {
+    "label": "Ururimi",
+    "en": "English",
+    "rw": "Kinyarwanda",
+    "fr": "Français"
+  }
+}
