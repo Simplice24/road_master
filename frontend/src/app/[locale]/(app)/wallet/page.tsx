@@ -155,7 +155,7 @@ export default function WalletPage() {
           <CardContent className="pt-0">
             <Button
               type="submit"
-              className="w-full bg-gold text-gold-foreground hover:bg-gold/90"
+              className="btn-primary w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? t("toppingUp") : t("topUpCta")}

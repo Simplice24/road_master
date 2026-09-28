@@ -20,7 +20,10 @@
     "timed": "Timed, exam-realistic conditions"
   },
   "HowItWorks": {
+    "eyebrow": "Getting started",
     "title": "How it works",
+    "subtitle": "Four simple steps from sign-up to your first certified practice score.",
+    "stepLabel": "Step {number}",
     "step1": {
       "title": "Register",
       "description": "Create your account in under a minute with just your phone number."
@@ -63,14 +66,31 @@
     }
   },
   "Pricing": {
-    "title": "Simple, transparent pricing",
-    "freeTitle": "Your first attempt",
-    "freeDescription": "Every new candidate gets one full practice exam, completely free — no wallet top-up required.",
-    "paidTitle": "Every attempt after that",
-    "paidDescription": "Top up your wallet and keep practicing for just {price} per attempt ({questions} questions, {minutes} minutes, {passMark}% to pass)."
+    "title": "Affordable, flexible pricing",
+    "subtitle": "Pick the bundle that matches how often you want to practice.",
+    "mostPopular": "Most popular",
+    "perBundle": "one-time purchase",
+    "cta": "Get started",
+    "plan1": {
+      "price": 500,
+      "features": ["5 exam attempts"]
+    },
+    "plan2": {
+      "price": 3000,
+      "features": ["Unlimited exam attempts", "Valid for 1 week"]
+    },
+    "plan3": {
+      "price": 5000,
+      "features": ["Unlimited exam attempts", "Valid for 2 weeks"]
+    },
+    "plan4": {
+      "price": 8000,
+      "features": ["Unlimited exam attempts", "Valid for 1 month"]
+    }
   },
   "Faq": {
     "title": "Frequently asked questions",
+    "subtitle": "Common questions about pricing, attempts, and how practice works.",
     "q1": {
       "question": "How much does it cost?",
       "answer": "Your first practice exam is completely free. After that, top up your wallet and continue for a small fee per attempt."

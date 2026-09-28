@@ -20,7 +20,10 @@
     "timed": "Conditions chronométrées, proches de l'examen réel"
   },
   "HowItWorks": {
+    "eyebrow": "Pour commencer",
     "title": "Comment ça marche",
+    "subtitle": "Quatre étapes simples, de l'inscription à votre premier score d'entraînement certifié.",
+    "stepLabel": "Étape {number}",
     "step1": {
       "title": "Inscription",
       "description": "Créez votre compte en moins d'une minute avec simplement votre numéro de téléphone."
@@ -64,13 +67,30 @@
   },
   "Pricing": {
     "title": "Des tarifs simples et transparents",
-    "freeTitle": "Votre premier essai",
-    "freeDescription": "Chaque nouveau candidat reçoit un examen d'entraînement complet, entièrement gratuit — aucune recharge de portefeuille requise.",
-    "paidTitle": "Chaque essai suivant",
-    "paidDescription": "Rechargez votre portefeuille et continuez à vous entraîner pour seulement {price} par essai ({questions} questions, {minutes} minutes, {passMark}% pour réussir)."
+    "subtitle": "Choisissez la formule adaptée à votre rythme d'entraînement.",
+    "mostPopular": "Le plus populaire",
+    "perBundle": "achat unique",
+    "cta": "Commencer",
+    "plan1": {
+      "price": 500,
+      "features": ["5 tentatives d'examen"]
+    },
+    "plan2": {
+      "price": 3000,
+      "features": ["Tentatives illimitées", "Valable 1 semaine"]
+    },
+    "plan3": {
+      "price": 5000,
+      "features": ["Tentatives illimitées", "Valable 2 semaines"]
+    },
+    "plan4": {
+      "price": 8000,
+      "features": ["Tentatives illimitées", "Valable 1 mois"]
+    }
   },
   "Faq": {
     "title": "Questions fréquentes",
+    "subtitle": "Questions courantes sur les tarifs, les tentatives et le fonctionnement de l'entraînement.",
     "q1": {
       "question": "Combien ça coûte ?",
       "answer": "Votre premier examen d'entraînement est entièrement gratuit. Ensuite, rechargez votre portefeuille et continuez pour un petit montant par essai."

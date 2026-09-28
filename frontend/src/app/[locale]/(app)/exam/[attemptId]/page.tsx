@@ -283,10 +283,7 @@ export default function ExamTakingPage() {
         </Button>
 
         {isLastQuestion ? (
-          <Button
-            className="bg-gold text-gold-foreground hover:bg-gold/90"
-            onClick={() => setConfirmOpen(true)}
-          >
+          <Button className="btn-primary" onClick={() => setConfirmOpen(true)}>
             {t("finish")}
           </Button>
         ) : (
@@ -315,7 +312,7 @@ export default function ExamTakingPage() {
               {tCommon("cancel")}
             </Button>
             <Button
-              className="bg-gold text-gold-foreground hover:bg-gold/90"
+              className="btn-primary"
               disabled={isFinishing}
               onClick={finishAttempt}
             >

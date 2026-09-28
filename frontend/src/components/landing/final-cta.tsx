@@ -6,17 +6,18 @@ export async function FinalCta() {
   const t = await getTranslations("FinalCta");
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <div className="flex flex-col items-center rounded-2xl bg-primary px-6 py-14 text-center text-primary-foreground sm:px-12">
-        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <div className="relative flex flex-col items-center overflow-hidden rounded-lg bg-landing-dark px-6 py-14 text-center text-white sm:px-12">
+        <div aria-hidden className="landing-grid-bg pointer-events-none absolute inset-0 opacity-50" />
+        <h2 className="relative font-display text-2xl font-normal tracking-tight sm:text-3xl">
           {t("title")}
         </h2>
-        <p className="mt-3 max-w-md text-primary-foreground/80">{t("subtitle")}</p>
+        <p className="relative mt-3 max-w-md text-white/70">{t("subtitle")}</p>
         <Button
           size="lg"
           render={<Link href="/register" />}
           nativeButton={false}
-          className="mt-8 h-11 bg-gold px-8 text-base text-gold-foreground hover:bg-gold/90"
+          className="btn-primary relative mt-8 h-11 px-8 text-base"
         >
           {t("cta")}
         </Button>

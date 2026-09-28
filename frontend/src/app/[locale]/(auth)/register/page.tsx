@@ -117,7 +117,7 @@ export default function RegisterPage() {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gold text-gold-foreground hover:bg-gold/90"
+            className="btn-primary w-full"
           >
             {isSubmitting ? t("registering") : t("registerCta")}
           </Button>

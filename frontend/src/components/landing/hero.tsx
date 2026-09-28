@@ -1,27 +1,29 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export async function Hero() {
   const t = await getTranslations("Hero");
 
   return (
-    <section className="relative overflow-hidden bg-primary text-primary-foreground">
-      {/* Soft radial glow, purely decorative */}
+    <section className="relative overflow-hidden bg-landing-dark text-white">
+      {/* Decorative grid texture + soft glow, matching the reference's hero backdrop */}
+      <div aria-hidden className="landing-grid-bg pointer-events-none absolute inset-0 opacity-60" />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.15),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(107,99,255,0.25),transparent_60%)]"
       />
 
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-20 text-center sm:px-6 sm:py-28 lg:px-8">
-        <Badge className="bg-gold text-gold-foreground">{t("eyebrow")}</Badge>
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32 lg:px-8">
+        <span className="rounded-full border border-white/15 bg-white/10 px-4 py-1.5 font-mono text-[11px] font-medium tracking-wide text-white">
+          {t("eyebrow")}
+        </span>
 
-        <h1 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+        <h1 className="mt-6 font-display text-[40px] leading-[1.04] font-normal tracking-[-0.02em] text-white sm:text-[48px] md:text-[56px]">
           {t("headline")}
         </h1>
 
-        <p className="mt-5 max-w-xl text-base text-primary-foreground/80 sm:text-lg">
+        <p className="mt-5 max-w-xl text-base text-white/70 sm:text-lg">
           {t("subheadline")}
         </p>
 
@@ -30,16 +32,15 @@ export async function Hero() {
             size="lg"
             render={<Link href="/register" />}
             nativeButton={false}
-            className="h-11 bg-gold px-6 text-base text-gold-foreground hover:bg-gold/90"
+            className="btn-primary h-11 px-6 text-base"
           >
             {t("ctaPrimary")}
           </Button>
           <Button
             size="lg"
-            variant="outline"
             render={<Link href="/login" />}
             nativeButton={false}
-            className="h-11 border-primary-foreground/30 bg-transparent px-6 text-base text-primary-foreground hover:bg-primary-foreground/10"
+            className="landing-btn-glass h-11 px-6 text-base"
           >
             {t("ctaSecondary")}
           </Button>

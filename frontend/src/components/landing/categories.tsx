@@ -28,7 +28,7 @@ export async function Categories() {
     <section id="categories" className="bg-secondary/30 py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h2 className="font-display text-2xl font-normal tracking-tight text-foreground sm:text-3xl">
             {t("title")}
           </h2>
           <p className="mt-3 text-muted-foreground">{t("subtitle")}</p>
@@ -41,20 +41,20 @@ export async function Categories() {
             return (
               <Card
                 key={item.name}
-                className="ring-border/80 transition-shadow hover:shadow-md"
+                className="rounded-lg border border-landing-border shadow-none ring-0 transition-colors hover:border-landing-primary/40"
               >
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <span className="flex size-10 items-center justify-center rounded bg-landing-primary-tint text-landing-primary">
                       <Icon className="size-5" />
                     </span>
                     {isFullyStocked && (
-                      <Badge variant="outline" className="border-gold/40 text-gold">
+                      <Badge variant="outline" className="border-landing-primary/30 text-landing-primary">
                         319
                       </Badge>
                     )}
                   </div>
-                  <CardTitle className="mt-2">{item.name}</CardTitle>
+                  <CardTitle className="mt-2 font-display font-normal">{item.name}</CardTitle>
                   <CardDescription>{item.description}</CardDescription>
                 </CardHeader>
               </Card>

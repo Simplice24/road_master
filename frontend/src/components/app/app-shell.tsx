@@ -15,6 +15,7 @@ import {
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { formatNumber } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -76,13 +77,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-secondary/10">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-sm backdrop-blur-sm">
+        <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
           <Link
             href="/dashboard"
-            className="flex shrink-0 items-center gap-2 font-heading text-lg font-semibold tracking-tight text-foreground"
+            className="flex shrink-0 items-center gap-2 font-display text-lg font-semibold tracking-tight text-foreground"
           >
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+            <span className="flex size-8 items-center justify-center rounded bg-primary text-sm font-bold text-primary-foreground">
               RM
             </span>
             <span className="hidden sm:inline">Road Master</span>
@@ -95,8 +96,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               return (
                 <Button
                   key={item.href}
-                  variant={active ? "secondary" : "ghost"}
+                  variant="ghost"
                   size="sm"
+                  className={cn(
+                    "font-mono text-xs tracking-wide uppercase",
+                    active && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+                  )}
                   render={<Link href={item.href} />}
                   nativeButton={false}
                 >
@@ -109,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-2">
             <Link href="/wallet" className="hidden sm:block">
-              <Badge variant="outline" className="h-7 gap-1.5 px-2.5 text-sm">
+              <Badge variant="outline" className="h-7 gap-1.5 border-primary/25 bg-primary/5 px-2.5 text-sm text-foreground">
                 <Wallet className="size-3.5" />
                 {formatNumber(user.walletBalance)} RWF
               </Badge>
@@ -122,8 +127,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <button className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
                 }
               >
-                <Avatar size="sm">
-                  <AvatarFallback>{initials(user.fullName)}</AvatarFallback>
+                <Avatar size="sm" className="ring-2 ring-primary/15">
+                  <AvatarFallback className="bg-primary/10 text-primary">{initials(user.fullName)}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -153,16 +158,19 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 overflow-x-auto border-t border-border/60 px-4 py-1.5 md:hidden">
+        <nav className="flex items-center gap-1 overflow-x-auto border-t border-border px-4 py-1.5 md:hidden">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href;
             return (
               <Button
                 key={item.href}
-                variant={active ? "secondary" : "ghost"}
+                variant="ghost"
                 size="sm"
-                className="shrink-0"
+                className={cn(
+                  "shrink-0 font-mono text-xs tracking-wide uppercase",
+                  active && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+                )}
                 render={<Link href={item.href} />}
                 nativeButton={false}
               >

@@ -20,7 +20,10 @@
     "timed": "Igihe nyacyo, nk'ikizamini nyakuri"
   },
   "HowItWorks": {
+    "eyebrow": "Gutangira",
     "title": "Uko bikorwa",
+    "subtitle": "Intambwe enye zoroshye, guhera ku iyandikisha kugeza ku manota yawe ya mbere yo kwitoza.",
+    "stepLabel": "Intambwe {number}",
     "step1": {
       "title": "Iyandikishe",
       "description": "Fungura konti yawe mu munota umwe gusa ukoresheje numero ya telefone yawe."
@@ -64,13 +67,30 @@
   },
   "Pricing": {
     "title": "Ibiciro Byoroshye kandi Bigaragara",
-    "freeTitle": "Ikizamini cyawe cya mbere",
-    "freeDescription": "Umukandida mushya wese ahabwa ikizamini cyuzuye cyo kwitoza, ku buntu rwose — nta kongeramo amafaranga muri konti bisabwa.",
-    "paidTitle": "Ikizamini cyose gikurikira",
-    "paidDescription": "Ongeramo amafaranga muri konti yawe maze ukomeze kwitoza ku giciro cya {price} gusa kuri buri kizamini (ibibazo {questions}, iminota {minutes}, {passMark}% kugira ngo utsinde)."
+    "subtitle": "Hitamo igurishwa rihuye n'uko ushaka kwitoza kenshi.",
+    "mostPopular": "Bikunzwe cyane",
+    "perBundle": "kwishyura rimwe",
+    "cta": "Tangira",
+    "plan1": {
+      "price": 500,
+      "features": ["Ibizamini 5"]
+    },
+    "plan2": {
+      "price": 3000,
+      "features": ["Ibizamini bidashira", "Bimara icyumweru 1"]
+    },
+    "plan3": {
+      "price": 5000,
+      "features": ["Ibizamini bidashira", "Bimara ibyumweru 2"]
+    },
+    "plan4": {
+      "price": 8000,
+      "features": ["Ibizamini bidashira", "Bimara ukwezi 1"]
+    }
   },
   "Faq": {
     "title": "Ibibazo Bikunze Kubazwa",
+    "subtitle": "Ibibazo bikunze kubazwa ku biciro, ibizamini, n'uko kwitoza bikorwa.",
     "q1": {
       "question": "Bihenda angahe?",
       "answer": "Ikizamini cyawe cya mbere cyo kwitoza ni ubuntu rwose. Nyuma, ongeramo amafaranga muri konti yawe ukomeze ku giciro gito kuri buri kizamini."

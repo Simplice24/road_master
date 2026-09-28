@@ -11,11 +11,11 @@ export async function TrustStrip() {
   ];
 
   return (
-    <section className="border-b border-border/60 bg-secondary/40">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 py-8 sm:grid-cols-3 sm:px-6 lg:px-8">
+    <section className="border-b border-landing-border bg-white">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 py-8 sm:flex-row sm:justify-center sm:gap-16 sm:px-6 lg:px-8">
         {items.map(({ icon: Icon, label }) => (
-          <div key={label} className="flex items-center justify-center gap-3 sm:justify-start">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <div key={label} className="flex items-center justify-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded bg-landing-primary-tint text-landing-primary">
               <Icon className="size-4.5" />
             </span>
             <span className="text-sm font-medium text-foreground">{label}</span>

@@ -106,7 +106,7 @@ export default function ExamResultsPage() {
         <Button render={<Link href="/dashboard" />} nativeButton={false} variant="outline">
           {t("backToDashboard")}
         </Button>
-        <Button render={<Link href="/exam/start" />} nativeButton={false} className="bg-gold text-gold-foreground hover:bg-gold/90">
+        <Button render={<Link href="/exam/start" />} nativeButton={false} className="btn-primary">
           {t("tryAgain")}
         </Button>
         <Button render={<Link href="/history" />} nativeButton={false} variant="ghost">

@@ -104,7 +104,7 @@ export default function DashboardPage() {
         <Link href="/exam/start" className="group block">
           <Card className="transition-colors group-hover:bg-muted/50">
             <CardContent className="flex items-center gap-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 <PlayCircle className="size-5" />
               </span>
               <div className="flex-1">

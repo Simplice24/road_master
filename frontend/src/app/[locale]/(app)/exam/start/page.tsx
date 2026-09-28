@@ -146,7 +146,7 @@ function StartExamForm() {
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-medium">{config.name}</p>
                       {isFree ? (
-                        <Badge className="bg-gold text-gold-foreground">
+                        <Badge className="bg-primary text-primary-foreground">
                           {t("freeBadge")}
                         </Badge>
                       ) : (
@@ -213,7 +213,7 @@ function StartExamForm() {
           </CardContent>
           <CardFooter>
             <Button
-              className="w-full bg-gold text-gold-foreground hover:bg-gold/90"
+              className="btn-primary w-full"
               disabled={isSubmitting || insufficientBalance || !selectedConfig}
               onClick={handleSubmit}
             >

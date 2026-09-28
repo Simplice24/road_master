@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  --font-heading: var(--font-bricolage);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -36,6 +36,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-2: var(--primary-2);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -57,13 +58,26 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Landing-page-only design tokens (cloud.strettch.com design-language reference).
+     Scoped under their own names, never aliased to --primary/--gold/etc., so the
+     authenticated app's theme is completely unaffected by the marketing redesign. */
+  --font-display: var(--font-bricolage);
+  --color-landing-primary: var(--landing-primary);
+  --color-landing-primary-2: var(--landing-primary-2);
+  --color-landing-primary-tint: var(--landing-primary-tint);
+  --color-landing-dark: var(--landing-dark);
+  --color-landing-dark-2: var(--landing-dark-2);
+  --color-landing-border: var(--landing-border);
+  --color-landing-divider: var(--landing-divider);
 }
 
 /*
- * Road Master theme — "official & trustworthy": a deep navy brand color (the kind of blue a
- * licensing authority uses) with a gold accent reserved for deliberate brand/CTA moments, plus
- * dedicated success/warning colors for exam pass/in-progress/fail states. Neutrals are Tailwind's
- * slate scale throughout for a cool, professional grey rather than a flat gray.
+ * Road Master theme — unified app-wide with the cloud.strettch.com-inspired design language
+ * (see the marketing components for the reference): an indigo/violet brand primary with a
+ * matching gradient end for hero-style CTAs, plus dedicated success/warning colors for exam
+ * pass/in-progress/fail states, which stay their own semantic colors since Strettch has no
+ * equivalent to mimic. Neutrals are Tailwind's slate scale throughout.
  */
 :root {
   --background: #ffffff;
@@ -72,16 +86,19 @@
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #1e3a8a; /* blue-900 — brand navy */
+  --primary: #6b63ff; /* brand indigo, sampled from cloud.strettch.com */
+  --primary-2: #8580ff; /* gradient end for primary CTAs */
   --primary-foreground: #f8fafc;
   --secondary: #f1f5f9; /* slate-100 */
   --secondary-foreground: #0f172a;
   --muted: #f1f5f9;
   --muted-foreground: #64748b; /* slate-500 */
-  --accent: #f1f5f9; /* quiet hover tint, not the brand gold — see --gold */
+  --accent: #f1f5f9; /* quiet hover tint, kept neutral rather than tinted with --primary */
   --accent-foreground: #0f172a;
-  --gold: #ca8a04; /* yellow-600 */
-  --gold-foreground: #1e293b; /* slate-800, better contrast on gold than pure white */
+  /* Unused by any current component after the redesign — kept only so a stray reference (or a
+     future one-off accent need) doesn't silently fall back to an undefined variable. */
+  --gold: #ca8a04;
+  --gold-foreground: #1e293b;
   --success: #059669; /* emerald-600 — exam passed */
   --success-foreground: #f8fafc;
   --warning: #f97316; /* orange-500 — exam in progress / pending */
@@ -90,21 +107,32 @@
   --destructive-foreground: #f8fafc;
   --border: #e2e8f0; /* slate-200 */
   --input: #e2e8f0;
-  --ring: #1d4ed8; /* blue-700 — visible focus ring tied to the brand color */
-  --chart-1: #1e3a8a;
+  --ring: #6b63ff; /* focus ring tied to the brand color */
+  --chart-1: #6b63ff;
   --chart-2: #ca8a04;
   --chart-3: #059669;
   --chart-4: #64748b;
   --chart-5: #dc2626;
-  --radius: 0.625rem;
+  --radius: 0.5rem; /* 8px base — matches cloud.strettch.com's card radius (rounded-lg) */
   --sidebar: #f8fafc;
   --sidebar-foreground: #0f172a;
-  --sidebar-primary: #1e3a8a;
+  --sidebar-primary: #6b63ff;
   --sidebar-primary-foreground: #f8fafc;
   --sidebar-accent: #f1f5f9;
   --sidebar-accent-foreground: #0f172a;
   --sidebar-border: #e2e8f0;
-  --sidebar-ring: #1d4ed8;
+  --sidebar-ring: #6b63ff;
+
+  /* Landing-specific aliases/tints — the primary/gradient colors now just mirror the app-wide
+     brand tokens above; these names are kept because marketing components already reference
+     them, and --landing-primary-tint/-dark/-border/-divider have no app-wide equivalent. */
+  --landing-primary: var(--primary);
+  --landing-primary-2: var(--primary-2);
+  --landing-primary-tint: #ecf0ff;
+  --landing-dark: #211c3b; /* hero + navbar background */
+  --landing-dark-2: #2a2350;
+  --landing-border: #eeedf0; /* card borders */
+  --landing-divider: #e5e7eb; /* flat-list dividers (FAQ, compliance grid) */
 }
 
 .dark {
@@ -114,8 +142,9 @@
   --card-foreground: #f1f5f9;
   --popover: #111c34;
   --popover-foreground: #f1f5f9;
-  --primary: #3b82f6; /* blue-500 — lightened so it still reads clearly on a dark navy bg */
-  --primary-foreground: #f8fafc;
+  --primary: #8580ff; /* lightened brand indigo for contrast on the dark background */
+  --primary-2: #a5a0ff;
+  --primary-foreground: #0b1220;
   --secondary: #1e293b; /* slate-800 */
   --secondary-foreground: #f1f5f9;
   --muted: #1e293b;
@@ -132,20 +161,20 @@
   --destructive-foreground: #f8fafc;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.15);
-  --ring: #60a5fa; /* blue-400 */
-  --chart-1: #3b82f6;
+  --ring: #8580ff;
+  --chart-1: #8580ff;
   --chart-2: #eab308;
   --chart-3: #10b981;
   --chart-4: #94a3b8;
   --chart-5: #ef4444;
   --sidebar: #0d1526;
   --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #3b82f6;
+  --sidebar-primary: #8580ff;
   --sidebar-primary-foreground: #f8fafc;
   --sidebar-accent: #1e293b;
   --sidebar-accent-foreground: #f1f5f9;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #60a5fa;
+  --sidebar-ring: #8580ff;
 }
 
 @layer base {
@@ -157,5 +186,56 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Landing-page-only component classes. Kept out of the shared shadcn primitives
+   (Button, Card, ...) so the authenticated app keeps its own look untouched —
+   marketing components apply these via className instead. */
+@layer components {
+  .landing-eyebrow {
+    @apply font-mono text-xs uppercase text-primary;
+    letter-spacing: 0.06em;
+  }
+
+  /*
+   * App-wide brand buttons (used on the marketing page AND on authenticated screens' primary
+   * actions — Register/Log in, Start/Finish exam, Top up, Save changes, etc). They apply to the
+   * shared shadcn <Button>, which always injects its own `rounded-lg`/`border-transparent`/
+   * variant `bg-*`+`text-*` utilities alongside whatever className we pass. Tailwind's cascade
+   * puts ALL utilities (shadcn's and ours) in the same `utilities` layer, so plain classes here
+   * would lose ties on specificity/source order — hence `!` (important) on every color/shape
+   * utility that must win. Non-conflicting utilities (font, tracking, gap, transitions) are left
+   * unmarked.
+   */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 !rounded font-mono text-sm font-medium
+      tracking-wide !text-white uppercase transition-opacity hover:opacity-90;
+    background-image: linear-gradient(180deg, var(--primary), var(--primary-2)) !important;
+  }
+
+  .btn-tint {
+    @apply inline-flex items-center justify-center gap-2 !rounded !bg-primary/10 font-mono text-sm
+      font-medium tracking-wide !text-primary uppercase transition-colors hover:!bg-primary/15;
+  }
+
+  /* Dark-surface-only companions — the marketing navbar/hero/mobile menu are the only dark
+     backgrounds in the app, so these stay landing-scoped. */
+  .landing-btn-glass {
+    @apply inline-flex items-center justify-center gap-2 !rounded !border !border-white/15
+      !bg-white/10 font-mono text-sm font-medium tracking-wide !text-white uppercase
+      transition-colors hover:!bg-white/20;
+  }
+
+  .landing-btn-solid {
+    @apply inline-flex items-center justify-center gap-2 !rounded !bg-white font-mono text-sm
+      font-medium tracking-wide !text-black uppercase transition-colors hover:!bg-neutral-100;
+  }
+
+  .landing-grid-bg {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
   }
 }
