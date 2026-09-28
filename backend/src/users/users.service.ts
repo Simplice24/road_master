@@ -8,6 +8,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CaslAbilityFactory, AppAbility } from '../casl/casl-ability.factory';
 import { Prisma, User } from '../../generated/prisma/client';
 import { accessibleBy } from '@casl/prisma';
+import { assertFieldsAllowed } from '../casl/policy-assertions';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 export interface CreateUserInput {
   fullName: string;
@@ -19,6 +21,8 @@ export interface CreateUserInput {
 // A label for the admin UI only — never queried or compared against. The bootstrap logic
 // below finds this role by its `isSuperAdmin` flag, not by this name.
 const SUPER_ADMIN_ROLE_NAME = 'SuperAdmin';
+
+const USER_FIELDS = ['fullName', 'email', 'phone'];
 
 @Injectable()
 export class UsersService {
@@ -120,6 +124,36 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async updateUser(id: string, data: UpdateUserDto, ability: AppAbility) {
+    assertFieldsAllowed(
+      ability,
+      'update',
+      'User',
+      USER_FIELDS,
+      Object.keys(data),
+    );
+
+    const where: Prisma.UserWhereInput = {
+      AND: [{ id }, accessibleBy(ability, 'update').ofType('User')],
+    };
+    const user = await this.prisma.user.findFirst({ where });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    try {
+      return await this.prisma.user.update({ where: { id }, data });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('A user with this email already exists');
+      }
+      throw error;
+    }
   }
 
   async listUsers(ability: AppAbility) {

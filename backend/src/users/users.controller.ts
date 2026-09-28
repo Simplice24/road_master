@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { RequirePermission } from '../casl/decorators/check-policies.decorator';
 import { CurrentAbility } from '../casl/decorators/current-ability.decorator';
 import { AppAbility } from '../casl/casl-ability.factory';
@@ -22,6 +23,16 @@ export class UsersController {
     @CurrentAbility() abilityParam: unknown,
   ) {
     return this.usersService.userProfile(id, abilityParam as AppAbility);
+  }
+
+  @Put(':id')
+  @RequirePermission('update', 'User')
+  updateUser(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @CurrentAbility() abilityParam: unknown,
+  ) {
+    return this.usersService.updateUser(id, dto, abilityParam as AppAbility);
   }
 
   @Get(':id/roles')
