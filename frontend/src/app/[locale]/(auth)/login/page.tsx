@@ -84,7 +84,7 @@ export default function LoginPage() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 h-12 w-full rounded-full bg-gradient-to-r from-primary to-primary-2 text-[15px] font-semibold shadow-lg shadow-primary/25 hover:opacity-90"
+          className="mt-2 h-12 w-full rounded-lg bg-gradient-to-r from-primary to-primary-2 text-[15px] font-semibold shadow-lg shadow-primary/25 hover:opacity-90"
         >
           {isSubmitting ? t("loggingIn") : t("loginCta")}
         </Button>

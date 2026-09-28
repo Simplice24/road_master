@@ -29,7 +29,7 @@ export function AuthField({ icon: Icon, label, id, type, className, ...props }: 
           id={id}
           type={isPassword ? (visible ? "text" : "password") : type}
           className={cn(
-            "h-12 rounded-full border-transparent bg-secondary/70 pl-11 pr-4 text-[15px] shadow-none transition-colors focus-visible:bg-background",
+            "h-12 rounded-lg border-transparent bg-secondary/70 pl-11 pr-4 text-[15px] shadow-none transition-colors focus-visible:bg-background",
             isPassword && "pr-11",
             className,
           )}
