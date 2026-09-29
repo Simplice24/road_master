@@ -40,6 +40,13 @@ export class CaslAbilityFactory {
       },
     });
 
+    // Deactivated accounts get an empty ability — deny everything, SuperAdmin included —
+    // before any role is considered. JwtStrategy already rejects them with a 401 on every
+    // request; this is the fail-closed second layer for any path that builds an ability.
+    if (!userWithRoles.isActive) {
+      return build();
+    }
+
     const roles = userWithRoles.userRoles.map((userRole) => userRole.role);
 
     // SuperAdmin short-circuit: a role with isSuperAdmin=true grants everything and never

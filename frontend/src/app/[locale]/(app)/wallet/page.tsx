@@ -6,12 +6,11 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { useApi } from "@/lib/use-api";
 import { apiFetch, ApiError } from "@/lib/api-client";
-import { formatDateTime, formatNumber } from "@/lib/format";
+import { formatDateTime, formatRwf } from "@/lib/format";
 import type { Transaction } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -19,39 +18,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Wallet as WalletIcon } from "lucide-react";
-
-const STATUS_VARIANT: Record<Transaction["status"], "default" | "secondary" | "destructive"> = {
-  SUCCESS: "default",
-  PENDING: "secondary",
-  FAILED: "destructive",
-};
+import { PageHeader } from "@/components/app/page-header";
+import { DataTable, type DataTableColumn } from "@/components/app/data-table";
+import { TransactionStatusBadge } from "@/components/app/record-status";
+import { RequirePermission } from "@/components/app/require-permission";
 
 const PROVIDERS = ["MTN_MOMO", "AIRTEL_MONEY", "CARD"] as const;
 
-export default function WalletPage() {
+function WalletContent() {
   const t = useTranslations("Wallet");
   const tType = useTranslations("TransactionType");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
-  const { user, token, refreshUser } = useAuth();
+  const { user, token, refreshUser, can } = useAuth();
+  const canTopUp = can("transactions.topUpOwn");
   const { data: transactions, isLoading, refetch } = useApi<Transaction[]>("/transactions");
 
   const [amount, setAmount] = useState("");
@@ -86,128 +67,130 @@ export default function WalletPage() {
       )
     : [];
 
+  const columns: DataTableColumn<Transaction>[] = [
+    {
+      key: "type",
+      header: t("type"),
+      cell: (transaction) => tType(transaction.type),
+    },
+    {
+      key: "amount",
+      header: t("amount"),
+      align: "right",
+      className: "font-mono tabular-nums",
+      cell: (transaction) =>
+        `${transaction.type === "TOPUP" || transaction.type === "REFUND" ? "+" : "-"}${formatRwf(transaction.amount)}`,
+    },
+    {
+      key: "status",
+      header: t("status"),
+      cell: (transaction) => <TransactionStatusBadge status={transaction.status} />,
+    },
+    {
+      key: "date",
+      header: t("date"),
+      className: "text-muted-foreground",
+      cell: (transaction) => formatDateTime(transaction.createdAt, locale),
+    },
+  ];
+
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+    <div className="flex flex-col gap-8">
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+
+      <div className={canTopUp ? "grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" : "grid gap-4"}>
+        <div className="flex flex-col justify-center rounded-lg border border-border bg-surface-muted p-5">
+          <p className="text-sm text-muted-foreground">{t("currentBalance")}</p>
+          <p className="mt-1 font-mono text-2xl font-medium text-foreground tabular-nums">
+            {formatRwf(user?.walletBalance ?? 0)}
+          </p>
+        </div>
+
+        {canTopUp && (
+          <section
+            id="top-up"
+            aria-labelledby="top-up-title"
+            className="scroll-mt-40 rounded-lg border border-border bg-background"
+          >
+            <h2 id="top-up-title" className="border-b border-border px-5 py-4 font-display text-lg font-medium">
+              {t("topUpTitle")}
+            </h2>
+            <form onSubmit={handleTopUp} className="flex flex-col gap-4 p-5">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="amount">{t("amount")}</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    min={1}
+                    step="1"
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                    placeholder={t("amountPlaceholder")}
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="provider">{t("provider")}</Label>
+                  <Select
+                    value={provider}
+                    onValueChange={(value) => setProvider(value ?? PROVIDERS[0])}
+                    items={PROVIDERS.map((option) => ({
+                      value: option,
+                      label: option.replace("_", " "),
+                    }))}
+                  >
+                    <SelectTrigger id="provider" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROVIDERS.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option.replace("_", " ")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button
+                type="submit"
+                className="btn-primary h-10 w-full sm:w-auto sm:self-end sm:px-5"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? t("toppingUp") : t("topUpCta")}
+              </Button>
+            </form>
+          </section>
+        )}
       </div>
 
-      <Card className="bg-primary text-primary-foreground">
-        <CardHeader>
-          <CardDescription className="flex items-center gap-1.5 text-primary-foreground/80">
-            <WalletIcon className="size-4" />
-            {t("currentBalance")}
-          </CardDescription>
-          <CardTitle className="text-3xl text-primary-foreground">
-            {formatNumber(user?.walletBalance ?? 0)} RWF
-          </CardTitle>
-        </CardHeader>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("topUpTitle")}</CardTitle>
-        </CardHeader>
-        <form onSubmit={handleTopUp}>
-          <CardContent className="flex flex-col gap-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="amount">{t("amount")}</Label>
-              <Input
-                id="amount"
-                type="number"
-                min={1}
-                step="1"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder={t("amountPlaceholder")}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="provider">{t("provider")}</Label>
-              <Select
-                value={provider}
-                onValueChange={(value) => setProvider(value ?? PROVIDERS[0])}
-                items={PROVIDERS.map((option) => ({
-                  value: option,
-                  label: option.replace("_", " "),
-                }))}
-              >
-                <SelectTrigger id="provider" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROVIDERS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option.replace("_", " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-          <CardContent className="pt-0">
-            <Button
-              type="submit"
-              className="btn-primary w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? t("toppingUp") : t("topUpCta")}
-            </Button>
-          </CardContent>
-        </form>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("transactionHistory")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading && <Skeleton className="h-32 w-full" />}
-          {!isLoading && sorted.length === 0 && (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              {t("noTransactions")}
-            </p>
-          )}
-          {!isLoading && sorted.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("type")}</TableHead>
-                  <TableHead>{t("amount")}</TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                  <TableHead>{t("date")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sorted.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{tType(transaction.type)}</TableCell>
-                    <TableCell className="tabular-nums">
-                      {transaction.type === "TOPUP" || transaction.type === "REFUND" ? "+" : "-"}
-                      {formatNumber(transaction.amount)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={STATUS_VARIANT[transaction.status]}>
-                        {transaction.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDateTime(transaction.createdAt, locale)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <section aria-labelledby="transactions-title" className="flex flex-col gap-4">
+        <h2 id="transactions-title" className="font-display text-xl font-medium">
+          {t("transactionHistory")}
+        </h2>
+        <DataTable
+          columns={columns}
+          rows={sorted}
+          getRowKey={(transaction) => transaction.id}
+          isLoading={isLoading}
+          caption={t("transactionHistory")}
+          emptyMessage={t("noTransactions")}
+        />
+      </section>
     </div>
+  );
+}
+
+export default function WalletPage() {
+  return (
+    <RequirePermission anyOf={["transactions.viewOwn"]}>
+      <WalletContent />
+    </RequirePermission>
   );
 }

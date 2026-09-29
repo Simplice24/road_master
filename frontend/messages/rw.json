@@ -133,7 +133,11 @@
     "back": "Subira inyuma",
     "currency": "RWF",
     "retry": "Ongera ugerageze",
-    "confirm": "Emeza"
+    "confirm": "Emeza",
+    "actions": "Ibikorwa",
+    "edit": "Hindura",
+    "delete": "Siba",
+    "rowActions": "Ibikorwa kuri {name}"
   },
   "Auth": {
     "registerTitle": "Fungura konti yawe",
@@ -167,7 +171,14 @@
     "wallet": "Konti y'amafaranga",
     "profile": "Umwirondoro",
     "logout": "Sohoka",
-    "menu": "Menu"
+    "menu": "Menu",
+    "balance": "Amafaranga",
+    "topUp": "Ongeramo",
+    "account": "Konti yawe",
+    "mainNav": "Ibice by'ingenzi",
+    "users": "Abakoresha",
+    "roles": "Inshingano",
+    "examConfig": "Imiterere y'ikizamini"
   },
   "Dashboard": {
     "welcomeBack": "Murakaza neza, {name}",
@@ -268,7 +279,8 @@
     "score": "Amanota",
     "date": "Itariki",
     "viewResults": "Reba ibisubizo",
-    "continue": "Komeza"
+    "continue": "Komeza",
+    "actions": "Ibikorwa"
   },
   "Profile": {
     "title": "Umwirondoro",
@@ -283,11 +295,188 @@
   "ExamAttemptStatus": {
     "IN_PROGRESS": "Bikomeje",
     "COMPLETED": "Byarangiye",
-    "ABANDONED": "Byahagaritswe"
+    "ABANDONED": "Byahagaritswe",
+    "passed": "Yatsinze",
+    "failed": "Yatsinzwe"
   },
   "TransactionType": {
     "TOPUP": "Kongera amafaranga",
     "EXAM_FEE": "Amafaranga y'ikizamini",
     "REFUND": "Kwishyurwa"
+  },
+  "TransactionStatus": {
+    "SUCCESS": "Byagenze neza",
+    "PENDING": "Birategerejwe",
+    "FAILED": "Byanze"
+  },
+  "Access": {
+    "notAuthorizedTitle": "Ntufite uburenganzira bwo kureba iyi paji",
+    "notAuthorizedBody": "Inshingano yawe ntikwemerera kuyireba. Niba utekereza ko wagombye kuyibona, baza umuyobozi wa sisitemu.",
+    "backToDashboard": "Subira ku mbonerahamwe",
+    "viewOnly": "Ushobora kureba gusa. Baza umuyobozi wa sisitemu niba ukeneye guhindura."
+  },
+  "Users": {
+    "title": "Abakoresha",
+    "subtitle": "Genzura konti, inshingano zazo n'uko zishobora kwinjira.",
+    "newUser": "Umukoresha mushya",
+    "name": "Amazina yose",
+    "phone": "Telefoni",
+    "email": "Imeri (si ngombwa)",
+    "roles": "Inshingano",
+    "status": "Uko bihagaze",
+    "createdAt": "Yakozwe",
+    "active": "Irakora",
+    "inactive": "Yahagaritswe",
+    "you": "Wowe",
+    "noUsers": "Nta mukoresha urabaho.",
+    "activate": "Ongera ukoreshe",
+    "deactivate": "Hagarika",
+    "activateTitle": "Ongera ukoreshe konti ya {name}?",
+    "activateBody": "Azongera kwinjira akoresheje ijambobanga rye risanzwe.",
+    "deactivateTitle": "Hagarika konti ya {name}?",
+    "deactivateBody": "Azasohorwa ku gikorwa gikurikira kandi ntazongera kwinjira keretse yongeye gukoreshwa.",
+    "createTitle": "Umukoresha mushya",
+    "createDescription": "Kora konti kandi uhitemo ibyo ishobora kugeraho.",
+    "editTitle": "Hindura umukoresha",
+    "password": "Ijambobanga rya mbere",
+    "passwordHint": "Nibura inyuguti 8. Uriha umukoresha mu buryo bwizewe.",
+    "rolesHint": "Ntugire icyo uhitamo kugira ngo ahabwe inshingano isanzwe.",
+    "activeLabel": "Irakora — ashobora kwinjira",
+    "create": "Kora umukoresha",
+    "created": "Umukoresha yakozwe.",
+    "updated": "Umukoresha yahinduwe.",
+    "statusUpdated": "Uko bihagaze byahinduwe.",
+    "superAdminRoleLocked": "SuperAdmin wenyine ni we ushobora gutanga cyangwa kwambura iyi nshingano."
+  },
+  "Roles": {
+    "title": "Inshingano",
+    "subtitle": "Sobanura ibyo buri nshingano ishobora kureba no gukora.",
+    "newRole": "Inshingano nshya",
+    "name": "Izina",
+    "description": "Ibisobanuro",
+    "permissions": "Uburenganzira",
+    "users": "Abakoresha",
+    "noRoles": "Nta nshingano irabaho.",
+    "superAdmin": "SuperAdmin",
+    "default": "Isanzwe",
+    "allPermissions": "Byose",
+    "permissionsCount": "{count} kuri {total}",
+    "createTitle": "Inshingano nshya",
+    "editTitle": "Hindura inshingano",
+    "formDescription": "Hitamo uburenganzira iyi nshingano itanga. Impinduka zikora ku gikorwa gikurikira cya buri mukoresha.",
+    "selectAll": "Hitamo byose",
+    "selectAllIn": "Hitamo uburenganzira bwose bwa {module}",
+    "superAdminNotice": "SuperAdmin irenga igenzura ryose ry'uburenganzira, bityo nta rutonde rw'uburenganzira igira. Ntishobora gusibwa.",
+    "create": "Kora inshingano",
+    "created": "Inshingano yakozwe.",
+    "updated": "Inshingano yahinduwe.",
+    "deleted": "Inshingano yasibwe.",
+    "deleteTitle": "Siba inshingano \"{name}\"?",
+    "deleteBody": "{count, plural, =0 {Nta mukoresha ufite iyi nshingano.} other {Abakoresha # bazatakaza uburenganzira itanga.}} Ntibishobora gusubizwa inyuma.",
+    "cannotDeleteSuperAdmin": "Inshingano ya SuperAdmin ntishobora gusibwa.",
+    "cannotDeleteDefault": "Inshingano isanzwe y'abiyandikisha bashya ntishobora gusibwa."
+  },
+  "ExamConfig": {
+    "title": "Imiterere y'ikizamini",
+    "subtitle": "Tunganya ubwoko bw'ibizamini abakandida bashobora gukora.",
+    "configsNav": "Imiterere y'ibizamini",
+    "newConfig": "Imiterere nshya",
+    "noConfigs": "Nta miterere y'ikizamini irabaho.",
+    "active": "Irakora",
+    "inactive": "Ntikora",
+    "general": "Rusange",
+    "generalDescription": "Izina ry'ikizamini n'uko abakandida bashobora kugihitamo.",
+    "name": "Izina",
+    "nameHint": "Inyuguti 100 ntarengwa.",
+    "activeLabel": "Kiraboneka ku bakandida",
+    "activeDescription": "Imiterere idakora ntigaragara ku paji yo gutangira ikizamini.",
+    "scoring": "Ibibazo n'amanota",
+    "scoringDescription": "Umubare w'ibibazo bitoranywa n'amanota asabwa kugira ngo utsinde.",
+    "numberOfQuestions": "Umubare w'ibibazo",
+    "passMark": "Amanota yo gutsinda",
+    "scoringHint": "Ibibazo 1–100 · amanota yo gutsinda 0–100%.",
+    "duration": "Igihe",
+    "durationDescription": "Igihe ntarengwa cyo kurangiza ikizamini.",
+    "durationMinutes": "Igihe",
+    "minutesShort": "min",
+    "durationHint": "Iminota 1–300.",
+    "price": "Igiciro",
+    "priceDescription": "Bikurwa kuri konti kuri buri kizamini cyishyurwa. Ikizamini cya mbere cy'umukandida ni ubuntu.",
+    "priceLabel": "Igiciro",
+    "priceHint": "0 – 99,999,999.99 RWF, imibare 2 nyuma y'akadomo ntarengwa.",
+    "saveChanges": "Bika impinduka",
+    "saved": "Impinduka zabitswe.",
+    "createTitle": "Imiterere nshya y'ikizamini",
+    "create": "Kora imiterere",
+    "created": "Imiterere y'ikizamini yakozwe.",
+    "dangerZone": "Siba iyi miterere",
+    "dangerDescription": "Imiterere yamaze gukoreshwa mu kizamini ntishobora gusibwa — yihagarike aho.",
+    "deleteCta": "Siba imiterere",
+    "deleteTitle": "Siba \"{name}\"?",
+    "deleteBody": "Ntibishobora gusubizwa inyuma.",
+    "deleted": "Imiterere y'ikizamini yasibwe.",
+    "errors": {
+      "required": "Iki gice kirakenewe.",
+      "integer": "Andika umubare wuzuye.",
+      "range": "Andika agaciro kari hagati ya {min} na {max}.",
+      "decimals": "Koresha imibare 2 nyuma y'akadomo ntarengwa.",
+      "maxLength": "Koresha inyuguti {max} ntarengwa."
+    }
+  },
+  "PermissionCatalog": {
+    "modules": {
+      "categories": "Ibyiciro",
+      "questions": "Ibibazo",
+      "examConfig": "Imiterere y'ikizamini",
+      "examAttempts": "Ibizamini byakozwe",
+      "transactions": "Ibikorwa by'amafaranga",
+      "users": "Abakoresha",
+      "roles": "Inshingano"
+    },
+    "actions": {
+      "categories": {
+        "view": "Kureba",
+        "create": "Gukora",
+        "update": "Guhindura",
+        "delete": "Gusiba"
+      },
+      "questions": {
+        "view": "Kureba",
+        "create": "Gukora",
+        "update": "Guhindura",
+        "delete": "Gusiba"
+      },
+      "examConfig": {
+        "view": "Kureba",
+        "create": "Gukora",
+        "update": "Guhindura",
+        "delete": "Gusiba"
+      },
+      "examAttempts": {
+        "viewOwn": "Kureba ibye",
+        "start": "Gutangira",
+        "answerOwn": "Gusubiza ibye",
+        "view": "Kureba byose"
+      },
+      "transactions": {
+        "viewOwn": "Kureba ibye",
+        "topUpOwn": "Kongera amafaranga kuri konti ye",
+        "view": "Kureba byose"
+      },
+      "users": {
+        "viewOwn": "Kureba umwirondoro we",
+        "updateOwn": "Guhindura umwirondoro we",
+        "view": "Kureba",
+        "create": "Gukora",
+        "update": "Guhindura"
+      },
+      "roles": {
+        "view": "Kureba",
+        "create": "Gukora",
+        "update": "Guhindura",
+        "delete": "Gusiba",
+        "assign": "Guha abakoresha"
+      }
+    }
   }
 }

@@ -1,36 +1,54 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useApi } from "@/lib/use-api";
-import { formatDateTime, formatNumber } from "@/lib/format";
+import { formatRwf } from "@/lib/format";
 import type { ExamAttempt } from "@/lib/api-types";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { PlayCircle, ListChecks, Wallet, ArrowRight } from "lucide-react";
+import { PageHeader } from "@/components/app/page-header";
+import { AttemptsTable } from "@/components/app/attempts-table";
+import { Plus } from "lucide-react";
 
-const STATUS_VARIANT: Record<ExamAttempt["status"], "default" | "secondary" | "destructive"> = {
-  IN_PROGRESS: "secondary",
-  COMPLETED: "default",
-  ABANDONED: "destructive",
-};
+function StatTile({
+  label,
+  value,
+  action,
+  highlight = false,
+}: {
+  label: string;
+  value: ReactNode;
+  action?: ReactNode;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-1 rounded-lg border p-5",
+        highlight ? "border-primary/30 bg-primary/5" : "border-border bg-background",
+      )}
+    >
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="font-mono text-2xl font-medium text-foreground tabular-nums">{value}</p>
+      {action && <div className="mt-2">{action}</div>}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const t = useTranslations("Dashboard");
-  const tStatus = useTranslations("ExamAttemptStatus");
-  const locale = useLocale();
-  const { user } = useAuth();
-  const { data: attempts, isLoading } = useApi<ExamAttempt[]>("/exam-attempts");
+  const { user, can } = useAuth();
+  // Every section below is shown only if the user may use it — a role with no permissions
+  // still gets a working (if sparse) dashboard rather than a wall of 403 errors.
+  const canViewAttempts = can("examAttempts.viewOwn");
+  const canStartExam = can("examAttempts.start");
+  const canTopUp = can("transactions.topUpOwn") && can("transactions.viewOwn");
+  const { data: attempts, isLoading } = useApi<ExamAttempt[]>(
+    canViewAttempts ? "/exam-attempts" : null,
+  );
 
   const sorted = attempts
     ? [...attempts].sort(
@@ -49,137 +67,77 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          {t("welcomeBack", { name: user.fullName.split(" ")[0] })}
-        </h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
-      </div>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        title={t("welcomeBack", { name: user.fullName.split(" ")[0] })}
+        subtitle={t("subtitle")}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardDescription>{t("walletBalance")}</CardDescription>
-            <CardTitle className="text-2xl">
-              {formatNumber(user.walletBalance)} RWF
-            </CardTitle>
-          </CardHeader>
-          <CardFooter className="bg-transparent pt-0">
-            <Button size="sm" variant="outline" render={<Link href="/wallet" />} nativeButton={false}>
-              {t("topUp")}
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardDescription>{t("attemptsTaken")}</CardDescription>
-            <CardTitle className="text-2xl">{sorted.length}</CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardDescription>{t("passRate")}</CardDescription>
-            <CardTitle className="text-2xl">
-              {passRate === null ? "—" : `${passRate}%`}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card className="bg-primary text-primary-foreground">
-          <CardHeader>
-            <CardDescription className="text-primary-foreground/80">
-              {user.hasUsedFreeExam ? t("freeExamUsed") : t("freeExamAvailable")}
-            </CardDescription>
-            <CardTitle className="text-2xl text-primary-foreground">
-              {user.hasUsedFreeExam ? "—" : "🎉"}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <StatTile
+          label={t("walletBalance")}
+          value={formatRwf(user.walletBalance)}
+          action={
+            canTopUp && (
+              // Same pill as the top bar's balance widget: tinted, mono, "+" on the left.
+              <Link
+                href="/wallet#top-up"
+                className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-primary/10 px-3 font-mono text-xs font-medium text-primary-text transition-colors hover:bg-primary/15 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+              >
+                <Plus className="size-3.5" aria-hidden />
+                {t("topUp")}
+              </Link>
+            )
+          }
+        />
+        {canViewAttempts && (
+          <>
+            <StatTile label={t("attemptsTaken")} value={isLoading ? "…" : sorted.length} />
+            <StatTile
+              label={t("passRate")}
+              value={isLoading ? "…" : passRate === null ? "—" : `${passRate}%`}
+            />
+          </>
+        )}
+        {canStartExam && (
+          <StatTile
+            highlight
+            label={user.hasUsedFreeExam ? t("freeExamUsed") : t("freeExamAvailable")}
+            value={user.hasUsedFreeExam ? "—" : "🎉"}
+          />
+        )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Link href="/exam/start" className="group block">
-          <Card className="transition-colors group-hover:bg-muted/50">
-            <CardContent className="flex items-center gap-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <PlayCircle className="size-5" />
-              </span>
-              <div className="flex-1">
-                <p className="font-medium">{t("startExam")}</p>
-              </div>
-              <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/categories" className="group block">
-          <Card className="transition-colors group-hover:bg-muted/50">
-            <CardContent className="flex items-center gap-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <ListChecks className="size-5" />
-              </span>
-              <div className="flex-1">
-                <p className="font-medium">{t("browseCategories")}</p>
-              </div>
-              <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>{t("recentAttempts")}</CardTitle>
-          <Button size="sm" variant="ghost" render={<Link href="/history" />} nativeButton={false}>
-            {t("viewAll")}
-          </Button>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          {isLoading && (
-            <>
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </>
-          )}
-          {!isLoading && recent.length === 0 && (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <Wallet className="size-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">{t("noAttemptsYet")}</p>
-              <Button size="sm" render={<Link href="/exam/start" />} nativeButton={false}>
-                {t("takeFirstExam")}
-              </Button>
-            </div>
-          )}
-          {recent.map((attempt) => (
+      {canViewAttempts && (
+        <section aria-labelledby="recent-attempts-title" className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="recent-attempts-title" className="font-display text-xl font-medium">
+              {t("recentAttempts")}
+            </h2>
             <Link
-              key={attempt.id}
-              href={
-                attempt.status === "IN_PROGRESS"
-                  ? `/exam/${attempt.id}`
-                  : `/exam/${attempt.id}/results`
-              }
-              className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2.5 transition-colors hover:bg-muted/50"
+              href="/history"
+              className="rounded-sm font-mono text-xs tracking-wide text-primary-text uppercase hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">
-                  {formatDateTime(attempt.startedAt, locale)}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {attempt.status === "IN_PROGRESS"
-                    ? "—"
-                    : `${attempt.score}/${attempt.totalQuestions}`}
-                </span>
-              </div>
-              <Badge variant={STATUS_VARIANT[attempt.status]}>
-                {tStatus(attempt.status)}
-              </Badge>
+              {t("viewAll")}
             </Link>
-          ))}
-        </CardContent>
-      </Card>
+          </div>
+          <AttemptsTable
+            attempts={recent}
+            isLoading={isLoading}
+            caption={t("recentAttempts")}
+            emptyMessage={
+              <span className="flex flex-col items-center gap-3">
+                {t("noAttemptsYet")}
+                {canStartExam && (
+                  <Button size="sm" className="btn-primary h-9 px-4 text-xs" render={<Link href="/exam/start" />} nativeButton={false}>
+                    {t("takeFirstExam")}
+                  </Button>
+                )}
+              </span>
+            }
+          />
+        </section>
+      )}
     </div>
   );
 }

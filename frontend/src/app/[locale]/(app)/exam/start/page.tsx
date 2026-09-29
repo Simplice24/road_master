@@ -30,8 +30,9 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
+import { RequirePermission } from "@/components/app/require-permission";
 
-export default function StartExamPage() {
+function StartExamContent() {
   return (
     <Suspense fallback={null}>
       <StartExamForm />
@@ -44,13 +45,19 @@ function StartExamForm() {
   const tCommon = useTranslations("Common");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, token, refreshUser } = useAuth();
+  const { user, token, refreshUser, can } = useAuth();
+  // The category picker and the in-progress check are optional extras — skip their requests
+  // (instead of surfacing 403s) when the role doesn't include them.
+  const canPickCategory = can("categories.view");
 
   const { data: examConfigs, isLoading: loadingConfigs } =
     useApi<ExamConfig[]>("/exam-config");
-  const { data: categories, isLoading: loadingCategories } =
-    useApi<Category[]>("/category");
-  const { data: attempts } = useApi<ExamAttempt[]>("/exam-attempts");
+  const { data: categories, isLoading: loadingCategoriesRequest } =
+    useApi<Category[]>(canPickCategory ? "/category" : null);
+  const loadingCategories = canPickCategory && loadingCategoriesRequest;
+  const { data: attempts } = useApi<ExamAttempt[]>(
+    can("examAttempts.viewOwn") ? "/exam-attempts" : null,
+  );
 
   const [examConfigId, setExamConfigId] = useState<string>("");
   const [categoryId, setCategoryId] = useState<string>(
@@ -167,40 +174,44 @@ function StartExamForm() {
               ))}
             </RadioGroup>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="category">{t("category")}</Label>
-              <Select
-                value={categoryId || "any"}
-                onValueChange={(value) => setCategoryId(!value || value === "any" ? "" : value)}
-                items={[
-                  { value: "any", label: t("anyCategory") },
-                  ...(categories ?? []).map((category) => ({
-                    value: category.id,
-                    label: category.name,
-                  })),
-                ]}
-              >
-                <SelectTrigger id="category" className="w-full">
-                  <SelectValue placeholder={t("anyCategory")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">{t("anyCategory")}</SelectItem>
-                  {categories?.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {canPickCategory && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="category">{t("category")}</Label>
+                <Select
+                  value={categoryId || "any"}
+                  onValueChange={(value) => setCategoryId(!value || value === "any" ? "" : value)}
+                  items={[
+                    { value: "any", label: t("anyCategory") },
+                    ...(categories ?? []).map((category) => ({
+                      value: category.id,
+                      label: category.name,
+                    })),
+                  ]}
+                >
+                  <SelectTrigger id="category" className="w-full">
+                    <SelectValue placeholder={t("anyCategory")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">{t("anyCategory")}</SelectItem>
+                    {categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {insufficientBalance && (
               <Alert variant="destructive">
                 <AlertDescription className="flex items-center justify-between gap-2">
                   {t("insufficientBalance")}
-                  <Button size="sm" render={<Link href="/wallet" />} nativeButton={false}>
-                    {t("topUpCta")}
-                  </Button>
+                  {can("transactions.topUpOwn") && can("transactions.viewOwn") && (
+                    <Button size="sm" render={<Link href="/wallet#top-up" />} nativeButton={false}>
+                      {t("topUpCta")}
+                    </Button>
+                  )}
                 </AlertDescription>
               </Alert>
             )}
@@ -223,5 +234,13 @@ function StartExamForm() {
         </Card>
       )}
     </div>
+  );
+}
+
+export default function StartExamPage() {
+  return (
+    <RequirePermission allOf={["examAttempts.start", "examConfig.view"]}>
+      <StartExamContent />
+    </RequirePermission>
   );
 }

@@ -15,10 +15,6 @@ export async function Hero() {
       />
 
       <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32 lg:px-8">
-        <span className="rounded-full border border-white/15 bg-white/10 px-4 py-1.5 font-mono text-[11px] font-medium tracking-wide text-white">
-          {t("eyebrow")}
-        </span>
-
         <h1 className="mt-6 font-display text-[40px] leading-[1.04] font-normal tracking-[-0.02em] text-white sm:text-[48px] md:text-[56px]">
           {t("headline")}
         </h1>
@@ -35,14 +31,6 @@ export async function Hero() {
             className="btn-primary h-11 px-6 text-base"
           >
             {t("ctaPrimary")}
-          </Button>
-          <Button
-            size="lg"
-            render={<Link href="/login" />}
-            nativeButton={false}
-            className="landing-btn-glass h-11 px-6 text-base"
-          >
-            {t("ctaSecondary")}
           </Button>
         </div>
       </div>

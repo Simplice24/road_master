@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { CaslModule } from './casl/casl.module';
+import { AccessModule } from './access/access.module';
 import { PoliciesGuard } from './casl/policies.guard';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
@@ -20,6 +21,7 @@ import { TransactionsModule } from './transactions/transactions.module';
   imports: [
     PrismaModule,
     CaslModule,
+    AccessModule,
     AuthModule,
     UsersModule,
     RolesModule,

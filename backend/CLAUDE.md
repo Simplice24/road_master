@@ -25,11 +25,11 @@ npm run test                 # unit tests (jest, rootDir=src, *.spec.ts)
 npm run test -- users.service   # run a single unit test by filename/pattern
 npm run test:watch
 npm run test:cov
-npm run test:e2e             # e2e tests (test/*.e2e-spec.ts, runInBand)
+npm run test:e2e             # e2e tests — WIPE DATA; refuse to run unless the DATABASE_URL db name contains "test"
 
 npx prisma migrate dev       # create/apply a migration from schema.prisma
 npx prisma generate          # regenerate the client into generated/prisma
-npm run seed                  # seed the default "client" role + its permissions (run once after first migrate)
+npm run seed                  # seed the default "client" role (by config permission name) + DefaultRole pointer
 ```
 
 There is no `.env.example`; `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN` are read from `.env` via `dotenv/config`.
@@ -38,12 +38,34 @@ There is no `.env.example`; `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN` are r
 
 ### RBAC is entirely database-driven (CASL, spatie/laravel-permission-style)
 
-Roles and permissions are rows, not code. **The only two things allowed to branch on directly
-are `Role.isSuperAdmin` and the `DefaultRole` singleton pointer — never a role or permission
-name.** New roles/permissions/grants (`POST /permissions`, `/roles`, `/roles/:id/permissions`,
-`/users/:id/roles`) take effect on a user's very next request with zero redeploy.
+Roles and role→permission grants are rows, not code. **The only two things allowed to branch on
+directly are `Role.isSuperAdmin` and the `DefaultRole` singleton pointer — never a role or
+permission name.** New roles/grants (`/roles`, `/users/:id/roles`) take effect on a user's very
+next request with zero redeploy.
 
-- `Permission` rows: `action` (`create|read|update|delete|manage`) + `subject` (any
+**The set of permissions itself is config-driven:** `src/access/access.config.ts` defines every
+permission as a stable name (`<module>.<action>`, e.g. `categories.create`, `examAttempts.viewOwn`)
+mapped to one CASL rule. `PermissionSyncService` (`src/access/`) makes the `permissions` table
+match it on startup and whenever a role is saved — creating missing rows, adopting pre-config
+rows with the same action/subject/conditions by setting their `name`, and never deleting
+anything (rows that match no config entry stay enforced for roles that hold them, are logged as
+a warning, and can't be newly assigned). There is no API to create/edit/delete permissions: add
+an entry to the config instead. `GET /permissions/catalog` serves the config to the frontend;
+`POST/PATCH /roles` take `permissions: string[]` (unknown names → 400); `GET /auth/me` returns the
+caller's profile, roles, `isSuperAdmin` and effective permission names.
+
+**SuperAdmin guard rails** (the bypass itself lives only in `CaslAbilityFactory`): `isSuperAdmin`
+is rejected in role DTOs; the SuperAdmin role can't be deleted, given permissions, or made the
+default role; only a SuperAdmin can grant/revoke it; the last active SuperAdmin can't lose it or
+be deactivated.
+
+**Deactivated users** (`User.isActive = false`) can't log in, get a 401 from `JwtStrategy` on
+every request with an existing token, and get an empty ability from `CaslAbilityFactory`.
+
+**`passwordHash` is omitted globally** (`GLOBAL_OMIT` in `src/prisma/prisma.service.ts`, typed so
+user rows don't carry it); only `UsersService#findCredentialsByPhone` opts back in, for login.
+
+- `Permission` rows: `name` (config key, unique; null only for legacy rows) + `action` (`create|read|update|delete|manage`) + `subject` (any
   `Prisma.ModelName`, or `all`) + optional `conditions` (CASL-style JSON, supports
   `${user.path}` placeholders interpolated against the real user record) + optional `fields`
   (JSON array restricting which payload fields the rule permits).
@@ -102,7 +124,7 @@ all three, `shapeAttempt()` strips `isCorrect`/`explanation`/`isCorrect` while t
 
 Each domain (`auth`, `users`, `roles`, `permissions`, `category`, `question`, `exam-config`,
 `exam-attempts`, `transactions`) follows the standard Nest `*.module.ts` / `*.controller.ts` /
-`*.service.ts` / `dto/*.ts` split, wired into `AppModule`. `casl/` and `prisma/` are
+`*.service.ts` / `dto/*.ts` split, wired into `AppModule`. `casl/`, `access/` and `prisma/` are
 cross-cutting infrastructure modules imported everywhere else needs them, not domain modules
 themselves.
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useAuth } from "@/lib/auth-context";
 import { Link } from "@/i18n/navigation";
 import { useApi } from "@/lib/use-api";
 import type { Category } from "@/lib/api-types";
@@ -15,10 +16,12 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ListChecks } from "lucide-react";
+import { RequirePermission } from "@/components/app/require-permission";
 
-export default function CategoriesPage() {
+function CategoriesContent() {
   const t = useTranslations("CategoryBrowser");
   const { data: categories, error, isLoading } = useApi<Category[]>("/category");
+  const canStartExam = useAuth().can("examAttempts.start");
 
   return (
     <div className="flex flex-col gap-6">
@@ -58,19 +61,29 @@ export default function CategoriesPage() {
                 </CardDescription>
               )}
             </CardHeader>
-            <CardFooter className="bg-transparent pt-0">
-              <Button
-                size="sm"
-                className="w-full"
-                render={<Link href={`/exam/start?categoryId=${category.id}`} />}
-                nativeButton={false}
-              >
-                {t("practiceThisTopic")}
-              </Button>
-            </CardFooter>
+            {canStartExam && (
+              <CardFooter className="bg-transparent pt-0">
+                <Button
+                  size="sm"
+                  className="w-full"
+                  render={<Link href={`/exam/start?categoryId=${category.id}`} />}
+                  nativeButton={false}
+                >
+                  {t("practiceThisTopic")}
+                </Button>
+              </CardFooter>
+            )}
           </Card>
         ))}
       </div>
     </div>
+  );
+}
+
+export default function CategoriesPage() {
+  return (
+    <RequirePermission anyOf={["categories.view"]}>
+      <CategoriesContent />
+    </RequirePermission>
   );
 }

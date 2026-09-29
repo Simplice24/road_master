@@ -8,7 +8,6 @@
     "register": "Get started"
   },
   "Hero": {
-    "eyebrow": "Provisional Driving License Exam Practice",
     "headline": "Pass your provisional driving license exam with confidence",
     "subheadline": "Practice under real, timed conditions across Rwanda's Highway Code. Your first exam attempt is completely free.",
     "ctaPrimary": "Start your free practice exam",
@@ -133,7 +132,11 @@
     "back": "Back",
     "currency": "RWF",
     "retry": "Try again",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "rowActions": "Actions for {name}"
   },
   "Auth": {
     "registerTitle": "Create your account",
@@ -167,7 +170,14 @@
     "wallet": "Wallet",
     "profile": "Profile",
     "logout": "Log out",
-    "menu": "Menu"
+    "menu": "Menu",
+    "balance": "Balance",
+    "topUp": "Top up",
+    "account": "Account menu",
+    "mainNav": "Main navigation",
+    "users": "Users",
+    "roles": "Roles",
+    "examConfig": "Exam config"
   },
   "Dashboard": {
     "welcomeBack": "Welcome back, {name}",
@@ -268,7 +278,8 @@
     "score": "Score",
     "date": "Date",
     "viewResults": "View results",
-    "continue": "Continue"
+    "continue": "Continue",
+    "actions": "Actions"
   },
   "Profile": {
     "title": "Profile",
@@ -283,11 +294,188 @@
   "ExamAttemptStatus": {
     "IN_PROGRESS": "In progress",
     "COMPLETED": "Completed",
-    "ABANDONED": "Abandoned"
+    "ABANDONED": "Abandoned",
+    "passed": "Passed",
+    "failed": "Failed"
   },
   "TransactionType": {
     "TOPUP": "Top-up",
     "EXAM_FEE": "Exam fee",
     "REFUND": "Refund"
+  },
+  "TransactionStatus": {
+    "SUCCESS": "Successful",
+    "PENDING": "Pending",
+    "FAILED": "Failed"
+  },
+  "Access": {
+    "notAuthorizedTitle": "You don't have access to this page",
+    "notAuthorizedBody": "Your role doesn't include permission to view it. If you think you should have access, ask an administrator.",
+    "backToDashboard": "Back to dashboard",
+    "viewOnly": "You have view-only access. Ask an administrator if you need to make changes."
+  },
+  "Users": {
+    "title": "Users",
+    "subtitle": "Manage system accounts, their roles and whether they can sign in.",
+    "newUser": "New user",
+    "name": "Full name",
+    "phone": "Phone",
+    "email": "Email (optional)",
+    "roles": "Roles",
+    "status": "Status",
+    "createdAt": "Created",
+    "active": "Active",
+    "inactive": "Inactive",
+    "you": "You",
+    "noUsers": "No users yet.",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "activateTitle": "Reactivate {name}?",
+    "activateBody": "They'll be able to sign in again with their existing password.",
+    "deactivateTitle": "Deactivate {name}?",
+    "deactivateBody": "They'll be signed out on their next request and won't be able to sign in until reactivated.",
+    "createTitle": "New user",
+    "createDescription": "Create an account and choose what it can access.",
+    "editTitle": "Edit user",
+    "password": "Initial password",
+    "passwordHint": "At least 8 characters. Share it with the user securely.",
+    "rolesHint": "Leave all unchecked to give the default role.",
+    "activeLabel": "Active — can sign in",
+    "create": "Create user",
+    "created": "User created.",
+    "updated": "User updated.",
+    "statusUpdated": "Status updated.",
+    "superAdminRoleLocked": "Only a SuperAdmin can assign or remove this role."
+  },
+  "Roles": {
+    "title": "Roles",
+    "subtitle": "Define what each role can see and do.",
+    "newRole": "New role",
+    "name": "Name",
+    "description": "Description",
+    "permissions": "Permissions",
+    "users": "Users",
+    "noRoles": "No roles yet.",
+    "superAdmin": "SuperAdmin",
+    "default": "Default",
+    "allPermissions": "All",
+    "permissionsCount": "{count} of {total}",
+    "createTitle": "New role",
+    "editTitle": "Edit role",
+    "formDescription": "Pick the permissions this role grants. Changes apply on each user's next request.",
+    "selectAll": "Select all",
+    "selectAllIn": "Select all {module} permissions",
+    "superAdminNotice": "SuperAdmin bypasses every permission check, so it has no permission list. It can't be deleted.",
+    "create": "Create role",
+    "created": "Role created.",
+    "updated": "Role updated.",
+    "deleted": "Role deleted.",
+    "deleteTitle": "Delete role \"{name}\"?",
+    "deleteBody": "{count, plural, =0 {No users have this role.} one {# user will lose the permissions it grants.} other {# users will lose the permissions it grants.}} This can't be undone.",
+    "cannotDeleteSuperAdmin": "The SuperAdmin role can't be deleted.",
+    "cannotDeleteDefault": "The default role for new registrations can't be deleted."
+  },
+  "ExamConfig": {
+    "title": "Exam config",
+    "subtitle": "Configure the exam formats candidates can take.",
+    "configsNav": "Exam configurations",
+    "newConfig": "New config",
+    "noConfigs": "No exam configurations yet.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "general": "General",
+    "generalDescription": "The exam's name and whether candidates can choose it.",
+    "name": "Name",
+    "nameHint": "Up to 100 characters.",
+    "activeLabel": "Available to candidates",
+    "activeDescription": "Inactive configs are hidden from the Start exam page.",
+    "scoring": "Questions & scoring",
+    "scoringDescription": "How many questions are drawn and the score needed to pass.",
+    "numberOfQuestions": "Number of questions",
+    "passMark": "Pass mark",
+    "scoringHint": "1–100 questions · pass mark 0–100%.",
+    "duration": "Duration",
+    "durationDescription": "Time limit for completing the exam.",
+    "durationMinutes": "Duration",
+    "minutesShort": "min",
+    "durationHint": "1–300 minutes.",
+    "price": "Price",
+    "priceDescription": "Charged from the wallet for each paid attempt. A candidate's first attempt is free.",
+    "priceLabel": "Price",
+    "priceHint": "0 – 99,999,999.99 RWF, up to 2 decimal places.",
+    "saveChanges": "Save changes",
+    "saved": "Changes saved.",
+    "createTitle": "New exam config",
+    "create": "Create config",
+    "created": "Exam config created.",
+    "dangerZone": "Delete this config",
+    "dangerDescription": "Configs already used by an exam attempt can't be deleted — deactivate them instead.",
+    "deleteCta": "Delete config",
+    "deleteTitle": "Delete \"{name}\"?",
+    "deleteBody": "This can't be undone.",
+    "deleted": "Exam config deleted.",
+    "errors": {
+      "required": "This field is required.",
+      "integer": "Enter a whole number.",
+      "range": "Enter a value between {min} and {max}.",
+      "decimals": "Use at most 2 decimal places.",
+      "maxLength": "Use at most {max} characters."
+    }
+  },
+  "PermissionCatalog": {
+    "modules": {
+      "categories": "Categories",
+      "questions": "Questions",
+      "examConfig": "Exam config",
+      "examAttempts": "Exam attempts",
+      "transactions": "Transactions",
+      "users": "Users",
+      "roles": "Roles"
+    },
+    "actions": {
+      "categories": {
+        "view": "View",
+        "create": "Create",
+        "update": "Edit",
+        "delete": "Delete"
+      },
+      "questions": {
+        "view": "View",
+        "create": "Create",
+        "update": "Edit",
+        "delete": "Delete"
+      },
+      "examConfig": {
+        "view": "View",
+        "create": "Create",
+        "update": "Edit",
+        "delete": "Delete"
+      },
+      "examAttempts": {
+        "viewOwn": "View own",
+        "start": "Start",
+        "answerOwn": "Answer own",
+        "view": "View all"
+      },
+      "transactions": {
+        "viewOwn": "View own",
+        "topUpOwn": "Top up own wallet",
+        "view": "View all"
+      },
+      "users": {
+        "viewOwn": "View own profile",
+        "updateOwn": "Edit own profile",
+        "view": "View",
+        "create": "Create",
+        "update": "Edit"
+      },
+      "roles": {
+        "view": "View",
+        "create": "Create",
+        "update": "Edit",
+        "delete": "Delete",
+        "assign": "Assign to users"
+      }
+    }
   }
 }

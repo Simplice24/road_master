@@ -10,8 +10,46 @@ export interface User {
   phone: string;
   walletBalance: string;
   hasUsedFreeExam: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface RoleSummary {
+  id: string;
+  name: string;
+  isSuperAdmin: boolean;
+}
+
+/** GET /auth/me — the signed-in user plus what they're allowed to do. */
+export interface CurrentUser extends User {
+  roles: RoleSummary[];
+  isSuperAdmin: boolean;
+  permissions: string[];
+}
+
+/** GET /users — a user row as seen by admins. */
+export interface ManagedUser extends User {
+  roles: RoleSummary[];
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string | null;
+  isSuperAdmin: boolean;
+  isDefault: boolean;
+  userCount: number;
+  permissions: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GET /permissions/catalog — modules and actions from the backend access config. */
+export interface PermissionCatalogModule {
+  module: string;
+  label: string;
+  actions: { name: string; action: string; label: string }[];
 }
 
 export interface Category {
@@ -30,6 +68,8 @@ export interface ExamConfig {
   passMarkPercent: number;
   durationMinutes: number;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Option {

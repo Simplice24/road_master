@@ -70,6 +70,12 @@
   --color-landing-dark-2: var(--landing-dark-2);
   --color-landing-border: var(--landing-border);
   --color-landing-divider: var(--landing-divider);
+
+  /* App-shell surface (cloud.strettch.com dashboard reference): the grey top bar, table
+     header rows, and row hover tint. */
+  --color-surface-muted: var(--surface-muted);
+  /* Brand indigo for small text on light surfaces — --primary itself is ~4.3:1 on white. */
+  --color-primary-text: var(--primary-text);
 }
 
 /*
@@ -133,6 +139,8 @@
   --landing-dark-2: #2a2350;
   --landing-border: #eeedf0; /* card borders */
   --landing-divider: #e5e7eb; /* flat-list dividers (FAQ, compliance grid) */
+  --surface-muted: #f7f8fa; /* app top bar + table header background */
+  --primary-text: #5b52f0; /* ~5.4:1 on white */
 }
 
 .dark {
@@ -175,6 +183,8 @@
   --sidebar-accent-foreground: #f1f5f9;
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: #8580ff;
+  --surface-muted: #0d1526;
+  --primary-text: var(--primary);
 }
 
 @layer base {

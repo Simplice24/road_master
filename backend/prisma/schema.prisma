@@ -48,8 +48,11 @@ model User {
   id               String   @id @default(uuid())
   fullName         String
   email            String?   @unique
-  phone            String
+  phone            String   @unique // login key — findByPhone must resolve to exactly one user
   passwordHash     String
+  // Deactivated users can't log in, and an existing token stops working on the next request
+  // (JwtStrategy + CaslAbilityFactory both check it). There is no user deletion.
+  isActive         Boolean  @default(true)
   userRoles        UserRole[]
 
   walletBalance    Decimal  @default(0) @db.Decimal(10, 2)
@@ -97,6 +100,11 @@ model DefaultRole {
 
 model Permission {
   id          String   @id @default(uuid())
+  // Stable key from src/access/access.config.ts (e.g. "categories.create"). The config is the
+  // single source of truth: PermissionSyncService creates/backfills rows to match it on
+  // startup. Null only for legacy rows that match no config entry — those stay enforced for
+  // roles that already hold them but can't be newly assigned.
+  name        String?  @unique
   action      String   // e.g. "create", "read", "update", "delete", "manage"
   subject     String   // e.g. "Question", "ExamAttempt", "Transaction", "all"
   conditions  Json?    // CASL-style conditions, e.g. { "userId": "${user.id}" }

@@ -37,7 +37,9 @@ export default function ProfilePage() {
   const t = useTranslations("Profile");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
-  const { user, token, refreshUser } = useAuth();
+  const { user, token, refreshUser, can } = useAuth();
+  // Without users.updateOwn the form is shown read-only (the backend would reject the save).
+  const canEdit = can("users.updateOwn");
 
   const [fullName, setFullName] = useState(user?.fullName ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -112,6 +114,7 @@ export default function ProfilePage() {
                 id="fullName"
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
+                disabled={!canEdit}
                 required
                 minLength={2}
               />
@@ -123,6 +126,7 @@ export default function ProfilePage() {
                 type="tel"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
+                disabled={!canEdit}
                 required
               />
             </div>
@@ -133,14 +137,17 @@ export default function ProfilePage() {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                disabled={!canEdit}
               />
             </div>
           </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? tCommon("saving") : t("saveChanges")}
-            </Button>
-          </CardFooter>
+          {canEdit && (
+            <CardFooter>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? tCommon("saving") : t("saveChanges")}
+              </Button>
+            </CardFooter>
+          )}
         </form>
       </Card>
     </div>

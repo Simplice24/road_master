@@ -133,7 +133,11 @@
     "back": "Retour",
     "currency": "RWF",
     "retry": "Réessayer",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+    "actions": "Actions",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "rowActions": "Actions pour {name}"
   },
   "Auth": {
     "registerTitle": "Créez votre compte",
@@ -167,7 +171,14 @@
     "wallet": "Portefeuille",
     "profile": "Profil",
     "logout": "Se déconnecter",
-    "menu": "Menu"
+    "menu": "Menu",
+    "balance": "Solde",
+    "topUp": "Recharger",
+    "account": "Menu du compte",
+    "mainNav": "Navigation principale",
+    "users": "Utilisateurs",
+    "roles": "Rôles",
+    "examConfig": "Config. d'examen"
   },
   "Dashboard": {
     "welcomeBack": "Content de vous revoir, {name}",
@@ -268,7 +279,8 @@
     "score": "Score",
     "date": "Date",
     "viewResults": "Voir les résultats",
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "actions": "Actions"
   },
   "Profile": {
     "title": "Profil",
@@ -283,11 +295,188 @@
   "ExamAttemptStatus": {
     "IN_PROGRESS": "En cours",
     "COMPLETED": "Terminé",
-    "ABANDONED": "Abandonné"
+    "ABANDONED": "Abandonné",
+    "passed": "Réussi",
+    "failed": "Échoué"
   },
   "TransactionType": {
     "TOPUP": "Recharge",
     "EXAM_FEE": "Frais d'examen",
     "REFUND": "Remboursement"
+  },
+  "TransactionStatus": {
+    "SUCCESS": "Réussie",
+    "PENDING": "En attente",
+    "FAILED": "Échouée"
+  },
+  "Access": {
+    "notAuthorizedTitle": "Vous n'avez pas accès à cette page",
+    "notAuthorizedBody": "Votre rôle ne permet pas de l'afficher. Si vous pensez devoir y accéder, contactez un administrateur.",
+    "backToDashboard": "Retour au tableau de bord",
+    "viewOnly": "Vous avez un accès en lecture seule. Contactez un administrateur pour effectuer des modifications."
+  },
+  "Users": {
+    "title": "Utilisateurs",
+    "subtitle": "Gérez les comptes, leurs rôles et leur possibilité de se connecter.",
+    "newUser": "Nouvel utilisateur",
+    "name": "Nom complet",
+    "phone": "Téléphone",
+    "email": "E-mail (facultatif)",
+    "roles": "Rôles",
+    "status": "Statut",
+    "createdAt": "Créé le",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "you": "Vous",
+    "noUsers": "Aucun utilisateur pour le moment.",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "activateTitle": "Réactiver {name} ?",
+    "activateBody": "Cette personne pourra de nouveau se connecter avec son mot de passe actuel.",
+    "deactivateTitle": "Désactiver {name} ?",
+    "deactivateBody": "Cette personne sera déconnectée à sa prochaine requête et ne pourra plus se connecter tant qu'elle n'est pas réactivée.",
+    "createTitle": "Nouvel utilisateur",
+    "createDescription": "Créez un compte et choisissez ses accès.",
+    "editTitle": "Modifier l'utilisateur",
+    "password": "Mot de passe initial",
+    "passwordHint": "Au moins 8 caractères. Transmettez-le à l'utilisateur de façon sécurisée.",
+    "rolesHint": "Ne cochez rien pour attribuer le rôle par défaut.",
+    "activeLabel": "Actif — peut se connecter",
+    "create": "Créer l'utilisateur",
+    "created": "Utilisateur créé.",
+    "updated": "Utilisateur mis à jour.",
+    "statusUpdated": "Statut mis à jour.",
+    "superAdminRoleLocked": "Seul un SuperAdmin peut attribuer ou retirer ce rôle."
+  },
+  "Roles": {
+    "title": "Rôles",
+    "subtitle": "Définissez ce que chaque rôle peut voir et faire.",
+    "newRole": "Nouveau rôle",
+    "name": "Nom",
+    "description": "Description",
+    "permissions": "Permissions",
+    "users": "Utilisateurs",
+    "noRoles": "Aucun rôle pour le moment.",
+    "superAdmin": "SuperAdmin",
+    "default": "Par défaut",
+    "allPermissions": "Toutes",
+    "permissionsCount": "{count} sur {total}",
+    "createTitle": "Nouveau rôle",
+    "editTitle": "Modifier le rôle",
+    "formDescription": "Choisissez les permissions accordées par ce rôle. Les changements s'appliquent à la prochaine requête de chaque utilisateur.",
+    "selectAll": "Tout sélectionner",
+    "selectAllIn": "Sélectionner toutes les permissions {module}",
+    "superAdminNotice": "Le SuperAdmin contourne toutes les vérifications de permissions : il n'a donc pas de liste de permissions. Il ne peut pas être supprimé.",
+    "create": "Créer le rôle",
+    "created": "Rôle créé.",
+    "updated": "Rôle mis à jour.",
+    "deleted": "Rôle supprimé.",
+    "deleteTitle": "Supprimer le rôle « {name} » ?",
+    "deleteBody": "{count, plural, =0 {Aucun utilisateur n'a ce rôle.} one {# utilisateur perdra les permissions qu'il accorde.} other {# utilisateurs perdront les permissions qu'il accorde.}} Cette action est irréversible.",
+    "cannotDeleteSuperAdmin": "Le rôle SuperAdmin ne peut pas être supprimé.",
+    "cannotDeleteDefault": "Le rôle par défaut des nouvelles inscriptions ne peut pas être supprimé."
+  },
+  "ExamConfig": {
+    "title": "Configuration d'examen",
+    "subtitle": "Configurez les formats d'examen proposés aux candidats.",
+    "configsNav": "Configurations d'examen",
+    "newConfig": "Nouvelle config.",
+    "noConfigs": "Aucune configuration d'examen pour le moment.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "general": "Général",
+    "generalDescription": "Le nom de l'examen et sa disponibilité pour les candidats.",
+    "name": "Nom",
+    "nameHint": "100 caractères maximum.",
+    "activeLabel": "Disponible pour les candidats",
+    "activeDescription": "Les configurations inactives sont masquées sur la page « Commencer un examen ».",
+    "scoring": "Questions et notation",
+    "scoringDescription": "Nombre de questions tirées et score requis pour réussir.",
+    "numberOfQuestions": "Nombre de questions",
+    "passMark": "Seuil de réussite",
+    "scoringHint": "1 à 100 questions · seuil de 0 à 100 %.",
+    "duration": "Durée",
+    "durationDescription": "Temps limite pour terminer l'examen.",
+    "durationMinutes": "Durée",
+    "minutesShort": "min",
+    "durationHint": "1 à 300 minutes.",
+    "price": "Prix",
+    "priceDescription": "Débité du portefeuille à chaque tentative payante. La première tentative d'un candidat est gratuite.",
+    "priceLabel": "Prix",
+    "priceHint": "0 à 99 999 999,99 RWF, 2 décimales maximum.",
+    "saveChanges": "Enregistrer",
+    "saved": "Modifications enregistrées.",
+    "createTitle": "Nouvelle configuration d'examen",
+    "create": "Créer la configuration",
+    "created": "Configuration d'examen créée.",
+    "dangerZone": "Supprimer cette configuration",
+    "dangerDescription": "Une configuration déjà utilisée par une tentative ne peut pas être supprimée — désactivez-la plutôt.",
+    "deleteCta": "Supprimer",
+    "deleteTitle": "Supprimer « {name} » ?",
+    "deleteBody": "Cette action est irréversible.",
+    "deleted": "Configuration d'examen supprimée.",
+    "errors": {
+      "required": "Ce champ est obligatoire.",
+      "integer": "Saisissez un nombre entier.",
+      "range": "Saisissez une valeur entre {min} et {max}.",
+      "decimals": "2 décimales maximum.",
+      "maxLength": "{max} caractères maximum."
+    }
+  },
+  "PermissionCatalog": {
+    "modules": {
+      "categories": "Catégories",
+      "questions": "Questions",
+      "examConfig": "Configuration d'examen",
+      "examAttempts": "Tentatives d'examen",
+      "transactions": "Transactions",
+      "users": "Utilisateurs",
+      "roles": "Rôles"
+    },
+    "actions": {
+      "categories": {
+        "view": "Voir",
+        "create": "Créer",
+        "update": "Modifier",
+        "delete": "Supprimer"
+      },
+      "questions": {
+        "view": "Voir",
+        "create": "Créer",
+        "update": "Modifier",
+        "delete": "Supprimer"
+      },
+      "examConfig": {
+        "view": "Voir",
+        "create": "Créer",
+        "update": "Modifier",
+        "delete": "Supprimer"
+      },
+      "examAttempts": {
+        "viewOwn": "Voir les siennes",
+        "start": "Commencer",
+        "answerOwn": "Répondre aux siennes",
+        "view": "Tout voir"
+      },
+      "transactions": {
+        "viewOwn": "Voir les siennes",
+        "topUpOwn": "Recharger son portefeuille",
+        "view": "Tout voir"
+      },
+      "users": {
+        "viewOwn": "Voir son profil",
+        "updateOwn": "Modifier son profil",
+        "view": "Voir",
+        "create": "Créer",
+        "update": "Modifier"
+      },
+      "roles": {
+        "view": "Voir",
+        "create": "Créer",
+        "update": "Modifier",
+        "delete": "Supprimer",
+        "assign": "Attribuer aux utilisateurs"
+      }
+    }
   }
 }

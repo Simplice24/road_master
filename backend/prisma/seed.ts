@@ -1,49 +1,28 @@
 import 'dotenv/config';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import { Prisma, PrismaClient } from '../generated/prisma/client';
+import { PrismaClient } from '../generated/prisma/client';
+import { PermissionName } from '../src/access/access.config';
+import { PermissionSyncService } from '../src/access/permission-sync.service';
+import type { PrismaService } from '../src/prisma/prisma.service';
 
-const prisma = new PrismaClient({ adapter: new PrismaMariaDb(process.env.DATABASE_URL as string) });
-
-interface SeedPermission {
-  action: string;
-  subject: string;
-  conditions?: Record<string, unknown>;
-  description: string;
-}
+const prisma = new PrismaClient({
+  adapter: new PrismaMariaDb(process.env.DATABASE_URL as string),
+});
 
 // Small, read/self-scoped set for the default "client" role — the exam candidate persona
-// every self-registered user other than the first lands in via the DefaultRole pointer.
-const CLIENT_PERMISSIONS: SeedPermission[] = [
-  { action: 'read', subject: 'Question', description: 'Browse exam questions' },
-  { action: 'read', subject: 'Category', description: 'Browse question categories' },
-  { action: 'read', subject: 'ExamConfig', description: 'View available exam configurations' },
-  { action: 'create', subject: 'ExamAttempt', description: 'Start a new exam attempt' },
-  {
-    action: 'read',
-    subject: 'ExamAttempt',
-    conditions: { userId: '${user.id}' },
-    description: 'View own exam attempts',
-  },
-  {
-    action: 'update',
-    subject: 'ExamAttempt',
-    conditions: { userId: '${user.id}' },
-    description: 'Answer/submit own exam attempts',
-  },
-  {
-    action: 'read',
-    subject: 'Transaction',
-    conditions: { userId: '${user.id}' },
-    description: 'View own transactions',
-  },
-  {
-    action: 'create',
-    subject: 'Transaction',
-    conditions: { userId: '${user.id}' },
-    description: 'Top up own wallet',
-  },
-  { action: 'read', subject: 'User', conditions: { id: '${user.id}' }, description: 'View own profile' },
-  { action: 'update', subject: 'User', conditions: { id: '${user.id}' }, description: 'Update own profile' },
+// every self-registered user other than the first lands in via the DefaultRole pointer. Names
+// come from src/access/access.config.ts; the rules behind them live there too.
+const CLIENT_PERMISSIONS: PermissionName[] = [
+  'questions.view',
+  'categories.view',
+  'examConfig.view',
+  'examAttempts.start',
+  'examAttempts.viewOwn',
+  'examAttempts.answerOwn',
+  'transactions.viewOwn',
+  'transactions.topUpOwn',
+  'users.viewOwn',
+  'users.updateOwn',
 ];
 
 async function main() {
@@ -52,28 +31,28 @@ async function main() {
   const clientRole = await prisma.role.upsert({
     where: { name: 'client' },
     update: {},
-    create: { name: 'client', description: 'Default role for every self-registered exam candidate' },
+    create: {
+      name: 'client',
+      description: 'Default role for every self-registered exam candidate',
+    },
   });
 
-  for (const seedPermission of CLIENT_PERMISSIONS) {
-    const existing = await prisma.permission.findFirst({
-      where: { action: seedPermission.action, subject: seedPermission.subject },
-    });
-    const permission =
-      existing ??
-      (await prisma.permission.create({
-        data: {
-          action: seedPermission.action,
-          subject: seedPermission.subject,
-          conditions: seedPermission.conditions as Prisma.InputJsonValue | undefined,
-          description: seedPermission.description,
-        },
-      }));
+  // Same sync the app runs on startup: creates missing config permissions (or adopts matching
+  // pre-config rows), so this script works on a fresh database before the API has ever booted.
+  const permissionSync = new PermissionSyncService(
+    prisma as unknown as PrismaService,
+  );
+  await permissionSync.syncAll(prisma);
+  const permissionIds = await permissionSync.resolveNames(
+    CLIENT_PERMISSIONS,
+    prisma,
+  );
 
+  for (const permissionId of permissionIds) {
     await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: clientRole.id, permissionId: permission.id } },
+      where: { roleId_permissionId: { roleId: clientRole.id, permissionId } },
       update: {},
-      create: { roleId: clientRole.id, permissionId: permission.id },
+      create: { roleId: clientRole.id, permissionId },
     });
   }
 
@@ -83,7 +62,9 @@ async function main() {
     create: { id: 1, roleId: clientRole.id },
   });
 
-  console.log(`Seeded default role "client" (${clientRole.id}) with ${CLIENT_PERMISSIONS.length} permissions.`);
+  console.log(
+    `Seeded default role "client" (${clientRole.id}) with ${CLIENT_PERMISSIONS.length} permissions.`,
+  );
 }
 
 main()

@@ -24,6 +24,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckIcon, Loader2, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RequirePermission } from "@/components/app/require-permission";
 
 function formatDuration(ms: number) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -32,7 +33,7 @@ function formatDuration(ms: number) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export default function ExamTakingPage() {
+function ExamTakingContent() {
   const params = useParams<{ attemptId: string }>();
   const attemptId = params.attemptId;
   const t = useTranslations("Exam");
@@ -322,5 +323,13 @@ export default function ExamTakingPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function ExamTakingPage() {
+  return (
+    <RequirePermission allOf={["examAttempts.viewOwn", "examAttempts.answerOwn"]}>
+      <ExamTakingContent />
+    </RequirePermission>
   );
 }

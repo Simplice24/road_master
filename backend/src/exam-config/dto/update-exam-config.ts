@@ -1,36 +1,5 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsNumber,
-  IsBoolean,
-  Min,
-  Max,
-} from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateExamConfigDto } from './create-exam-config';
 
-export class UpdateExamConfigDto {
-  @IsNotEmpty()
-  @IsString()
-  name?: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  numberOfQuestions?: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  price?: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  passMarkPercent?: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  durationMinutes?: number;
-
-  @IsNotEmpty()
-  @IsBoolean()
-  isActive?: boolean;
-}
+// Same rules as create, every field optional — the settings page saves one section at a time.
+export class UpdateExamConfigDto extends PartialType(CreateExamConfigDto) {}

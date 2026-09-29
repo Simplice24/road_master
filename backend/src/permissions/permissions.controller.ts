@@ -1,44 +1,30 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { RequirePermission } from '../casl/decorators/check-policies.decorator';
+import { getPermissionCatalog } from '../access/access.config';
 
+// Read-only: permissions are defined in src/access/access.config.ts and synced into the
+// database by PermissionSyncService — there is no API to create, edit or delete them.
 @Controller('permissions')
-@RequirePermission('manage', 'Permission')
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
-  @Post()
-  create(@Body() dto: CreatePermissionDto) {
-    return this.permissionsService.create(dto);
+  /** Modules + actions from the access config, for the role permission picker. */
+  @Get('catalog')
+  @RequirePermission('read', 'Role')
+  catalog() {
+    return getPermissionCatalog();
   }
 
   @Get()
+  @RequirePermission('manage', 'Permission')
   findAll() {
     return this.permissionsService.findAll();
   }
 
   @Get(':id')
+  @RequirePermission('manage', 'Permission')
   findOne(@Param('id') id: string) {
     return this.permissionsService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePermissionDto) {
-    return this.permissionsService.update(id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.permissionsService.remove(id);
   }
 }

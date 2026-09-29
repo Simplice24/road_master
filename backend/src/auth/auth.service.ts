@@ -18,7 +18,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.usersService.findByPhone(dto.phone);
+    const user = await this.usersService.findCredentialsByPhone(dto.phone);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -29,6 +29,11 @@ export class AuthService {
     );
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+    // Only revealed after a correct password, so it can't be used to probe which phone
+    // numbers have (deactivated) accounts.
+    if (!user.isActive) {
+      throw new UnauthorizedException('This account has been deactivated');
     }
 
     return this.buildTokenResponse(user.id);

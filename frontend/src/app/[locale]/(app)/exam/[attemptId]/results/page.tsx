@@ -26,8 +26,9 @@ import {
 } from "@/components/ui/accordion";
 import { CheckCircle2, XCircle, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RequirePermission } from "@/components/app/require-permission";
 
-export default function ExamResultsPage() {
+function ExamResultsContent() {
   const params = useParams<{ attemptId: string }>();
   const attemptId = params.attemptId;
   const t = useTranslations("Results");
@@ -179,5 +180,13 @@ export default function ExamResultsPage() {
         </Accordion>
       </div>
     </div>
+  );
+}
+
+export default function ExamResultsPage() {
+  return (
+    <RequirePermission anyOf={["examAttempts.viewOwn", "examAttempts.view"]}>
+      <ExamResultsContent />
+    </RequirePermission>
   );
 }

@@ -9,8 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import { apiFetch } from "@/lib/api-client";
-import { decodeJwt } from "@/lib/jwt";
-import type { User } from "@/lib/api-types";
+import type { CurrentUser } from "@/lib/api-types";
+import { hasPermission, type Permission } from "@/lib/permissions";
 
 const TOKEN_STORAGE_KEY = "roadmaster.token";
 
@@ -22,26 +22,30 @@ interface RegisterInput {
 }
 
 interface AuthContextValue {
-  user: User | null;
+  user: CurrentUser | null;
   token: string | null;
   isLoading: boolean;
   login: (phone: string, password: string) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  /** UX-only permission check (SuperAdmin → always true). The backend enforces for real. */
+  can: (permission: Permission) => boolean;
+  canAny: (...permissions: Permission[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<CurrentUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // GET /auth/me needs no permission of its own, so every active user — even one whose role
+  // grants nothing — can load who they are. A 401 (expired token, deactivated account) throws
+  // and the caller signs them out.
   const loadUser = useCallback(async (activeToken: string) => {
-    const payload = decodeJwt(activeToken);
-    if (!payload?.sub) throw new Error("Invalid session");
-    const profile = await apiFetch<User>(`/users/${payload.sub}`, {
+    const profile = await apiFetch<CurrentUser>("/auth/me", {
       token: activeToken,
     });
     setUser(profile);
@@ -106,9 +110,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loadUser(token);
   }, [token, loadUser]);
 
+  const can = useCallback(
+    (permission: Permission) => hasPermission(user, permission),
+    [user],
+  );
+  const canAny = useCallback(
+    (...permissions: Permission[]) =>
+      permissions.some((permission) => hasPermission(user, permission)),
+    [user],
+  );
+
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, login, register, logout, refreshUser }}
+      value={{ user, token, isLoading, login, register, logout, refreshUser, can, canAny }}
     >
       {children}
     </AuthContext.Provider>

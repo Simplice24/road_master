@@ -152,6 +152,29 @@
             "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
             "description": "Refreshes {{clientToken}}/{{clientUserId}} after expiry, without re-registering (which would create a brand new user)."
           }
+        },
+        {
+          "name": "Me (current user + effective permissions)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] },
+            "description": "Profile (never includes passwordHash) + roles + isSuperAdmin + permission names. Needs no permission of its own, so even a role with zero permissions can load who it is."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('ok', () => pm.response.to.have.status(200));",
+                  "const me = pm.response.json();",
+                  "pm.test('no password hash', () => pm.expect(me).to.not.have.property('passwordHash'));",
+                  "pm.test('has permission names', () => pm.expect(me.permissions).to.include('examAttempts.start'));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -738,16 +761,11 @@
       "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
       "item": [
         {
-          "name": "Create Permission",
+          "name": "Permission Catalog",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"action\": \"update\",\n  \"subject\": \"ExamAttempt\",\n  \"conditions\": { \"userId\": \"${user.id}\" },\n  \"description\": \"Update own exam attempts (row-level, via ${user.id} interpolation)\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/permissions", "host": ["{{baseUrl}}"], "path": ["permissions"] },
-            "description": "action/subject/conditions/fields are the CASL rule stored as data — see CaslAbilityFactory for how `conditions` gets interpolated against the real user at ability-build time."
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/permissions/catalog", "host": ["{{baseUrl}}"], "path": ["permissions", "catalog"] },
+            "description": "Modules + actions from src/access/access.config.ts — the single source of truth for permissions (there is no API to create, edit or delete them). Needs roles.view. Used by the frontend role permission picker."
           },
           "event": [
             {
@@ -755,8 +773,12 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('created', () => pm.response.to.have.status(201));",
-                  "pm.environment.set('permissionId', pm.response.json().id);"
+                  "pm.test('ok', () => pm.response.to.have.status(200));",
+                  "const modules = pm.response.json();",
+                  "pm.test('lists roles.assign', () => {",
+                  "  const names = modules.flatMap((m) => m.actions.map((a) => a.name));",
+                  "  pm.expect(names).to.include('roles.assign');",
+                  "});"
                 ]
               }
             }
@@ -766,29 +788,28 @@
           "name": "List Permissions",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/permissions", "host": ["{{baseUrl}}"], "path": ["permissions"] }
-          }
+            "url": { "raw": "{{baseUrl}}/permissions", "host": ["{{baseUrl}}"], "path": ["permissions"] },
+            "description": "Raw permission rows (SuperAdmin only). Rows are created by PermissionSyncService on startup to match the access config; captures the id of `examAttempts.view` for the legacy attach/detach requests below."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('ok', () => pm.response.to.have.status(200));",
+                  "const row = pm.response.json().find((p) => p.name === 'examAttempts.view');",
+                  "pm.test('config permission row exists', () => pm.expect(row).to.be.an('object'));",
+                  "pm.environment.set('permissionId', row.id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Permission by Id",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/permissions/{{permissionId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["permissions", "{{permissionId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Permission",
-          "request": {
-            "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"description\": \"Update own exam attempts (edited via Postman)\"\n}"
-            },
             "url": {
               "raw": "{{baseUrl}}/permissions/{{permissionId}}",
               "host": ["{{baseUrl}}"],
@@ -809,10 +830,10 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"exam-marker-{{runId}}\",\n  \"description\": \"Can review and grade exam attempts\"\n}"
+              "raw": "{\n  \"name\": \"exam-marker-{{runId}}\",\n  \"description\": \"Can review and grade exam attempts\",\n  \"permissions\": [\"examAttempts.view\", \"questions.view\"]\n}"
             },
             "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] },
-            "description": "Role.name is @unique — suffixed with {{runId}} for the same reason as the Category name above."
+            "description": "Role.name is @unique — suffixed with {{runId}} for the same reason as the Category name above. `permissions` are names from the access config; any config permission missing from the database is created first, and unknown names are rejected with a 400."
           },
           "event": [
             {
@@ -821,7 +842,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('created', () => pm.response.to.have.status(201));",
-                  "pm.environment.set('roleId', pm.response.json().id);"
+                  "const role = pm.response.json();",
+                  "pm.test('permissions assigned', () => pm.expect(role.permissions).to.have.members(['examAttempts.view', 'questions.view']));",
+                  "pm.environment.set('roleId', role.id);"
                 ]
               }
             }
@@ -848,9 +871,10 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Can review, grade, and annotate exam attempts\"\n}"
+              "raw": "{\n  \"description\": \"Can review, grade, and annotate exam attempts\",\n  \"permissions\": [\"examAttempts.view\", \"questions.view\", \"categories.view\"]\n}"
             },
-            "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles", "{{roleId}}"] }
+            "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles", "{{roleId}}"] },
+            "description": "When `permissions` is present it replaces the role's configured permission set."
           }
         },
         {
@@ -962,6 +986,85 @@
               "path": ["users", "{{clientUserId}}", "effective-permissions"]
             },
             "description": "Returns the caller's fully resolved CASL rule set (union of every attached role's permissions) — the same thing a frontend would call to conditionally render UI."
+          }
+        },
+        {
+          "name": "Create User (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Staff Member\",\n  \"phone\": \"{{runId}}03\",\n  \"password\": \"password123\",\n  \"roleIds\": [\"{{roleId}}\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "description": "Needs users.create; passing roleIds also needs roles.assign (omit it to get the default role). Assigning a SuperAdmin role needs the caller to be a SuperAdmin. Phone must be unique."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.response.to.have.status(201));",
+                  "const user = pm.response.json();",
+                  "pm.test('no password hash', () => pm.expect(user).to.not.have.property('passwordHash'));",
+                  "pm.environment.set('staffUserId', user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Replace User Roles",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"roleIds\": [\"{{roleId}}\"]\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{staffUserId}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{staffUserId}}", "roles"]
+            },
+            "description": "Replaces the user's whole role set in one transaction (roles.assign)."
+          }
+        },
+        {
+          "name": "Deactivate User",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isActive\": false\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{staffUserId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{staffUserId}}", "status"]
+            },
+            "description": "Deactivated users can't log in, and any token they still hold is rejected (401) on the next request. You can't change your own status, and the last active SuperAdmin can't be deactivated."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('deactivated', () => pm.expect(pm.response.json().isActive).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reactivate User",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isActive\": true\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{staffUserId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{staffUserId}}", "status"]
+            }
           }
         }
       ]
@@ -1093,12 +1196,52 @@
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{clientToken}}" }] },
             "method": "GET",
             "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] },
-            "description": "RolesController is guarded class-wide by @RequirePermission('manage','Role') — even listing roles needs it, and the client role has no Role permissions at all."
+            "description": "Listing roles needs roles.view (read Role), and the client role has no Role permissions at all."
           },
           "event": [
             {
               "listen": "test",
               "script": { "type": "text/javascript", "exec": ["pm.test('forbidden', () => pm.response.to.have.status(403));"] }
+            }
+          ]
+        },
+        {
+          "name": "Create Role With Unknown Permission (expect 400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"bogus-{{runId}}\",\n  \"permissions\": [\"categories.view\", \"categories.launch\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] },
+            "description": "Permissions not defined in src/access/access.config.ts are rejected, and the role is not created."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('bad request', () => pm.response.to.have.status(400));"] }
+            }
+          ]
+        },
+        {
+          "name": "Create SuperAdmin Role via API (expect 400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"sneaky-{{runId}}\",\n  \"isSuperAdmin\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] },
+            "description": "isSuperAdmin can't be set (or cleared) through the API — the only SuperAdmin role is the one created for the first user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('bad request', () => pm.response.to.have.status(400));"] }
             }
           ]
         },
