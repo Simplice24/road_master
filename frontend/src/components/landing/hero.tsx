@@ -7,8 +7,8 @@ export async function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-landing-dark text-white">
-      {/* Decorative grid texture + soft glow, matching the reference's hero backdrop */}
-      <div aria-hidden className="landing-grid-bg pointer-events-none absolute inset-0 opacity-60" />
+      {/* Decorative square-dot texture + soft glow behind the headline */}
+      <div aria-hidden className="landing-dots-bg pointer-events-none absolute inset-0 opacity-60" />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(107,99,255,0.25),transparent_60%)]"
