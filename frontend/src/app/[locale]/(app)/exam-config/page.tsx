@@ -66,7 +66,7 @@ function ExamConfigContent() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <PageHeader backHref="/dashboard" title={t("title")} subtitle={t("subtitle")} />
 
       <div className="mt-8 bg-surface-muted py-8" style={FULL_BLEED}>
         {error && (

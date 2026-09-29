@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-40">
         {/* Top bar: brand on the left, balance + account on the right. */}
-        <div className="border-b border-border bg-surface-muted md:border-b-0">
+        <div className="border-b border-border bg-surface-muted lg:border-b-0">
           <div className={cn(CONTAINER, "flex h-16 items-center justify-between gap-3")}>
             <Link
               href="/dashboard"
@@ -151,7 +151,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-expanded={menuOpen}
                 aria-controls="app-mobile-nav"
                 onClick={() => setMenuOpen((open) => !open)}
-                className="flex size-9 items-center justify-center rounded text-foreground transition-colors hover:bg-background focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none md:hidden"
+                className="flex size-9 items-center justify-center rounded text-foreground transition-colors hover:bg-background focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none lg:hidden"
               >
                 {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
               </button>
@@ -159,9 +159,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* Tab bar (desktop): uppercase mono links, active one underlined in the brand color. */}
-        <nav aria-label={t("mainNav")} className="hidden border-b border-border bg-background md:block">
-          <ul className={cn(CONTAINER, "flex items-center gap-6 overflow-x-auto lg:gap-9")}>
+        {/* Tab bar (desktop, lg+): uppercase mono links, active one underlined in the brand color. No
+            scroll container: below lg all eight links don't fit, so the hamburger menu takes over. */}
+        <nav aria-label={t("mainNav")} className="hidden border-b border-border bg-background lg:block">
+          <ul className={cn(CONTAINER, "flex items-center gap-7 xl:gap-9")}>
             {navItems.map((item) => {
               const active = isActive(item.href);
               return (
@@ -189,7 +190,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <nav
             id="app-mobile-nav"
             aria-label={t("mainNav")}
-            className="absolute inset-x-0 top-full border-y border-border bg-background shadow-lg md:hidden"
+            className="absolute inset-x-0 top-full border-y border-border bg-background shadow-lg lg:hidden"
           >
             <ul className="flex flex-col py-2">
               {navItems.map((item) => {

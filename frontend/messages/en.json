@@ -205,7 +205,9 @@
     "title": "Categories",
     "subtitle": "Browse the full question bank by topic.",
     "practiceThisTopic": "Practice this topic",
-    "noCategories": "No categories available yet."
+    "noCategories": "No categories available yet.",
+    "searchPlaceholder": "Search categories…",
+    "count": "{count, plural, one {# category} other {# categories}}"
   },
   "StartExam": {
     "title": "Start an exam",

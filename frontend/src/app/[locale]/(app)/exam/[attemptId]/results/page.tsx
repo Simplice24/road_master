@@ -78,6 +78,7 @@ function ExamResultsContent() {
   return (
     <div className="flex flex-col">
       <PageHeader
+        backHref={can("examAttempts.viewOwn") ? "/history" : "/dashboard"}
         title={t("title")}
         subtitle={
           attempt

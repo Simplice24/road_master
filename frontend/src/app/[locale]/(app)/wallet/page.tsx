@@ -113,7 +113,7 @@ function WalletContent() {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <PageHeader backHref="/dashboard" title={t("title")} subtitle={t("subtitle")} />
 
       <div className="bg-surface-muted py-8" style={FULL_BLEED}>
         <div

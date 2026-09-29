@@ -134,6 +134,7 @@ function RolesContent() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
+        backHref="/dashboard"
         title={t("title")}
         subtitle={t("subtitle")}
         action={

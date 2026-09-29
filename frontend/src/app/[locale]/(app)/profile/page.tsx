@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { apiFetch } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/app/status-badge";
+import { BackLink } from "@/components/app/back-link";
 import { FULL_BLEED, SettingsField, SettingsSection } from "@/components/app/settings-layout";
 
 // Mirrors backend UpdateUserDto (fullName MinLength 2) and CreateUserDto (≤100 chars, phone ≤32).
@@ -71,13 +70,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col">
-      <Link
-        href="/dashboard"
-        className="flex w-fit items-center gap-1.5 rounded-sm text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        {t("back")}
-      </Link>
+      <BackLink href="/dashboard" />
       <h1 className="mt-4 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
         {t("title")}
       </h1>

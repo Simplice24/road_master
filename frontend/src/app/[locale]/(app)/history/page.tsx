@@ -19,7 +19,7 @@ function HistoryContent() {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <PageHeader backHref="/dashboard" title={t("title")} subtitle={t("subtitle")} />
       <AttemptsTable
         attempts={sorted}
         isLoading={isLoading}

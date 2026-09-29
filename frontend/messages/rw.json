@@ -206,7 +206,9 @@
     "title": "Ibyiciro",
     "subtitle": "Reba ibibazo byose bitandukanijwe mu byiciro.",
     "practiceThisTopic": "Witoze kuri iki cyiciro",
-    "noCategories": "Nta byiciro birahari."
+    "noCategories": "Nta byiciro birahari.",
+    "searchPlaceholder": "Shakisha ibyiciro…",
+    "count": "{count, plural, one {Icyiciro #} other {Ibyiciro #}}"
   },
   "StartExam": {
     "title": "Tangira ikizamini",

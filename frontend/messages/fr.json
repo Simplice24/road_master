@@ -206,7 +206,9 @@
     "title": "Catégories",
     "subtitle": "Parcourez toute la banque de questions par thème.",
     "practiceThisTopic": "S'entraîner sur ce thème",
-    "noCategories": "Aucune catégorie disponible pour le moment."
+    "noCategories": "Aucune catégorie disponible pour le moment.",
+    "searchPlaceholder": "Rechercher une catégorie…",
+    "count": "{count, plural, one {# catégorie} other {# catégories}}"
   },
   "StartExam": {
     "title": "Commencer un examen",
