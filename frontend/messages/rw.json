@@ -273,7 +273,21 @@
     "explanation": "Ibisobanuro",
     "backToDashboard": "Subira ku imbonerahamwe",
     "tryAgain": "Ongera witoze",
-    "viewHistory": "Reba amateka"
+    "viewHistory": "Reba amateka",
+    "reviewDescription": "Fungura ikibazo urebe igisubizo nyacyo n'ibisobanuro.",
+    "outcome": {
+      "correct": "Ni cyo",
+      "wrong": "Si cyo",
+      "unanswered": "Ntibyasubijwe"
+    },
+    "passedBadge": "Yatsinze",
+    "failedBadge": "Yatsinzwe",
+    "correct": "Byo",
+    "wrong": "Sibyo",
+    "unanswered": "Ntibyasubijwe",
+    "passMark": "Amanota yo gutsinda",
+    "timeTaken": "Igihe cyakoreshejwe",
+    "minutes": "Iminota {minutes}"
   },
   "Wallet": {
     "title": "Konti y'amafaranga",
@@ -290,7 +304,15 @@
     "noTransactions": "Nta gikorwa kirabaho.",
     "type": "Ubwoko",
     "status": "Uko bihagaze",
-    "date": "Itariki"
+    "date": "Itariki",
+    "topUpDescription": "Ongera amafaranga kuri konti yawe yo kwishyura ibizamini.",
+    "topUpHint": "Amafaranga yuzuye mu RWF. Amafaranga uri kuri konti ahita ahinduka iyo kwishyura bigenze neza.",
+    "amountError": "Andika amafaranga yuzuye ari hagati ya 1 na {max} RWF.",
+    "quickAmounts": "Amafaranga yihuse",
+    "totalToppedUp": "Yose yongewe",
+    "totalSpent": "Yakoreshejwe ku bizamini",
+    "totalRefunded": "Yasubijwe",
+    "balanceHint": "Igiteranyo kibara gusa ibikorwa byagenze neza."
   },
   "History": {
     "title": "Amateka y'ibizamini",

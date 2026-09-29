@@ -272,7 +272,21 @@
     "explanation": "Explanation",
     "backToDashboard": "Back to dashboard",
     "tryAgain": "Practice again",
-    "viewHistory": "View history"
+    "viewHistory": "View history",
+    "reviewDescription": "Open a question to see the correct answer and explanation.",
+    "outcome": {
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "unanswered": "Not answered"
+    },
+    "passedBadge": "Passed",
+    "failedBadge": "Failed",
+    "correct": "Correct",
+    "wrong": "Wrong",
+    "unanswered": "Not answered",
+    "passMark": "Pass mark",
+    "timeTaken": "Time taken",
+    "minutes": "{minutes} min"
   },
   "Wallet": {
     "title": "Wallet",
@@ -289,7 +303,15 @@
     "noTransactions": "No transactions yet.",
     "type": "Type",
     "status": "Status",
-    "date": "Date"
+    "date": "Date",
+    "topUpDescription": "Add money to your wallet to pay for exam attempts.",
+    "topUpHint": "Whole amounts in RWF. Your balance updates as soon as the payment succeeds.",
+    "amountError": "Enter a whole amount between 1 and {max} RWF.",
+    "quickAmounts": "Quick amounts",
+    "totalToppedUp": "Total topped up",
+    "totalSpent": "Spent on exams",
+    "totalRefunded": "Refunded",
+    "balanceHint": "Totals include successful transactions only."
   },
   "History": {
     "title": "Exam history",

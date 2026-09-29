@@ -273,7 +273,21 @@
     "explanation": "Explication",
     "backToDashboard": "Retour au tableau de bord",
     "tryAgain": "S'entraîner à nouveau",
-    "viewHistory": "Voir l'historique"
+    "viewHistory": "Voir l'historique",
+    "reviewDescription": "Ouvrez une question pour voir la bonne réponse et l'explication.",
+    "outcome": {
+      "correct": "Correcte",
+      "wrong": "Incorrecte",
+      "unanswered": "Sans réponse"
+    },
+    "passedBadge": "Réussi",
+    "failedBadge": "Échoué",
+    "correct": "Correctes",
+    "wrong": "Incorrectes",
+    "unanswered": "Sans réponse",
+    "passMark": "Seuil de réussite",
+    "timeTaken": "Temps passé",
+    "minutes": "{minutes} min"
   },
   "Wallet": {
     "title": "Portefeuille",
@@ -290,7 +304,15 @@
     "noTransactions": "Aucune transaction pour le moment.",
     "type": "Type",
     "status": "Statut",
-    "date": "Date"
+    "date": "Date",
+    "topUpDescription": "Ajoutez de l'argent à votre portefeuille pour payer vos tentatives d'examen.",
+    "topUpHint": "Montants entiers en RWF. Votre solde est mis à jour dès que le paiement réussit.",
+    "amountError": "Saisissez un montant entier entre 1 et {max} RWF.",
+    "quickAmounts": "Montants rapides",
+    "totalToppedUp": "Total rechargé",
+    "totalSpent": "Dépensé en examens",
+    "totalRefunded": "Remboursé",
+    "balanceHint": "Les totaux ne comptent que les transactions réussies."
   },
   "History": {
     "title": "Historique des examens",

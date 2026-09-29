@@ -22,6 +22,8 @@ export const FULL_BLEED = {
 } as const;
 
 interface SettingsSectionProps {
+  /** Anchor id (e.g. for "#top-up" links); the sticky header is offset via scroll-margin. */
+  id?: string;
   title: string;
   description: string;
   hint: string;
@@ -33,10 +35,14 @@ interface SettingsSectionProps {
   readOnly?: boolean;
   dirty?: boolean;
   valid?: boolean;
+  /** Footer button text; defaults to "Save changes" / "Saving…". */
+  submitLabel?: string;
+  submittingLabel?: string;
 }
 
 /** One settings card. When `onSave` is given, the card is a form that saves only its own fields. */
 export function SettingsSection({
+  id,
   title,
   description,
   hint,
@@ -46,6 +52,8 @@ export function SettingsSection({
   readOnly = false,
   dirty = false,
   valid = true,
+  submitLabel,
+  submittingLabel,
 }: SettingsSectionProps) {
   const tCommon = useTranslations("Common");
   const [isSaving, setIsSaving] = useState(false);
@@ -89,7 +97,7 @@ export function SettingsSection({
         <p className="text-sm text-muted-foreground">{hint}</p>
         {canSave && (
           <Button type="submit" className="btn-primary h-10 shrink-0 px-5" disabled={!dirty || !valid || isSaving}>
-            {isSaving ? tCommon("saving") : tCommon("saveChanges")}
+            {isSaving ? (submittingLabel ?? tCommon("saving")) : (submitLabel ?? tCommon("saveChanges"))}
           </Button>
         )}
       </div>
@@ -97,7 +105,7 @@ export function SettingsSection({
   );
 
   return (
-    <section className="overflow-hidden rounded-lg border border-border bg-background">
+    <section id={id} className="scroll-mt-40 overflow-hidden rounded-lg border border-border bg-background">
       {onSave ? (
         <form onSubmit={handleSubmit} noValidate>
           {body}
