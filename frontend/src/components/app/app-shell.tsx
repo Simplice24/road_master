@@ -10,6 +10,7 @@ import type { Permission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routing } from "@/i18n/routing";
+import { LanguageFlag } from "@/components/language-flag";
 import {
   Avatar,
   AvatarFallback,
@@ -294,8 +295,9 @@ function AccountMenu({
         </DropdownMenuItem>
         <DropdownMenuSeparator className="mx-0 my-0" />
 
-        {/* Segmented language control in the slot the reference uses for its theme toggle.
-            Radio items keep it reachable with arrow keys and announce which one is selected. */}
+        {/* Segmented language control (flags, like the landing/auth switcher) in the slot the
+            reference uses for its theme toggle. Radio items keep it reachable with arrow keys and
+            announce the selected language by name. */}
         <div className="flex flex-col gap-2 px-4 py-3">
           <span className="text-[15px] text-foreground">{tLanguage("label")}</span>
           <DropdownMenuRadioGroup
@@ -308,9 +310,10 @@ function AccountMenu({
                 key={option}
                 value={option}
                 aria-label={tLanguage(option)}
-                className="justify-center rounded px-2 py-1.5 font-mono text-xs text-muted-foreground uppercase focus:bg-background focus:text-foreground data-checked:bg-background data-checked:text-foreground data-checked:shadow-sm data-checked:ring-1 data-checked:ring-border [&>[data-slot=dropdown-menu-radio-item-indicator]]:hidden"
+                title={tLanguage(option)}
+                className="justify-center rounded px-2 py-2 opacity-70 focus:bg-background focus:opacity-100 data-checked:bg-background data-checked:opacity-100 data-checked:shadow-sm data-checked:ring-1 data-checked:ring-border [&>[data-slot=dropdown-menu-radio-item-indicator]]:hidden"
               >
-                {option}
+                <LanguageFlag locale={option} />
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>

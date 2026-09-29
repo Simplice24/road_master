@@ -67,9 +67,7 @@ export function SiteHeaderClient({ navLinks, loginLabel, registerLabel }: SiteHe
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <LanguageSwitcher
-            className={cn("hidden sm:inline-flex", !scrolled && "border-white/15 bg-white/10 text-white")}
-          />
+          <LanguageSwitcher className="hidden sm:inline-flex" tone={scrolled ? "light" : "dark"} />
           <Button
             render={<Link href="/login" />}
             nativeButton={false}
