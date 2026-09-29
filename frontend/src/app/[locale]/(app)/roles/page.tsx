@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, ToggleRight, Trash2 } from "lucide-react";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useApi } from "@/lib/use-api";
 import { apiFetch, ApiError } from "@/lib/api-client";
@@ -21,6 +22,7 @@ function RolesContent() {
   const t = useTranslations("Roles");
   const tCommon = useTranslations("Common");
   const { token, can } = useAuth();
+  const router = useRouter();
 
   const canCreate = can("roles.create");
   const canUpdate = can("roles.update");
@@ -57,7 +59,12 @@ function RolesContent() {
       header: t("name"),
       cell: (role) => (
         <span className="flex flex-wrap items-center gap-2">
-          <span className="font-medium">{role.name}</span>
+          <Link
+            href={`/roles/${role.id}`}
+            className="rounded-sm font-medium text-foreground hover:text-primary-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            {role.name}
+          </Link>
           {role.isSuperAdmin && <StatusBadge tone="success">{t("superAdmin")}</StatusBadge>}
           {role.isDefault && <StatusBadge tone="neutral">{t("default")}</StatusBadge>}
         </span>
@@ -89,47 +96,53 @@ function RolesContent() {
     },
   ];
 
-  if (canUpdate || canDelete) {
-    columns.push({
-      key: "actions",
-      header: tCommon("actions"),
-      srOnlyHeader: true,
-      align: "center",
-      className: "w-16",
-      cell: (role) => (
-        <RowActionsMenu
-          rowLabel={role.name}
-          actions={[
-            {
-              key: "edit",
-              label: tCommon("edit"),
-              icon: Pencil,
-              hidden: !canUpdate,
-              onSelect: () => {
-                setEditing(role);
-                setFormOpen(true);
-              },
+  // Always present: everyone who can see this page can open a role's permissions (read-only
+  // without roles.update).
+  columns.push({
+    key: "actions",
+    header: tCommon("actions"),
+    srOnlyHeader: true,
+    align: "center",
+    className: "w-16",
+    cell: (role) => (
+      <RowActionsMenu
+        rowLabel={role.name}
+        actions={[
+          {
+            key: "permissions",
+            label: t("managePermissions"),
+            icon: ToggleRight,
+            href: `/roles/${role.id}`,
+          },
+          {
+            key: "edit",
+            label: t("editDetails"),
+            icon: Pencil,
+            hidden: !canUpdate,
+            onSelect: () => {
+              setEditing(role);
+              setFormOpen(true);
             },
-            {
-              key: "delete",
-              group: 1,
-              label: tCommon("delete"),
-              icon: Trash2,
-              destructive: true,
-              hidden: !canDelete,
-              // The backend refuses both; the menu says why instead of letting the click fail.
-              disabledReason: role.isSuperAdmin
-                ? t("cannotDeleteSuperAdmin")
-                : role.isDefault
-                  ? t("cannotDeleteDefault")
-                  : undefined,
-              onSelect: () => setDeleting(role),
-            },
-          ]}
-        />
-      ),
-    });
-  }
+          },
+          {
+            key: "delete",
+            group: 1,
+            label: tCommon("delete"),
+            icon: Trash2,
+            destructive: true,
+            hidden: !canDelete,
+            // The backend refuses both; the menu says why instead of letting the click fail.
+            disabledReason: role.isSuperAdmin
+              ? t("cannotDeleteSuperAdmin")
+              : role.isDefault
+                ? t("cannotDeleteDefault")
+                : undefined,
+            onSelect: () => setDeleting(role),
+          },
+        ]}
+      />
+    ),
+  });
 
   return (
     <div className="flex flex-col gap-8">
@@ -160,8 +173,7 @@ function RolesContent() {
         open={formOpen}
         onOpenChange={setFormOpen}
         role={editing}
-        catalog={catalog}
-        onSaved={refetch}
+        onSaved={(role, created) => (created ? router.push(`/roles/${role.id}`) : refetch())}
       />
 
       <ConfirmDialog

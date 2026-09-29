@@ -442,7 +442,23 @@
     "deleteTitle": "Supprimer le rôle « {name} » ?",
     "deleteBody": "{count, plural, =0 {Aucun utilisateur n'a ce rôle.} one {# utilisateur perdra les permissions qu'il accorde.} other {# utilisateurs perdront les permissions qu'il accorde.}} Cette action est irréversible.",
     "cannotDeleteSuperAdmin": "Le rôle SuperAdmin ne peut pas être supprimé.",
-    "cannotDeleteDefault": "Le rôle par défaut des nouvelles inscriptions ne peut pas être supprimé."
+    "cannotDeleteDefault": "Le rôle par défaut des nouvelles inscriptions ne peut pas être supprimé.",
+    "managePermissions": "Gérer les permissions",
+    "editDetails": "Modifier les détails",
+    "createDescription": "Nommez le rôle — vous choisirez ensuite ses permissions.",
+    "editDescription": "Modifiez le nom et la description du rôle.",
+    "createAndContinue": "Créer et définir les permissions",
+    "noDescription": "Aucune description.",
+    "permissionManagement": "Gestion des permissions",
+    "permissionManagementDescription": "Activez ce que ce rôle peut voir et faire. Les changements s'appliquent à la prochaine requête de chaque utilisateur.",
+    "allLabel": "Tout",
+    "allPermissionsLabel": "Toutes les permissions",
+    "allInLabel": "Toutes les permissions {name}",
+    "columnLabel": "{action} — tout {name}",
+    "unsavedChanges": "{count, plural, one {# modification non enregistrée} other {# modifications non enregistrées}}",
+    "allSaved": "Toutes les modifications sont enregistrées.",
+    "discard": "Annuler les modifications",
+    "permissionsSaved": "Permissions enregistrées."
   },
   "ExamConfig": {
     "title": "Configuration d'examen",
@@ -545,6 +561,24 @@
         "delete": "Supprimer",
         "assign": "Attribuer aux utilisateurs"
       }
+    },
+    "groups": {
+      "questionBank": "Banque de questions",
+      "candidates": "Candidats",
+      "administration": "Administration",
+      "other": "Autres"
+    },
+    "actionNames": {
+      "view": "Voir",
+      "create": "Créer",
+      "update": "Modifier",
+      "delete": "Supprimer",
+      "assign": "Attribuer",
+      "viewOwn": "Voir les siens",
+      "updateOwn": "Modifier le sien",
+      "start": "Commencer",
+      "answerOwn": "Répondre",
+      "topUpOwn": "Recharger"
     }
   }
 }

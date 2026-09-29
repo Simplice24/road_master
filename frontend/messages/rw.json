@@ -442,7 +442,23 @@
     "deleteTitle": "Siba inshingano \"{name}\"?",
     "deleteBody": "{count, plural, =0 {Nta mukoresha ufite iyi nshingano.} other {Abakoresha # bazatakaza uburenganzira itanga.}} Ntibishobora gusubizwa inyuma.",
     "cannotDeleteSuperAdmin": "Inshingano ya SuperAdmin ntishobora gusibwa.",
-    "cannotDeleteDefault": "Inshingano isanzwe y'abiyandikisha bashya ntishobora gusibwa."
+    "cannotDeleteDefault": "Inshingano isanzwe y'abiyandikisha bashya ntishobora gusibwa.",
+    "managePermissions": "Genzura uburenganzira",
+    "editDetails": "Hindura amakuru",
+    "createDescription": "Ita inshingano izina — uzahitamo uburenganzira bwayo nyuma.",
+    "editDescription": "Hindura izina n'ibisobanuro by'inshingano.",
+    "createAndContinue": "Kora hanyuma ushyireho uburenganzira",
+    "noDescription": "Nta bisobanuro.",
+    "permissionManagement": "Imicungire y'uburenganzira",
+    "permissionManagementDescription": "Fungura ibyo iyi nshingano ishobora kureba no gukora. Impinduka zikora ku gikorwa gikurikira cya buri mukoresha.",
+    "allLabel": "Byose",
+    "allPermissionsLabel": "Uburenganzira bwose",
+    "allInLabel": "Uburenganzira bwose bwa {name}",
+    "columnLabel": "{action} — byose bya {name}",
+    "unsavedChanges": "{count, plural, one {Impinduka # itarabikwa} other {Impinduka # zitarabikwa}}",
+    "allSaved": "Impinduka zose zabitswe.",
+    "discard": "Reka impinduka",
+    "permissionsSaved": "Uburenganzira bwabitswe."
   },
   "ExamConfig": {
     "title": "Imiterere y'ikizamini",
@@ -545,6 +561,24 @@
         "delete": "Gusiba",
         "assign": "Guha abakoresha"
       }
+    },
+    "groups": {
+      "questionBank": "Ububiko bw'ibibazo",
+      "candidates": "Abakandida",
+      "administration": "Ubuyobozi",
+      "other": "Ibindi"
+    },
+    "actionNames": {
+      "view": "Kureba",
+      "create": "Gukora",
+      "update": "Guhindura",
+      "delete": "Gusiba",
+      "assign": "Gutanga",
+      "viewOwn": "Kureba ibye",
+      "updateOwn": "Guhindura ibye",
+      "start": "Gutangira",
+      "answerOwn": "Gusubiza",
+      "topUpOwn": "Kongeramo"
     }
   }
 }

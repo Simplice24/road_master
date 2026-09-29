@@ -441,7 +441,23 @@
     "deleteTitle": "Delete role \"{name}\"?",
     "deleteBody": "{count, plural, =0 {No users have this role.} one {# user will lose the permissions it grants.} other {# users will lose the permissions it grants.}} This can't be undone.",
     "cannotDeleteSuperAdmin": "The SuperAdmin role can't be deleted.",
-    "cannotDeleteDefault": "The default role for new registrations can't be deleted."
+    "cannotDeleteDefault": "The default role for new registrations can't be deleted.",
+    "managePermissions": "Manage permissions",
+    "editDetails": "Edit details",
+    "createDescription": "Name the role — you'll choose its permissions next.",
+    "editDescription": "Update the role's name and description.",
+    "createAndContinue": "Create and set permissions",
+    "noDescription": "No description.",
+    "permissionManagement": "Permission management",
+    "permissionManagementDescription": "Turn on what this role can see and do. Changes apply on each user's next request.",
+    "allLabel": "All",
+    "allPermissionsLabel": "All permissions",
+    "allInLabel": "All {name} permissions",
+    "columnLabel": "{action} — all of {name}",
+    "unsavedChanges": "{count, plural, one {# unsaved change} other {# unsaved changes}}",
+    "allSaved": "All changes saved.",
+    "discard": "Discard",
+    "permissionsSaved": "Permissions saved."
   },
   "ExamConfig": {
     "title": "Exam config",
@@ -544,6 +560,24 @@
         "delete": "Delete",
         "assign": "Assign to users"
       }
+    },
+    "groups": {
+      "questionBank": "Question bank",
+      "candidates": "Candidates",
+      "administration": "Administration",
+      "other": "Other"
+    },
+    "actionNames": {
+      "view": "View",
+      "create": "Create",
+      "update": "Edit",
+      "delete": "Delete",
+      "assign": "Assign",
+      "viewOwn": "View own",
+      "updateOwn": "Edit own",
+      "start": "Start",
+      "answerOwn": "Answer own",
+      "topUpOwn": "Top up own"
     }
   }
 }
