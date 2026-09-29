@@ -50,7 +50,7 @@ function initials(fullName: string) {
     .join("");
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   const t = useTranslations("AppNav");
   const { user, isLoading, logout, can, canAny } = useAuth();
   const router = useRouter();
@@ -221,6 +221,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className={cn(CONTAINER, "min-w-0 flex-1 py-8")}>
         {children}
       </main>
+
+      {footer}
     </div>
   );
 }

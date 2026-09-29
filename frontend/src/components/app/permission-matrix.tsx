@@ -91,7 +91,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
 
   return (
     <div className="flex flex-col gap-8">
-      <label className="flex w-fit items-center gap-3">
+      <div className="flex w-fit items-center gap-3">
         <Switch
           size="lg"
           checked={allOn(everything)}
@@ -100,7 +100,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
           aria-label={t("allPermissionsLabel")}
         />
         <span className="text-sm font-medium text-foreground">{t("allLabel")}</span>
-      </label>
+      </div>
 
       {sections.map((section) => {
         const sectionNames = section.modules.flatMap((module) => module.actions.map((action) => action.name));
@@ -115,7 +115,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
                 <thead>
                   <tr className="border-b border-border">
                     <th scope="col" className="py-3 pr-6 text-left font-normal">
-                      <label className="flex items-center gap-3">
+                      <div className="flex items-center gap-3">
                         <Switch
                           size="lg"
                           checked={allOn(sectionNames)}
@@ -124,7 +124,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
                           aria-label={t("allInLabel", { name: groupLabel })}
                         />
                         <span className="font-medium text-foreground">{t("allLabel")}</span>
-                      </label>
+                      </div>
                     </th>
                     {section.columns.map((column) => {
                       const columnNames = section.modules.flatMap((module) =>
@@ -133,7 +133,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
                       const columnLabel = labels.column(column.action, column.label);
                       return (
                         <th key={column.action} scope="col" className="px-3 py-3 text-left font-normal">
-                          <label className="flex items-center gap-2.5 whitespace-nowrap">
+                          <div className="flex items-center gap-2.5 whitespace-nowrap">
                             <Switch
                               size="lg"
                               checked={allOn(columnNames)}
@@ -142,7 +142,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
                               aria-label={t("columnLabel", { action: columnLabel, name: groupLabel })}
                             />
                             <span className="text-muted-foreground">{columnLabel}</span>
-                          </label>
+                          </div>
                         </th>
                       );
                     })}
@@ -155,7 +155,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
                     return (
                       <tr key={module.module} className="border-b border-dashed border-border last:border-b-0">
                         <th scope="row" className="py-3 pr-6 text-left font-normal">
-                          <label className="flex items-center gap-3">
+                          <div className="flex items-center gap-3">
                             <Switch
                               size="lg"
                               checked={allOn(rowNames)}
@@ -164,7 +164,7 @@ export function PermissionMatrix({ catalog, selected, onChange, disabled = false
                               aria-label={t("allInLabel", { name: moduleLabel })}
                             />
                             <span className="whitespace-nowrap text-foreground">{moduleLabel}</span>
-                          </label>
+                          </div>
                         </th>
                         {section.columns.map((column) => {
                           const action = module.actions.find((candidate) => candidate.action === column.action);

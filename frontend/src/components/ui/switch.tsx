@@ -20,7 +20,7 @@ function Switch({ className, size = "default", ...props }: SwitchProps) {
       data-slot="switch"
       data-size={size}
       className={cn(
-        "peer group/switch inline-flex shrink-0 cursor-pointer items-center rounded-full border border-transparent bg-input p-0.5 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-checked:bg-primary dark:bg-input/80 dark:data-checked:bg-primary",
+        "peer group/switch inline-flex shrink-0 cursor-pointer items-center rounded-full border border-transparent bg-input p-0.5 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-disabled:cursor-not-allowed data-disabled:opacity-60 data-checked:bg-primary dark:bg-input/80 dark:data-checked:bg-primary",
         large ? "h-7 w-[3.25rem] bg-slate-200 dark:bg-slate-700" : "h-5 w-9",
         className
       )}
