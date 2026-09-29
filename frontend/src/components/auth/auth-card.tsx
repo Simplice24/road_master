@@ -1,4 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
 
 interface AuthCardProps {
   title: string;
@@ -7,23 +12,31 @@ interface AuthCardProps {
   footer: ReactNode;
 }
 
+/**
+ * The form column of the auth screens (agasekestore.com-style): left-aligned heading, the form,
+ * the "switch to login/register" line, and a secondary "Back to home" button. Sits directly on
+ * the grey form panel from the (auth) layout — no card chrome.
+ */
 export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
+  const t = useTranslations("Auth");
+
   return (
-    <div className="w-full max-w-sm rounded-3xl border border-border bg-card p-6 shadow-xl shadow-foreground/5 sm:p-8">
-      <div className="flex flex-col items-center text-center">
-        <div className="relative mb-5 flex size-16 items-center justify-center">
-          <span className="absolute inset-0 rounded-full border-2 border-dashed border-primary/25" />
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-2 font-display text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30">
-            RM
-          </span>
-        </div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
-      </div>
+    <div className="flex flex-col">
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+      <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
 
       <div className="mt-7">{children}</div>
 
-      <div className="mt-6 border-t border-border pt-5 text-center text-sm text-muted-foreground">{footer}</div>
+      <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>
+
+      <Button
+        variant="outline"
+        className="mt-6 h-11 w-full rounded-lg border-border bg-transparent text-sm font-normal text-muted-foreground hover:bg-background hover:text-foreground"
+        render={<Link href="/" />}
+        nativeButton={false}
+      >
+        {t("backToHome")}
+      </Button>
     </div>
   );
 }

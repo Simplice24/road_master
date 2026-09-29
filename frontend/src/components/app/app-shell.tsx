@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { LogOut, Menu, Plus, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -56,9 +56,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  // Set while signing out so the "not signed in → /login" guard below doesn't race the
+  // redirect to the landing page.
+  const loggingOut = useRef(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !user && !loggingOut.current) {
       router.replace("/login");
     }
   }, [isLoading, user, router]);
@@ -88,9 +91,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
+  // The only logout path (the account menu is the same on desktop and mobile). `replace`, not
+  // `push`: the dashboard page leaves history, so Back after logout can't return to it.
   function handleLogout() {
+    loggingOut.current = true;
+    router.replace("/");
     logout();
-    router.push("/login");
   }
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);

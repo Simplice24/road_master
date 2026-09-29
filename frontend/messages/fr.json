@@ -137,7 +137,8 @@
     "actions": "Actions",
     "edit": "Modifier",
     "delete": "Supprimer",
-    "rowActions": "Actions pour {name}"
+    "rowActions": "Actions pour {name}",
+    "saveChanges": "Enregistrer"
   },
   "Auth": {
     "registerTitle": "Créez votre compte",
@@ -161,7 +162,10 @@
     "loginLink": "Se connecter",
     "registerLink": "S'inscrire",
     "loggingIn": "Connexion…",
-    "registering": "Création du compte…"
+    "registering": "Création du compte…",
+    "brandTitle": "Bienvenue sur Road Master",
+    "brandTagline": "Entraînez-vous à l'examen du permis provisoire en conditions réelles et chronométrées — en anglais, en kinyarwanda ou en français.",
+    "backToHome": "Retour à l'accueil"
   },
   "AppNav": {
     "dashboard": "Tableau de bord",
@@ -283,14 +287,37 @@
     "actions": "Actions"
   },
   "Profile": {
-    "title": "Profil",
+    "title": "Paramètres du compte",
     "subtitle": "Gérez les informations de votre compte.",
     "fullName": "Nom complet",
     "email": "E-mail",
     "phone": "Numéro de téléphone",
     "memberSince": "Membre depuis le {date}",
     "saveChanges": "Enregistrer les modifications",
-    "profileUpdated": "Profil mis à jour."
+    "profileUpdated": "Profil mis à jour.",
+    "back": "Retour",
+    "sectionsNav": "Sections des paramètres du compte",
+    "general": "Général",
+    "avatarTitle": "Avatar",
+    "avatarDescription": "Voici votre avatar.",
+    "avatarHint": "Votre avatar est généré à partir de vos initiales.",
+    "nameTitle": "Nom complet",
+    "nameDescription": "C'est le nom affiché partout dans Road Master.",
+    "nameHint": "{max} caractères maximum.",
+    "contactTitle": "Coordonnées",
+    "contactDescription": "Votre numéro de téléphone sert à vous connecter.",
+    "contactHint": "Le téléphone est obligatoire ; l'e-mail est facultatif.",
+    "emailOptional": "E-mail (facultatif)",
+    "rolesTitle": "Rôles",
+    "rolesDescription": "Ce à quoi vous avez accès dans Road Master.",
+    "rolesHint": "Les rôles sont gérés par un administrateur.",
+    "noRoles": "Aucun rôle ne vous est attribué.",
+    "errors": {
+      "nameLength": "Utilisez entre {min} et {max} caractères.",
+      "phoneRequired": "Saisissez votre numéro de téléphone.",
+      "phoneLength": "{max} caractères maximum.",
+      "emailInvalid": "Saisissez une adresse e-mail valide."
+    }
   },
   "ExamAttemptStatus": {
     "IN_PROGRESS": "En cours",

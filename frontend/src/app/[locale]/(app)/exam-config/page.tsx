@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
@@ -18,7 +18,6 @@ import {
 import type { ExamConfig } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -31,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/app/page-header";
+import { FULL_BLEED, SettingsField, SettingsSection } from "@/components/app/settings-layout";
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
 import { RequirePermission } from "@/components/app/require-permission";
 
@@ -42,13 +42,6 @@ type ConfigPayload = Partial<{
   price: number;
   isActive: boolean;
 }>;
-
-// Full-bleed grey band (the reference's settings area) without 100vw overflow: the shadow paints
-// sideways past the container and the clip-path trims it to this element's own height.
-const FULL_BLEED = {
-  boxShadow: "0 0 0 100vmax var(--surface-muted)",
-  clipPath: "inset(0 -100vmax)",
-} as const;
 
 function useErrorText() {
   const t = useTranslations("ExamConfig.errors");
@@ -233,7 +226,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
         onSave={() => save({ name: name.trim(), isActive })}
       >
         <div className="flex flex-col gap-5">
-          <Field id="cfg-name" label={t("name")} error={errorText(nameError)}>
+          <SettingsField id="cfg-name" label={t("name")} error={errorText(nameError)}>
             <Input
               id="cfg-name"
               value={name}
@@ -242,7 +235,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
               aria-invalid={!!nameError}
               className="max-w-md"
             />
-          </Field>
+          </SettingsField>
           <label className="flex max-w-md items-start justify-between gap-4">
             <span className="flex flex-col gap-0.5">
               <span className="text-sm font-medium">{t("activeLabel")}</span>
@@ -271,7 +264,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
         }
       >
         <div className="grid max-w-md gap-5 sm:grid-cols-2">
-          <Field id="cfg-questions" label={t("numberOfQuestions")} error={errorText(questionsError)}>
+          <SettingsField id="cfg-questions" label={t("numberOfQuestions")} error={errorText(questionsError)}>
             <Input
               id="cfg-questions"
               type="number"
@@ -284,8 +277,8 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
               disabled={readOnly}
               aria-invalid={!!questionsError}
             />
-          </Field>
-          <Field id="cfg-passmark" label={t("passMark")} error={errorText(passMarkError)} suffix="%">
+          </SettingsField>
+          <SettingsField id="cfg-passmark" label={t("passMark")} error={errorText(passMarkError)} suffix="%">
             <Input
               id="cfg-passmark"
               type="number"
@@ -299,7 +292,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
               aria-invalid={!!passMarkError}
               className="pr-8"
             />
-          </Field>
+          </SettingsField>
         </div>
       </SettingsSection>
 
@@ -313,7 +306,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
         onSave={() => save({ durationMinutes: Number(durationMinutes) })}
       >
         <div className="max-w-[14rem]">
-          <Field
+          <SettingsField
             id="cfg-duration"
             label={t("durationMinutes")}
             error={errorText(durationError)}
@@ -332,7 +325,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
               aria-invalid={!!durationError}
               className="pr-12"
             />
-          </Field>
+          </SettingsField>
         </div>
       </SettingsSection>
 
@@ -346,7 +339,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
         onSave={() => save({ price: Number(price) })}
       >
         <div className="max-w-[14rem]">
-          <Field id="cfg-price" label={t("priceLabel")} error={errorText(priceError)} suffix="RWF">
+          <SettingsField id="cfg-price" label={t("priceLabel")} error={errorText(priceError)} suffix="RWF">
             <Input
               id="cfg-price"
               type="number"
@@ -360,7 +353,7 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
               aria-invalid={!!priceError}
               className="pr-14"
             />
-          </Field>
+          </SettingsField>
         </div>
       </SettingsSection>
 
@@ -388,104 +381,6 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
         onConfirm={handleDelete}
       />
     </>
-  );
-}
-
-/* ------------------------------------------------------------------------------------------ */
-
-interface SettingsSectionProps {
-  title: string;
-  description: string;
-  hint: string;
-  readOnly: boolean;
-  dirty: boolean;
-  valid: boolean;
-  onSave: () => Promise<void>;
-  children: ReactNode;
-}
-
-/** One card in the Team-settings layout: title + description, fields, and a grey footer with a
- * hint on the left and "Save changes" on the right. Each section saves only its own fields. */
-function SettingsSection({ title, description, hint, readOnly, dirty, valid, onSave, children }: SettingsSectionProps) {
-  const t = useTranslations("ExamConfig");
-  const tCommon = useTranslations("Common");
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    if (!dirty || !valid) return;
-    setError(null);
-    setIsSaving(true);
-    try {
-      await onSave();
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : tCommon("error");
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  return (
-    <section className="overflow-hidden rounded-lg border border-border bg-background">
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="flex flex-col gap-5 p-5 sm:p-7">
-          <div>
-            <h2 className="font-display text-xl font-medium">{title}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-          </div>
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {children}
-        </div>
-        <div className="flex flex-col gap-3 border-t border-border bg-surface-muted/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-          <p className="text-sm text-muted-foreground">{hint}</p>
-          {!readOnly && (
-            <Button type="submit" className="btn-primary h-10 shrink-0 px-5" disabled={!dirty || !valid || isSaving}>
-              {isSaving ? tCommon("saving") : t("saveChanges")}
-            </Button>
-          )}
-        </div>
-      </form>
-    </section>
-  );
-}
-
-function Field({
-  id,
-  label,
-  error,
-  suffix,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  suffix?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <div className="relative">
-        {children}
-        {suffix && (
-          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-muted-foreground">
-            {suffix}
-          </span>
-        )}
-      </div>
-      {error && (
-        <p id={`${id}-error`} role="alert" className="text-xs text-destructive">
-          {error}
-        </p>
-      )}
-    </div>
   );
 }
 
@@ -577,11 +472,11 @@ function CreateConfigForm({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Field id="new-name" label={t("name")} error={shown(errors.name)}>
+          <SettingsField id="new-name" label={t("name")} error={shown(errors.name)}>
             <Input id="new-name" value={name} onChange={(event) => setName(event.target.value)} />
-          </Field>
+          </SettingsField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field id="new-questions" label={t("numberOfQuestions")} error={shown(errors.numberOfQuestions)}>
+            <SettingsField id="new-questions" label={t("numberOfQuestions")} error={shown(errors.numberOfQuestions)}>
               <Input
                 id="new-questions"
                 type="number"
@@ -589,8 +484,8 @@ function CreateConfigForm({
                 value={numberOfQuestions}
                 onChange={(event) => setNumberOfQuestions(event.target.value)}
               />
-            </Field>
-            <Field id="new-passmark" label={t("passMark")} error={shown(errors.passMarkPercent)} suffix="%">
+            </SettingsField>
+            <SettingsField id="new-passmark" label={t("passMark")} error={shown(errors.passMarkPercent)} suffix="%">
               <Input
                 id="new-passmark"
                 type="number"
@@ -599,8 +494,8 @@ function CreateConfigForm({
                 onChange={(event) => setPassMarkPercent(event.target.value)}
                 className="pr-8"
               />
-            </Field>
-            <Field
+            </SettingsField>
+            <SettingsField
               id="new-duration"
               label={t("durationMinutes")}
               error={shown(errors.durationMinutes)}
@@ -614,8 +509,8 @@ function CreateConfigForm({
                 onChange={(event) => setDurationMinutes(event.target.value)}
                 className="pr-12"
               />
-            </Field>
-            <Field id="new-price" label={t("priceLabel")} error={shown(errors.price)} suffix="RWF">
+            </SettingsField>
+            <SettingsField id="new-price" label={t("priceLabel")} error={shown(errors.price)} suffix="RWF">
               <Input
                 id="new-price"
                 type="number"
@@ -625,7 +520,7 @@ function CreateConfigForm({
                 onChange={(event) => setPrice(event.target.value)}
                 className="pr-14"
               />
-            </Field>
+            </SettingsField>
           </div>
           <label className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-2.5">
             <span className="text-sm font-medium">{t("activeLabel")}</span>

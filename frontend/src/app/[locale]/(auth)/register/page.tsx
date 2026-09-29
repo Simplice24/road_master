@@ -56,7 +56,7 @@ export default function RegisterPage() {
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -112,13 +112,13 @@ export default function RegisterPage() {
             minLength={8}
             required
           />
-          <p className="pl-4 text-xs text-muted-foreground">{t("passwordHint")}</p>
+          <p className="text-xs text-muted-foreground">{t("passwordHint")}</p>
         </div>
 
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 h-12 w-full rounded-lg bg-gradient-to-r from-primary to-primary-2 text-[15px] font-semibold shadow-lg shadow-primary/25 hover:opacity-90"
+          className="btn-primary mt-3 h-12 w-full text-sm"
         >
           {isSubmitting ? t("registering") : t("registerCta")}
         </Button>

@@ -137,7 +137,8 @@
     "actions": "Ibikorwa",
     "edit": "Hindura",
     "delete": "Siba",
-    "rowActions": "Ibikorwa kuri {name}"
+    "rowActions": "Ibikorwa kuri {name}",
+    "saveChanges": "Bika impinduka"
   },
   "Auth": {
     "registerTitle": "Fungura konti yawe",
@@ -161,7 +162,10 @@
     "loginLink": "Injira",
     "registerLink": "Iyandikishe",
     "loggingIn": "Kwinjira…",
-    "registering": "Gufungura konti…"
+    "registering": "Gufungura konti…",
+    "brandTitle": "Murakaza neza kuri Road Master",
+    "brandTagline": "Itoze ikizamini cy'uruhushya rw'agateganyo rwo gutwara mu buryo nyabwo kandi bufite igihe — mu Cyongereza, Ikinyarwanda cyangwa Igifaransa.",
+    "backToHome": "Subira ahabanza"
   },
   "AppNav": {
     "dashboard": "Imbonerahamwe",
@@ -283,14 +287,37 @@
     "actions": "Ibikorwa"
   },
   "Profile": {
-    "title": "Umwirondoro",
+    "title": "Igenamiterere rya konti",
     "subtitle": "Genzura amakuru ya konti yawe.",
     "fullName": "Amazina yombi",
     "email": "Imeri",
     "phone": "Numero ya telefone",
     "memberSince": "Umunyamuryango kuva {date}",
     "saveChanges": "Bika impinduka",
-    "profileUpdated": "Umwirondoro wavuguruwe."
+    "profileUpdated": "Umwirondoro wavuguruwe.",
+    "back": "Subira inyuma",
+    "sectionsNav": "Ibice by'igenamiterere rya konti",
+    "general": "Rusange",
+    "avatarTitle": "Ifoto y'umwirondoro",
+    "avatarDescription": "Iyi ni ifoto yawe y'umwirondoro.",
+    "avatarHint": "Ifoto yawe ikorwa hifashishijwe inyuguti zibanza z'amazina yawe.",
+    "nameTitle": "Amazina yose",
+    "nameDescription": "Aya ni yo mazina agaragara hose kuri Road Master.",
+    "nameHint": "Inyuguti {max} ntarengwa.",
+    "contactTitle": "Aho ubarizwa",
+    "contactDescription": "Nimero ya telefoni ni yo winjiriraho.",
+    "contactHint": "Telefoni irakenewe; imeri si ngombwa.",
+    "emailOptional": "Imeri (si ngombwa)",
+    "rolesTitle": "Inshingano",
+    "rolesDescription": "Ibyo ushobora kugeraho kuri Road Master.",
+    "rolesHint": "Inshingano zigenwa n'umuyobozi wa sisitemu.",
+    "noRoles": "Nta nshingano uhawe.",
+    "errors": {
+      "nameLength": "Koresha inyuguti ziri hagati ya {min} na {max}.",
+      "phoneRequired": "Andika nimero ya telefoni yawe.",
+      "phoneLength": "Koresha inyuguti {max} ntarengwa.",
+      "emailInvalid": "Andika imeri yemewe."
+    }
   },
   "ExamAttemptStatus": {
     "IN_PROGRESS": "Bikomeje",

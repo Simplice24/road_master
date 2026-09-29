@@ -136,7 +136,8 @@
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
-    "rowActions": "Actions for {name}"
+    "rowActions": "Actions for {name}",
+    "saveChanges": "Save changes"
   },
   "Auth": {
     "registerTitle": "Create your account",
@@ -160,7 +161,10 @@
     "loginLink": "Log in",
     "registerLink": "Register",
     "loggingIn": "Logging in…",
-    "registering": "Creating account…"
+    "registering": "Creating account…",
+    "brandTitle": "Welcome to Road Master",
+    "brandTagline": "Practice for your provisional driving licence exam under real, timed conditions — in English, Kinyarwanda or French.",
+    "backToHome": "Back to home"
   },
   "AppNav": {
     "dashboard": "Dashboard",
@@ -282,14 +286,37 @@
     "actions": "Actions"
   },
   "Profile": {
-    "title": "Profile",
+    "title": "Account settings",
     "subtitle": "Manage your account details.",
     "fullName": "Full name",
     "email": "Email",
     "phone": "Phone number",
     "memberSince": "Member since {date}",
     "saveChanges": "Save changes",
-    "profileUpdated": "Profile updated."
+    "profileUpdated": "Profile updated.",
+    "back": "Back",
+    "sectionsNav": "Account settings sections",
+    "general": "General",
+    "avatarTitle": "Avatar",
+    "avatarDescription": "This is your avatar.",
+    "avatarHint": "Your avatar is generated from your initials.",
+    "nameTitle": "Full name",
+    "nameDescription": "This is your display name across Road Master.",
+    "nameHint": "{max} characters maximum.",
+    "contactTitle": "Contact details",
+    "contactDescription": "Your phone number is what you log in with.",
+    "contactHint": "Phone is required; email is optional.",
+    "emailOptional": "Email (optional)",
+    "rolesTitle": "Roles",
+    "rolesDescription": "What you can access in Road Master.",
+    "rolesHint": "Roles are managed by an administrator.",
+    "noRoles": "You have no roles assigned.",
+    "errors": {
+      "nameLength": "Use between {min} and {max} characters.",
+      "phoneRequired": "Enter your phone number.",
+      "phoneLength": "Use at most {max} characters.",
+      "emailInvalid": "Enter a valid email address."
+    }
   },
   "ExamAttemptStatus": {
     "IN_PROGRESS": "In progress",

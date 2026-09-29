@@ -49,7 +49,7 @@ export default function LoginPage() {
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -84,7 +84,7 @@ export default function LoginPage() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 h-12 w-full rounded-lg bg-gradient-to-r from-primary to-primary-2 text-[15px] font-semibold shadow-lg shadow-primary/25 hover:opacity-90"
+          className="btn-primary mt-3 h-12 w-full text-sm"
         >
           {isSubmitting ? t("loggingIn") : t("loginCta")}
         </Button>
