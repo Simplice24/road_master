@@ -137,7 +137,9 @@
     "edit": "Edit",
     "delete": "Delete",
     "rowActions": "Actions for {name}",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "search": "Search…",
+    "noMatches": "No matches."
   },
   "Auth": {
     "registerTitle": "Create your account",
@@ -223,7 +225,22 @@
     "starting": "Starting…",
     "inProgressNotice": "You already have an exam in progress.",
     "resume": "Resume exam",
-    "noExamConfigs": "No exams are available right now."
+    "noExamConfigs": "No exams are available right now.",
+    "examSectionTitle": "Choose an exam",
+    "examSectionDescription": "Each exam draws a fresh set of questions from the question bank.",
+    "examSectionHint": "Only exams that are currently available are shown.",
+    "topicSectionTitle": "Focus topic",
+    "topicSectionDescription": "Practice a single category, or take a balanced mix of all of them.",
+    "topicSectionHint": "A balanced mix is closest to the real exam.",
+    "searchCategories": "Search categories…",
+    "summaryTitle": "Summary",
+    "summaryExam": "Exam",
+    "summaryQuestions": "Questions",
+    "summaryTimeLimit": "Time limit",
+    "summaryPassMark": "Pass mark",
+    "summaryCost": "Cost",
+    "summaryBalanceAfter": "Balance after",
+    "freeAttemptNote": "Your first attempt is free — nothing is charged."
   },
   "Exam": {
     "question": "Question {current} of {total}",

@@ -138,7 +138,9 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "rowActions": "Actions pour {name}",
-    "saveChanges": "Enregistrer"
+    "saveChanges": "Enregistrer",
+    "search": "Rechercher…",
+    "noMatches": "Aucun résultat."
   },
   "Auth": {
     "registerTitle": "Créez votre compte",
@@ -224,7 +226,22 @@
     "starting": "Démarrage…",
     "inProgressNotice": "Vous avez déjà un examen en cours.",
     "resume": "Reprendre l'examen",
-    "noExamConfigs": "Aucun examen n'est disponible pour le moment."
+    "noExamConfigs": "Aucun examen n'est disponible pour le moment.",
+    "examSectionTitle": "Choisir un examen",
+    "examSectionDescription": "Chaque examen tire une nouvelle série de questions de la banque de questions.",
+    "examSectionHint": "Seuls les examens actuellement disponibles sont affichés.",
+    "topicSectionTitle": "Thème ciblé",
+    "topicSectionDescription": "Entraînez-vous sur une seule catégorie ou sur un mélange équilibré de toutes.",
+    "topicSectionHint": "Un mélange équilibré est le plus proche de l'examen réel.",
+    "searchCategories": "Rechercher une catégorie…",
+    "summaryTitle": "Récapitulatif",
+    "summaryExam": "Examen",
+    "summaryQuestions": "Questions",
+    "summaryTimeLimit": "Temps limite",
+    "summaryPassMark": "Seuil de réussite",
+    "summaryCost": "Coût",
+    "summaryBalanceAfter": "Solde après",
+    "freeAttemptNote": "Votre première tentative est gratuite — rien n'est débité."
   },
   "Exam": {
     "question": "Question {current} sur {total}",

@@ -138,7 +138,9 @@
     "edit": "Hindura",
     "delete": "Siba",
     "rowActions": "Ibikorwa kuri {name}",
-    "saveChanges": "Bika impinduka"
+    "saveChanges": "Bika impinduka",
+    "search": "Shakisha…",
+    "noMatches": "Nta cyabonetse."
   },
   "Auth": {
     "registerTitle": "Fungura konti yawe",
@@ -224,7 +226,22 @@
     "starting": "Aratangira…",
     "inProgressNotice": "Usanzwe ufite ikizamini gikomeje.",
     "resume": "Komeza ikizamini",
-    "noExamConfigs": "Nta kizamini kiboneka ubu."
+    "noExamConfigs": "Nta kizamini kiboneka ubu.",
+    "examSectionTitle": "Hitamo ikizamini",
+    "examSectionDescription": "Buri kizamini gitoranya ibibazo bishya mu bubiko bw'ibibazo.",
+    "examSectionHint": "Hagaragara gusa ibizamini biboneka ubu.",
+    "topicSectionTitle": "Icyiciro wibandaho",
+    "topicSectionDescription": "Itoze ku cyiciro kimwe, cyangwa ku ruvange rungana rw'ibyiciro byose.",
+    "topicSectionHint": "Uruvange rungana ni rwo rwegereye ikizamini nyacyo.",
+    "searchCategories": "Shakisha ibyiciro…",
+    "summaryTitle": "Incamake",
+    "summaryExam": "Ikizamini",
+    "summaryQuestions": "Ibibazo",
+    "summaryTimeLimit": "Igihe ntarengwa",
+    "summaryPassMark": "Amanota yo gutsinda",
+    "summaryCost": "Igiciro",
+    "summaryBalanceAfter": "Amafaranga asigara",
+    "freeAttemptNote": "Ikizamini cyawe cya mbere ni ubuntu — nta mafaranga akurwaho."
   },
   "Exam": {
     "question": "Ikibazo {current} kuri {total}",

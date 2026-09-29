@@ -11,13 +11,7 @@ import type { Transaction } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PageHeader } from "@/components/app/page-header";
 import { DataTable, type DataTableColumn } from "@/components/app/data-table";
@@ -25,6 +19,7 @@ import { TransactionStatusBadge } from "@/components/app/record-status";
 import { RequirePermission } from "@/components/app/require-permission";
 
 const PROVIDERS = ["MTN_MOMO", "AIRTEL_MONEY", "CARD"] as const;
+const PROVIDER_OPTIONS = PROVIDERS.map((option) => ({ value: option, label: option.replace("_", " ") }));
 
 function WalletContent() {
   const t = useTranslations("Wallet");
@@ -137,25 +132,14 @@ function WalletContent() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="provider">{t("provider")}</Label>
-                  <Select
+                  <SearchableSelect
+                    id="provider"
                     value={provider}
-                    onValueChange={(value) => setProvider(value ?? PROVIDERS[0])}
-                    items={PROVIDERS.map((option) => ({
-                      value: option,
-                      label: option.replace("_", " "),
-                    }))}
-                  >
-                    <SelectTrigger id="provider" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PROVIDERS.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option.replace("_", " ")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onValueChange={setProvider}
+                    options={PROVIDER_OPTIONS}
+                    searchPlaceholder={tCommon("search")}
+                    emptyText={tCommon("noMatches")}
+                  />
                 </div>
               </div>
               <Button
