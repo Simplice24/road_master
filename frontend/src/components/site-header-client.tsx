@@ -33,8 +33,10 @@ export function SiteHeaderClient({ navLinks, loginLabel, registerLabel }: SiteHe
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b transition-colors duration-300",
-        scrolled ? "border-border bg-white/95 shadow-sm backdrop-blur-sm" : "border-white/10 bg-landing-dark",
+        // Fixed + transparent at the top so the hero's background runs up behind it (the hero
+        // pads its content by the header height); gains a solid surface once the page scrolls.
+        "fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300",
+        scrolled ? "border-border bg-white/95 shadow-sm backdrop-blur-sm" : "border-transparent bg-transparent",
       )}
     >
       <div className="relative flex h-16 items-center justify-between px-4 sm:px-6 lg:px-10">

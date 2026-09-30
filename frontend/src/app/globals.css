@@ -195,7 +195,8 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    /* Keeps "/#section" anchors clear of the fixed marketing header (h-16). */
+    @apply scroll-pt-16 font-sans;
   }
 }
 

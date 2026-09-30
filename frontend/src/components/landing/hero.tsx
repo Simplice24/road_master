@@ -14,7 +14,7 @@ export async function Hero() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(107,99,255,0.25),transparent_60%)]"
       />
 
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32 lg:px-8">
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 pt-40 pb-24 text-center sm:px-6 sm:pt-48 sm:pb-32 lg:px-8">
         <h1 className="mt-6 font-display text-[40px] leading-[1.04] font-normal tracking-[-0.02em] text-white sm:text-[48px] md:text-[56px]">
           {t("headline")}
         </h1>
