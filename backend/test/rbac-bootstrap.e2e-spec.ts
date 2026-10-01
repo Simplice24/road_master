@@ -37,6 +37,7 @@ describe('RBAC bootstrap (e2e)', () => {
     await prisma.examAttemptAnswer.deleteMany();
     await prisma.examAttemptQuestion.deleteMany();
     await prisma.examAttempt.deleteMany();
+    await prisma.userSubscription.deleteMany();
     await prisma.transaction.deleteMany();
     await prisma.userRole.deleteMany();
     await prisma.rolePermission.deleteMany();

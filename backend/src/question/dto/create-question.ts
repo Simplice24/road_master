@@ -10,6 +10,7 @@ import {
   IsArray,
   ArrayMinSize,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { QuestionType } from '../../../generated/prisma/enums'; // adjust to your actual generated client path
@@ -20,9 +21,10 @@ export class CreateOptionDto {
   @MaxLength(500)
   text?: string;
 
-  @IsOptional()
-  @IsUrl()
-  imageUrl?: string;
+  // null removes the image. require_tld:false so dev uploads (http://localhost:3000/...) pass.
+  @ValidateIf((_, value) => value !== null && value !== undefined)
+  @IsUrl({ require_tld: false })
+  imageUrl?: string | null;
 
   @IsOptional()
   @IsBoolean()
@@ -41,9 +43,10 @@ export class CreateQuestionDto {
   @MinLength(3)
   text!: string;
 
-  @IsOptional()
-  @IsUrl()
-  imageUrl?: string;
+  // null removes the image. require_tld:false so dev uploads (http://localhost:3000/...) pass.
+  @ValidateIf((_, value) => value !== null && value !== undefined)
+  @IsUrl({ require_tld: false })
+  imageUrl?: string | null;
 
   @IsOptional()
   @IsString()

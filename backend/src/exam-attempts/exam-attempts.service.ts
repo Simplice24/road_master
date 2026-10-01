@@ -11,7 +11,7 @@ import {
   assertCanCreate,
   assertFieldsAllowed,
 } from '../casl/policy-assertions';
-import { TransactionsService } from '../transactions/transactions.service';
+import { SubscriptionAccessService } from '../subscriptions/subscription-access.service';
 import { StartExamAttemptDto } from './dto/start-exam-attempt.dto';
 import { SubmitAnswerDto } from './dto/submit-answer.dto';
 
@@ -21,7 +21,11 @@ const ATTEMPT_DETAIL_INCLUDE = {
   examConfig: true,
   questions: {
     orderBy: { order: 'asc' as const },
-    include: { question: { include: { options: true } } },
+    include: {
+      question: {
+        include: { options: { orderBy: { position: 'asc' as const } } },
+      },
+    },
   },
   answers: { include: { selectedOptions: true } },
 } satisfies Prisma.ExamAttemptInclude;
@@ -34,7 +38,7 @@ type AttemptDetail = Prisma.ExamAttemptGetPayload<{
 export class ExamAttemptsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly transactionsService: TransactionsService,
+    private readonly access: SubscriptionAccessService,
   ) {}
 
   async listAttempts(ability: AppAbility) {
@@ -78,6 +82,10 @@ export class ExamAttemptsService {
     });
 
     const attemptId = await this.prisma.$transaction(async (tx) => {
+      // First statement on purpose: serializes concurrent starts for this user, and every read
+      // below then sees the latest committed subscriptions (see SubscriptionAccessService).
+      await this.access.lockUser(tx, userId);
+
       const examConfig = await tx.examConfig.findFirst({
         where: { id: dto.examConfigId, isActive: true },
       });
@@ -112,7 +120,11 @@ export class ExamAttemptsService {
           throw new NotFoundException('Category not found');
         }
         const categoryQuestions = await tx.question.findMany({
-          where: { isActive: true, categoryId: dto.categoryId },
+          where: {
+            isActive: true,
+            deletedAt: null,
+            categoryId: dto.categoryId,
+          },
           select: { id: true },
         });
         if (categoryQuestions.length < examConfig.numberOfQuestions) {
@@ -131,33 +143,32 @@ export class ExamAttemptsService {
         );
       }
 
-      // Compare-and-swap on the free-exam flag: a plain findUnique + blind update would let two
+      // Every new user's first exam is free — the one deliberate exception to "subscriptions
+      // are the only thing that grants exam access", so candidates can try before they buy.
+      // Compare-and-swap on the flag: a plain findUnique + blind update would let two
       // concurrent starts both observe hasUsedFreeExam=false (a SELECT is a snapshot read under
       // MySQL's default REPEATABLE READ, unblocked by a concurrent uncommitted write), granting
-      // two free exams. updateMany's WHERE turns this into a locking read, same as
-      // TransactionsService#chargeExamFee's balance CAS below.
+      // two free exams. updateMany's WHERE turns this into a locking read.
       const claimed = await tx.user.updateMany({
         where: { id: userId, hasUsedFreeExam: false },
         data: { hasUsedFreeExam: true },
       });
       const isFree = claimed.count === 1;
 
-      let transactionId: string | undefined;
-      if (!isFree && examConfig.price.greaterThan(0)) {
-        const transaction = await this.transactionsService.chargeExamFee(
-          tx,
-          userId,
-          examConfig.price,
-        );
-        transactionId = transaction.id;
-      }
+      // Otherwise access comes only from a subscription: an active time plan (nothing
+      // consumed), else one attempt from the oldest bundle, else 403 SUBSCRIPTION_REQUIRED.
+      // The wallet is never debited for an exam.
+      const userSubscriptionId = isFree
+        ? undefined
+        : (await this.access.consumeForExamStart(tx, userId))
+            .userSubscriptionId;
 
       const attempt = await tx.examAttempt.create({
         data: {
           userId,
           examConfigId: dto.examConfigId,
           categoryId: dto.categoryId,
-          transactionId,
+          userSubscriptionId,
           isFree,
           totalQuestions: selected.length,
           questions: {
@@ -379,7 +390,7 @@ export class ExamAttemptsService {
     numberOfQuestions: number,
   ): Promise<{ id: string }[]> {
     const activeQuestions = await tx.question.findMany({
-      where: { isActive: true },
+      where: { isActive: true, deletedAt: null },
       select: { id: true, categoryId: true },
     });
 

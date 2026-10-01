@@ -2,13 +2,14 @@
 
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useApi } from "@/lib/use-api";
-import { apiFetch, ApiError } from "@/lib/api-client";
-import { formatRwf } from "@/lib/format";
+import { apiFetch, API_ERROR_CODES, ApiError } from "@/lib/api-client";
+import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Category, ExamAttempt, ExamConfig } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
@@ -35,11 +36,12 @@ function StartExamForm() {
   const tCommon = useTranslations("Common");
   const searchParams = useSearchParams();
   const router = useRouter();
+  const locale = useLocale();
   const { user, token, refreshUser, can } = useAuth();
   // The category picker and the in-progress check are optional extras — skip their requests
   // (instead of surfacing 403s) when the role doesn't include them.
   const canPickCategory = can("categories.view");
-  const canTopUp = can("transactions.topUpOwn") && can("transactions.viewOwn");
+  const canBuy = can("subscriptions.purchaseOwn");
 
   const { data: examConfigs, isLoading: loadingConfigs } =
     useApi<ExamConfig[]>("/exam-config");
@@ -78,11 +80,20 @@ function StartExamForm() {
   const inProgress = attempts?.find((attempt) => attempt.status === "IN_PROGRESS");
   const selectedConfig = activeConfigs.find((config) => config.id === effectiveConfigId);
   const selectedCategory = categories?.find((category) => category.id === categoryId);
-  const isFree = !user?.hasUsedFreeExam;
-  const price = selectedConfig ? Number(selectedConfig.price) : 0;
-  const cost = isFree ? 0 : price;
-  const balance = Number(user?.walletBalance ?? 0);
-  const insufficientBalance = !isFree && !!user && !!selectedConfig && balance < price;
+  // Same priority the server applies on start (it decides for real): the free first exam, then
+  // an active time plan (nothing consumed), then one attempt from the oldest bundle.
+  const access = user?.access;
+  const isFree = !!access?.freeExamAvailable;
+  const noAccess = !!access && !access.hasAccess;
+  const accessUsed = !access
+    ? ""
+    : access.freeExamAvailable
+      ? t("useFree")
+      : access.activeTimePlan?.expiresAt
+        ? t("useTimePlan", { date: formatDateTime(access.activeTimePlan.expiresAt, locale) })
+        : access.bundleAttemptsRemaining > 0
+          ? t("useBundle", { count: access.bundleAttemptsRemaining - 1 })
+          : t("useNone");
 
   async function handleSubmit() {
     if (!token || !selectedConfig) return;
@@ -100,6 +111,13 @@ function StartExamForm() {
       await refreshUser();
       router.push(`/exam/${attempt.id}`);
     } catch (err) {
+      if (err instanceof ApiError && err.code === API_ERROR_CODES.subscriptionRequired) {
+        // Access ran out between page load and start (e.g. used on another device).
+        toast.error(t("noAccess"));
+        await refreshUser();
+        router.push("/pricing");
+        return;
+      }
       setError(err instanceof ApiError ? err.message : tCommon("error"));
     } finally {
       setIsSubmitting(false);
@@ -167,9 +185,6 @@ function StartExamForm() {
                       <span className="flex min-w-0 flex-1 flex-col gap-2">
                         <span className="flex items-start justify-between gap-2">
                           <span className="font-medium text-foreground">{config.name}</span>
-                          <span className="shrink-0 rounded-sm border border-border bg-background px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground uppercase">
-                            {isFree || Number(config.price) === 0 ? t("free") : formatRwf(config.price)}
-                          </span>
                         </span>
                         <span className="font-mono text-xs text-muted-foreground">
                           {t("questions", { count: config.numberOfQuestions })} ·{" "}
@@ -230,13 +245,8 @@ function StartExamForm() {
                   <SummaryRow label={t("summaryPassMark")} mono>
                     {selectedConfig.passMarkPercent}%
                   </SummaryRow>
-                  <SummaryRow label={t("summaryCost")} mono>
-                    {cost === 0 ? t("free") : formatRwf(cost)}
-                  </SummaryRow>
-                  <SummaryRow label={t("summaryBalanceAfter")} mono>
-                    <span className={cn(insufficientBalance && "text-red-700 dark:text-red-300")}>
-                      {formatRwf(Math.max(balance - cost, 0))}
-                    </span>
+                  <SummaryRow label={t("summaryAccess")}>
+                    <span className={cn(noAccess && "text-red-700 dark:text-red-300")}>{accessUsed}</span>
                   </SummaryRow>
                 </dl>
                 {isFree && (
@@ -247,16 +257,16 @@ function StartExamForm() {
               </div>
 
               <div className="flex flex-col gap-3 border-t border-border bg-surface-muted/60 px-5 py-4 sm:px-7">
-                {insufficientBalance && (
+                {noAccess && (
                   <Alert variant="destructive" className="bg-background">
                     <AlertDescription className="flex flex-col gap-2">
-                      {t("insufficientBalance")}
-                      {canTopUp && (
+                      {t("noAccess")}
+                      {canBuy && (
                         <Link
-                          href="/wallet#top-up"
+                          href="/pricing"
                           className="font-mono text-xs tracking-wide text-primary-text uppercase hover:underline"
                         >
-                          {t("topUpCta")}
+                          {t("seePlans")}
                         </Link>
                       )}
                     </AlertDescription>
@@ -269,7 +279,7 @@ function StartExamForm() {
                 )}
                 <Button
                   className="btn-primary h-11 w-full"
-                  disabled={isSubmitting || insufficientBalance}
+                  disabled={isSubmitting || noAccess}
                   onClick={handleSubmit}
                 >
                   {isSubmitting ? t("starting") : t("start")}

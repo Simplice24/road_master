@@ -9,6 +9,7 @@ import { formatRwf } from "@/lib/format";
 import type { Permission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AccessStatusPill } from "@/components/app/access-status";
 import { routing } from "@/i18n/routing";
 import { LanguageFlag } from "@/components/language-flag";
 import {
@@ -32,10 +33,15 @@ const NAV_ITEMS: { href: string; labelKey: string; anyOf: Permission[] }[] = [
   { href: "/categories", labelKey: "categories", anyOf: ["categories.view"] },
   { href: "/exam/start", labelKey: "startExam", anyOf: ["examAttempts.start"] },
   { href: "/history", labelKey: "history", anyOf: ["examAttempts.viewOwn"] },
+  // The pricing page itself is unguarded (plans are public); only buyers get the nav link.
+  { href: "/pricing", labelKey: "pricing", anyOf: ["subscriptions.purchaseOwn"] },
   { href: "/wallet", labelKey: "wallet", anyOf: ["transactions.viewOwn"] },
   { href: "/users", labelKey: "users", anyOf: ["users.view"] },
   { href: "/roles", labelKey: "roles", anyOf: ["roles.view"] },
   { href: "/exam-config", labelKey: "examConfig", anyOf: ["examConfig.view"] },
+  { href: "/questions", labelKey: "questions", anyOf: ["questions.view"] },
+  { href: "/plans", labelKey: "plans", anyOf: ["plans.view"] },
+  { href: "/subscriptions", labelKey: "subscriptions", anyOf: ["subscriptions.view"] },
 ];
 
 // Top bar, tab bar and page content all span the full width with the landing page navbar's
@@ -119,10 +125,12 @@ export function AppShell({ children, footer }: { children: ReactNode; footer?: R
               <span className="hidden sm:inline">Road Master</span>
             </Link>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="flex items-stretch rounded border border-success/50 bg-background">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              {/* Exam access (subscriptions) and money (wallet) are separate things, shown apart. */}
+              <AccessStatusPill access={user.access} />
+              <div className="hidden items-stretch rounded border border-border bg-background sm:flex">
                 <div className="flex flex-col justify-center py-1 pr-2 pl-2.5 leading-tight">
-                  <span className="text-[11px] text-muted-foreground">{t("balance")}</span>
+                  <span className="text-[11px] text-muted-foreground">{t("wallet")}</span>
                   <span className="font-mono text-xs font-medium whitespace-nowrap text-foreground tabular-nums sm:text-sm">
                     {formatRwf(user.walletBalance)}
                   </span>
@@ -160,10 +168,16 @@ export function AppShell({ children, footer }: { children: ReactNode; footer?: R
           </div>
         </div>
 
-        {/* Tab bar (desktop, lg+): uppercase mono links, active one underlined in the brand color. No
-            scroll container: below lg all eight links don't fit, so the hamburger menu takes over. */}
+        {/* Tab bar (desktop, lg+): uppercase mono links, active one underlined in the brand color.
+            Below lg the hamburger menu takes over. An admin can hold up to twelve links, more than
+            fit at lg, so the list scrolls sideways (scrollbar hidden) rather than wrapping. */}
         <nav aria-label={t("mainNav")} className="hidden border-b border-border bg-background lg:block">
-          <ul className={cn(CONTAINER, "flex items-center gap-7 xl:gap-9")}>
+          <ul
+            className={cn(
+              CONTAINER,
+              "flex items-center gap-7 overflow-x-auto [scrollbar-width:none] xl:gap-9 [&::-webkit-scrollbar]:hidden",
+            )}
+          >
             {navItems.map((item) => {
               const active = isActive(item.href);
               return (

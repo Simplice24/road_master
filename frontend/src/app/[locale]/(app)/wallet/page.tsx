@@ -77,11 +77,13 @@ function WalletContent() {
       if (transaction.status !== "SUCCESS") return sum;
       const value = Number(transaction.amount);
       if (transaction.type === "TOPUP") sum.toppedUp += value;
-      else if (transaction.type === "EXAM_FEE") sum.spent += value;
+      // EXAM_FEE is legacy (exams no longer charge the wallet) but still counts as spending.
+      else if (transaction.type === "PLAN_PURCHASE" || transaction.type === "EXAM_FEE") sum.spent += value;
       else if (transaction.type === "REFUND") sum.refunded += value;
+      else if (transaction.type === "ADMIN_ADJUSTMENT") sum.adjusted += value;
       return sum;
     },
-    { toppedUp: 0, spent: 0, refunded: 0 },
+    { toppedUp: 0, spent: 0, refunded: 0, adjusted: 0 },
   );
 
   const columns: DataTableColumn<Transaction>[] = [
@@ -95,8 +97,21 @@ function WalletContent() {
       header: t("amount"),
       align: "right",
       className: "font-mono tabular-nums",
-      cell: (transaction) =>
-        `${transaction.type === "TOPUP" || transaction.type === "REFUND" ? "+" : "-"}${formatRwf(transaction.amount)}`,
+      cell: (transaction) => {
+        // Adjustments carry their own sign; every other type is positive with an implied direction.
+        const value = Number(transaction.amount);
+        const credit =
+          transaction.type === "ADMIN_ADJUSTMENT"
+            ? value >= 0
+            : transaction.type === "TOPUP" || transaction.type === "REFUND";
+        return `${credit ? "+" : "-"}${formatRwf(Math.abs(value))}`;
+      },
+    },
+    {
+      key: "note",
+      header: t("note"),
+      className: "max-w-xs text-muted-foreground",
+      cell: (transaction) => transaction.note ?? "—",
     },
     {
       key: "status",
@@ -197,6 +212,12 @@ function WalletContent() {
                 <BalanceRow label={t("totalToppedUp")} value={isLoading ? "…" : formatRwf(totals.toppedUp)} />
                 <BalanceRow label={t("totalSpent")} value={isLoading ? "…" : formatRwf(totals.spent)} />
                 <BalanceRow label={t("totalRefunded")} value={isLoading ? "…" : formatRwf(totals.refunded)} />
+                {totals.adjusted !== 0 && (
+                  <BalanceRow
+                    label={t("totalAdjusted")}
+                    value={isLoading ? "…" : `${totals.adjusted > 0 ? "+" : "-"}${formatRwf(Math.abs(totals.adjusted))}`}
+                  />
+                )}
               </dl>
             </div>
             <p className="border-t border-border bg-surface-muted/60 px-5 py-4 text-sm text-muted-foreground sm:px-7">

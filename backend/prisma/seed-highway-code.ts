@@ -92,9 +92,11 @@ async function main() {
         isActive: true,
         allowMultiple: false,
         options: {
-          create: q.options.map((o) => ({
+          // Array order is the source PDF's a/b/c/d order — keep it as the display order.
+          create: q.options.map((o, position) => ({
             text: o.text,
             isCorrect: o.isCorrect,
+            position,
           })),
         },
       },

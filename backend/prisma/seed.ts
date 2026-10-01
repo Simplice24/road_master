@@ -12,8 +12,9 @@ const prisma = new PrismaClient({
 // Small, read/self-scoped set for the default "client" role — the exam candidate persona
 // every self-registered user other than the first lands in via the DefaultRole pointer. Names
 // come from src/access/access.config.ts; the rules behind them live there too.
+// questions.view is deliberately absent: GET /question returns the answer key. Candidates see
+// questions only through their own exam attempts, which hide isCorrect until completion.
 const CLIENT_PERMISSIONS: PermissionName[] = [
-  'questions.view',
   'categories.view',
   'examConfig.view',
   'examAttempts.start',
@@ -21,6 +22,8 @@ const CLIENT_PERMISSIONS: PermissionName[] = [
   'examAttempts.answerOwn',
   'transactions.viewOwn',
   'transactions.topUpOwn',
+  'subscriptions.viewOwn',
+  'subscriptions.purchaseOwn',
   'users.viewOwn',
   'users.updateOwn',
 ];

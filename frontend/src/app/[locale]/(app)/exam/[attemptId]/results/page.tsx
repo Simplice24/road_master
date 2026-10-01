@@ -22,6 +22,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { FULL_BLEED } from "@/components/app/settings-layout";
 import { StatusBadge } from "@/components/app/status-badge";
 import { RequirePermission } from "@/components/app/require-permission";
+import { OptionContent } from "@/components/app/option-content";
 
 type Outcome = "correct" | "wrong" | "unanswered";
 
@@ -144,7 +145,15 @@ function ExamResultsContent() {
                       </AccordionTrigger>
                       <AccordionContent className="pb-5">
                         <div className="flex flex-col gap-2 pl-10 sm:pl-[3.25rem]">
-                          {item.question.options.map((option) => {
+                          {item.question.imageUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.question.imageUrl}
+                              alt=""
+                              className="mb-1 max-h-48 w-auto max-w-full rounded-lg border border-border object-contain"
+                            />
+                          )}
+                          {item.question.options.map((option, index) => {
                             const wasSelected = selectedIds.has(option.id);
                             return (
                               <div
@@ -158,7 +167,7 @@ function ExamResultsContent() {
                                       : "border-border text-muted-foreground",
                                 )}
                               >
-                                <span>{option.text}</span>
+                                <OptionContent option={option} index={index} />
                                 <span className="flex shrink-0 gap-1.5">
                                   {wasSelected && (
                                     <StatusBadge tone={option.isCorrect ? "success" : "danger"}>

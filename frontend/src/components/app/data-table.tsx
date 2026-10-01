@@ -1,6 +1,6 @@
 "use client";
 
-import type { Key, ReactNode } from "react";
+import type { HTMLAttributes, Key, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -33,6 +33,9 @@ interface DataTableProps<T> {
   caption: string;
   loadingRows?: number;
   className?: string;
+  /** Extra attributes per body row (e.g. drag-and-drop handlers from useDragReorder). */
+  getRowProps?: (row: T, index: number) => HTMLAttributes<HTMLTableRowElement> & Record<`data-${string}`, unknown>;
+  rowClassName?: string;
 }
 
 /**
@@ -49,6 +52,8 @@ export function DataTable<T>({
   caption,
   loadingRows = 3,
   className,
+  getRowProps,
+  rowClassName,
 }: DataTableProps<T>) {
   const cellBase = "border-r border-border px-5 last:border-r-0 sm:px-6";
 
@@ -101,8 +106,12 @@ export function DataTable<T>({
           )}
 
           {!isLoading &&
-            rows.map((row) => (
-              <TableRow key={getRowKey(row)} className="hover:bg-surface-muted/60">
+            rows.map((row, index) => (
+              <TableRow
+                key={getRowKey(row)}
+                {...getRowProps?.(row, index)}
+                className={cn("hover:bg-surface-muted/60", rowClassName)}
+              >
                 {columns.map((column) => (
                   <TableCell
                     key={column.key}

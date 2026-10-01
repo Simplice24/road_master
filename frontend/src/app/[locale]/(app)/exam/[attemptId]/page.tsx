@@ -10,6 +10,7 @@ import { apiFetch, ApiError } from "@/lib/api-client";
 import type { ExamAttempt } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { OptionContent } from "@/components/app/option-content";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -227,7 +228,7 @@ function ExamTakingContent() {
         <CardContent>
           {current.question.allowMultiple ? (
             <div className="flex flex-col gap-2">
-              {current.question.options.map((option) => (
+              {current.question.options.map((option, index) => (
                 <label
                   key={option.id}
                   className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 p-3 has-data-checked:border-primary has-data-checked:bg-primary/5"
@@ -238,7 +239,7 @@ function ExamTakingContent() {
                       handleMultiToggle(current.question.id, option.id, checked === true)
                     }
                   />
-                  <span className="text-sm">{option.text}</span>
+                  <OptionContent option={option} index={index} />
                 </label>
               ))}
             </div>
@@ -247,13 +248,13 @@ function ExamTakingContent() {
               value={selected[0] ?? ""}
               onValueChange={(value) => handleSingleSelect(current.question.id, value)}
             >
-              {current.question.options.map((option) => (
+              {current.question.options.map((option, index) => (
                 <label
                   key={option.id}
                   className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 p-3 has-data-checked:border-primary has-data-checked:bg-primary/5"
                 >
                   <RadioGroupItem value={option.id} />
-                  <span className="text-sm">{option.text}</span>
+                  <OptionContent option={option} index={index} />
                 </label>
               ))}
             </RadioGroup>

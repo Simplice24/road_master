@@ -3,6 +3,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Max,
   MaxLength,
@@ -34,10 +35,13 @@ export class CreateExamConfigDto {
   @Max(EXAM_CONFIG_LIMITS.numberOfQuestions.max)
   numberOfQuestions!: number;
 
+  // Legacy per-exam fee: no longer charged (exam access comes from subscriptions), kept only so
+  // existing rows/clients stay valid. The admin UI no longer sends it.
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false })
   @Min(EXAM_CONFIG_LIMITS.price.min)
   @Max(EXAM_CONFIG_LIMITS.price.max)
-  price!: number;
+  price?: number;
 
   @IsInt()
   @Min(EXAM_CONFIG_LIMITS.passMarkPercent.min)

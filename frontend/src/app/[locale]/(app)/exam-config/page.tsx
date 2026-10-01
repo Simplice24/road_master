@@ -12,7 +12,6 @@ import {
   EXAM_CONFIG_LIMITS,
   validateInteger,
   validateName,
-  validatePrice,
   type FieldError,
 } from "@/lib/exam-config-validation";
 import type { ExamConfig } from "@/lib/api-types";
@@ -39,7 +38,6 @@ type ConfigPayload = Partial<{
   numberOfQuestions: number;
   passMarkPercent: number;
   durationMinutes: number;
-  price: number;
   isActive: boolean;
 }>;
 
@@ -186,14 +184,12 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
   const [numberOfQuestions, setNumberOfQuestions] = useState(String(config.numberOfQuestions));
   const [passMarkPercent, setPassMarkPercent] = useState(String(config.passMarkPercent));
   const [durationMinutes, setDurationMinutes] = useState(String(config.durationMinutes));
-  const [price, setPrice] = useState(String(Number(config.price)));
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const nameError = validateName(name);
   const questionsError = validateInteger(numberOfQuestions, EXAM_CONFIG_LIMITS.numberOfQuestions);
   const passMarkError = validateInteger(passMarkPercent, EXAM_CONFIG_LIMITS.passMarkPercent);
   const durationError = validateInteger(durationMinutes, EXAM_CONFIG_LIMITS.durationMinutes);
-  const priceError = validatePrice(price);
 
   async function save(payload: ConfigPayload) {
     if (!token) return;
@@ -329,34 +325,6 @@ function ConfigSections({ config, readOnly, canDelete, onSaved, onDeleted }: Con
         </div>
       </SettingsSection>
 
-      <SettingsSection
-        title={t("price")}
-        description={t("priceDescription")}
-        hint={t("priceHint")}
-        readOnly={readOnly}
-        dirty={Number(price) !== Number(config.price) || price.trim() === ""}
-        valid={!priceError}
-        onSave={() => save({ price: Number(price) })}
-      >
-        <div className="max-w-[14rem]">
-          <SettingsField id="cfg-price" label={t("priceLabel")} error={errorText(priceError)} suffix="RWF">
-            <Input
-              id="cfg-price"
-              type="number"
-              inputMode="decimal"
-              min={EXAM_CONFIG_LIMITS.price.min}
-              max={EXAM_CONFIG_LIMITS.price.max}
-              step="0.01"
-              value={price}
-              onChange={(event) => setPrice(event.target.value)}
-              disabled={readOnly}
-              aria-invalid={!!priceError}
-              className="pr-14"
-            />
-          </SettingsField>
-        </div>
-      </SettingsSection>
-
       {canDelete && (
         <section className="overflow-hidden rounded-lg border border-destructive/30 bg-background">
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
@@ -415,7 +383,6 @@ function CreateConfigForm({
   const [numberOfQuestions, setNumberOfQuestions] = useState("20");
   const [passMarkPercent, setPassMarkPercent] = useState("60");
   const [durationMinutes, setDurationMinutes] = useState("20");
-  const [price, setPrice] = useState("0");
   const [isActive, setIsActive] = useState(true);
   const [showErrors, setShowErrors] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -426,7 +393,6 @@ function CreateConfigForm({
     numberOfQuestions: validateInteger(numberOfQuestions, EXAM_CONFIG_LIMITS.numberOfQuestions),
     passMarkPercent: validateInteger(passMarkPercent, EXAM_CONFIG_LIMITS.passMarkPercent),
     durationMinutes: validateInteger(durationMinutes, EXAM_CONFIG_LIMITS.durationMinutes),
-    price: validatePrice(price),
   };
   const shown = (fieldError: FieldError | null) => (showErrors ? errorText(fieldError) : undefined);
 
@@ -445,7 +411,6 @@ function CreateConfigForm({
           numberOfQuestions: Number(numberOfQuestions),
           passMarkPercent: Number(passMarkPercent),
           durationMinutes: Number(durationMinutes),
-          price: Number(price),
           isActive,
         },
       });
@@ -508,17 +473,6 @@ function CreateConfigForm({
                 value={durationMinutes}
                 onChange={(event) => setDurationMinutes(event.target.value)}
                 className="pr-12"
-              />
-            </SettingsField>
-            <SettingsField id="new-price" label={t("priceLabel")} error={shown(errors.price)} suffix="RWF">
-              <Input
-                id="new-price"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                value={price}
-                onChange={(event) => setPrice(event.target.value)}
-                className="pr-14"
               />
             </SettingsField>
           </div>

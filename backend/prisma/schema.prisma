@@ -24,8 +24,29 @@ enum QuestionType {
 
 enum TransactionType {
   TOPUP
-  EXAM_FEE
+  EXAM_FEE          // legacy: exams no longer debit the wallet (access comes from subscriptions)
   REFUND
+  PLAN_PURCHASE
+  ADMIN_ADJUSTMENT
+}
+
+enum PlanAccessType {
+  ATTEMPTS  // fixed number of exam attempts, never expires
+  TIME      // unlimited attempts for durationDays
+}
+
+enum UserSubscriptionStatus {
+  PENDING    // awaiting payment confirmation — never grants access
+  ACTIVE     // stored status only; time-plan activity is always decided from startsAt/expiresAt
+  EXHAUSTED  // attempt bundle with no attempts left
+  EXPIRED
+  CANCELLED  // revoked by an admin — never grants access
+}
+
+enum UserSubscriptionSource {
+  PURCHASE
+  ADMIN_GRANT
+  MIGRATION
 }
 
 enum TransactionStatus {
@@ -60,6 +81,11 @@ model User {
 
   transactions     Transaction[]
   examAttempts     ExamAttempt[]
+  subscriptions    UserSubscription[]
+
+  // Audit back-relations: admin-performed wallet adjustments and subscription grants/changes.
+  performedTransactions  Transaction[]       @relation("TransactionPerformedBy")
+  grantedSubscriptions   UserSubscription[]  @relation("SubscriptionGrantedBy")
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -168,13 +194,92 @@ model Transaction {
   provider      String?            // e.g. MTN_MOMO, CARD, AIRTEL_MONEY
   providerRef   String?            // gateway transaction reference
 
-  examAttempt   ExamAttempt?       // if this transaction paid for an exam
+  examAttempt   ExamAttempt?       // if this transaction paid for an exam (legacy EXAM_FEE)
+  userSubscription UserSubscription? // if this transaction paid for a plan (PLAN_PURCHASE)
+
+  // ADMIN_ADJUSTMENT / REFUND audit: who made the change and why.
+  performedBy   User?              @relation("TransactionPerformedBy", fields: [performedById], references: [id])
+  performedById String?
+  note          String?            @db.Text
 
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
   @@index([userId])
   @@map("transactions")
+}
+
+// -----------------------------
+// SUBSCRIPTIONS (one-time prepaid plans — never auto-renewing)
+// -----------------------------
+
+// The catalog, fully admin-managed (no seed). Money is whole RWF (Int), unlike the legacy
+// Decimal wallet columns. Translatable text is stored as JSON keyed by locale — see
+// src/subscription-plans/plan-locales.ts for the supported set and the fallback rule.
+model SubscriptionPlan {
+  id             String          @id @default(uuid())
+  name           Json            // { "en": "Starter", "rw": "...", "fr": "..." } — "en" required
+  extraFeatures  Json?           // { "en": ["..."], "rw": ["..."] } — admin-entered extra lines
+  price          Int
+  currency       String          @default("RWF") @db.VarChar(3)
+  accessType     PlanAccessType
+  attemptLimit   Int?            // ATTEMPTS only
+  durationDays   Int?            // TIME only
+  isActive       Boolean         @default(true)
+  isMostPopular  Boolean         @default(false) // at most one — enforced in SubscriptionPlansService
+  displayOrder   Int             @default(0)
+
+  subscriptions  UserSubscription[]
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@map("subscription_plans")
+}
+
+// One row per purchase/grant. Everything that matters for access is snapshotted at purchase
+// time, so editing a plan never changes an existing subscription.
+model UserSubscription {
+  id                 String                  @id @default(uuid())
+  user               User                    @relation(fields: [userId], references: [id])
+  userId             String
+
+  // Null for ADMIN_GRANT/MIGRATION rows that don't come from a catalog plan. Restrict: a plan
+  // with purchases can only be deactivated, never deleted.
+  plan               SubscriptionPlan?       @relation(fields: [planId], references: [id], onDelete: Restrict)
+  planId             String?
+
+  // Snapshot
+  planName           Json
+  price              Int
+  currency           String                  @default("RWF") @db.VarChar(3)
+  accessType         PlanAccessType
+  attemptLimit       Int?
+  durationDays       Int?
+
+  attemptsRemaining  Int?                    // ATTEMPTS only — decremented with a conditional update
+  status             UserSubscriptionStatus  @default(ACTIVE)
+  source             UserSubscriptionSource  @default(PURCHASE)
+  startsAt           DateTime                // UTC; queued time plans start in the future
+  expiresAt          DateTime?               // UTC; always null for ATTEMPTS
+
+  transaction        Transaction?            @relation(fields: [transactionId], references: [id])
+  transactionId      String?                 @unique
+
+  grantedBy          User?                   @relation("SubscriptionGrantedBy", fields: [grantedById], references: [id])
+  grantedById        String?
+  note               String?                 @db.Text
+
+  examAttempts       ExamAttempt[]
+
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  @@index([userId, accessType, startsAt, expiresAt]) // "is a time plan active right now?"
+  @@index([userId, accessType, attemptsRemaining])   // "oldest bundle with attempts left"
+  @@index([planId])
+  @@map("user_subscriptions")
 }
 
 // -----------------------------
@@ -209,6 +314,9 @@ model Question {
 
   isActive      Boolean       @default(true)
   allowMultiple Boolean      @default(false)
+  // Soft delete for questions referenced by past attempts (those can't be hard-deleted without
+  // breaking attempt history). Deleted questions are hidden from admin lists and exam draws.
+  deletedAt     DateTime?
 
   options       Option[]
   attemptLinks  ExamAttemptQuestion[]
@@ -228,11 +336,14 @@ model Option {
 
   text         String?    @db.Text // see Question.text above — same VARCHAR(191) truncation risk
   imageUrl     String?
-  isCorrect    Boolean    @default(false)
+  isCorrect    Boolean    @default(false) // correctness lives on the option row, so reordering can't change it
+  // Display order within the question (0-based). Labels A/B/C/D are derived from this at render
+  // time and never stored.
+  position     Int        @default(0)
 
-  selectedIn   ExamAttemptAnswerOption[] 
+  selectedIn   ExamAttemptAnswerOption[]
 
-  @@index([questionId])
+  @@index([questionId, position])
   @@map("options")
 }
 
@@ -277,6 +388,11 @@ model ExamAttempt {
   transaction     Transaction?        @relation(fields: [transactionId], references: [id])
   transactionId   String?             @unique
 
+  // The subscription that authorized this attempt (null for the free first exam and for
+  // attempts made before subscriptions existed).
+  userSubscription   UserSubscription? @relation(fields: [userSubscriptionId], references: [id])
+  userSubscriptionId String?
+
   isFree          Boolean             @default(false)
   status          ExamAttemptStatus   @default(IN_PROGRESS)
 
@@ -292,6 +408,7 @@ model ExamAttempt {
   completedAt     DateTime?
 
   @@index([userId])
+  @@index([userSubscriptionId])
   @@map("exam_attempts")
 }
 

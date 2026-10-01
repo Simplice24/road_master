@@ -130,6 +130,72 @@ export const ACCESS_CONFIG = {
         label: 'View all',
         rule: { action: 'read', subject: 'Transaction' },
       },
+      // Unconditioned create: any user's wallet. TransactionsService#adjust additionally
+      // refuses self-adjustments, since topUpOwn's own-wallet create rule would otherwise
+      // satisfy the same check.
+      adjust: {
+        label: 'Adjust wallet balances',
+        rule: { action: 'create', subject: 'Transaction' },
+      },
+    },
+  },
+  plans: {
+    label: 'Pricing plans',
+    actions: {
+      // Listing *active* plans is public (GET /plans) — the landing page has no user. This is
+      // the admin view, which includes inactive plans and purchase counts.
+      view: {
+        label: 'View all',
+        rule: { action: 'read', subject: 'SubscriptionPlan' },
+      },
+      create: {
+        label: 'Create',
+        rule: { action: 'create', subject: 'SubscriptionPlan' },
+      },
+      // Covers edit, activate/deactivate and reorder — one CASL rule can't tell them apart.
+      update: {
+        label: 'Edit, activate & reorder',
+        rule: { action: 'update', subject: 'SubscriptionPlan' },
+      },
+      delete: {
+        label: 'Delete unused',
+        rule: { action: 'delete', subject: 'SubscriptionPlan' },
+      },
+    },
+  },
+  subscriptions: {
+    label: 'Subscriptions',
+    actions: {
+      viewOwn: {
+        label: 'View own',
+        rule: {
+          action: 'read',
+          subject: 'UserSubscription',
+          conditions: OWN_USER,
+        },
+      },
+      // Pinned to source PURCHASE so the grant endpoint (which proposes ADMIN_GRANT) can never
+      // be satisfied by this rule — a client can't hand themselves a free plan.
+      purchaseOwn: {
+        label: 'Purchase',
+        rule: {
+          action: 'create',
+          subject: 'UserSubscription',
+          conditions: { userId: '${user.id}', source: 'PURCHASE' },
+        },
+      },
+      view: {
+        label: 'View all',
+        rule: { action: 'read', subject: 'UserSubscription' },
+      },
+      grant: {
+        label: 'Grant',
+        rule: { action: 'create', subject: 'UserSubscription' },
+      },
+      update: {
+        label: 'Revoke & extend',
+        rule: { action: 'update', subject: 'UserSubscription' },
+      },
     },
   },
   users: {

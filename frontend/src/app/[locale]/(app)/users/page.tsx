@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Pencil, Plus, Power } from "lucide-react";
+import { Pencil, Plus, Power, Wallet } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useApi } from "@/lib/use-api";
 import { apiFetch, ApiError } from "@/lib/api-client";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatRwf } from "@/lib/format";
 import type { ManagedUser, Role } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/app/page-header";
@@ -17,6 +17,7 @@ import { ConfirmDialog } from "@/components/app/confirm-dialog";
 import { UserFormDialog } from "@/components/app/user-form-dialog";
 import { RowActionsMenu } from "@/components/app/row-actions-menu";
 import { RequirePermission } from "@/components/app/require-permission";
+import { AdjustBalanceDialog } from "@/components/app/adjust-balance-dialog";
 
 function UsersContent() {
   const t = useTranslations("Users");
@@ -28,6 +29,8 @@ function UsersContent() {
   const canUpdate = can("users.update");
   // Role checkboxes need both the list of roles and the right to assign them.
   const canAssignRoles = can("roles.assign") && can("roles.view");
+  const canViewBalances = can("transactions.view");
+  const canAdjust = can("transactions.adjust");
 
   const { data: users, isLoading, refetch } = useApi<ManagedUser[]>("/users");
   const { data: roles } = useApi<Role[]>(canAssignRoles ? "/roles" : null);
@@ -35,6 +38,7 @@ function UsersContent() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ManagedUser | undefined>();
   const [statusTarget, setStatusTarget] = useState<ManagedUser | null>(null);
+  const [adjustTarget, setAdjustTarget] = useState<ManagedUser | null>(null);
 
   function openCreate() {
     setEditing(undefined);
@@ -109,6 +113,17 @@ function UsersContent() {
           <StatusBadge tone="danger">{t("inactive")}</StatusBadge>
         ),
     },
+    ...(canViewBalances
+      ? [
+          {
+            key: "balance",
+            header: t("balance"),
+            align: "right" as const,
+            className: "font-mono tabular-nums",
+            cell: (user: ManagedUser) => formatRwf(user.walletBalance),
+          },
+        ]
+      : []),
     {
       key: "created",
       header: t("createdAt"),
@@ -117,7 +132,7 @@ function UsersContent() {
     },
   ];
 
-  if (canUpdate || canAssignRoles) {
+  if (canUpdate || canAssignRoles || canAdjust) {
     columns.push({
       key: "actions",
       header: tCommon("actions"),
@@ -128,7 +143,21 @@ function UsersContent() {
         <RowActionsMenu
           rowLabel={user.fullName}
           actions={[
-            { key: "edit", label: tCommon("edit"), icon: Pencil, onSelect: () => openEdit(user) },
+            {
+              key: "edit",
+              label: tCommon("edit"),
+              icon: Pencil,
+              onSelect: () => openEdit(user),
+              hidden: !canUpdate && !canAssignRoles,
+            },
+            {
+              key: "adjust",
+              label: t("adjustBalance"),
+              icon: Wallet,
+              onSelect: () => setAdjustTarget(user),
+              // Nobody adjusts their own wallet (backend-enforced too).
+              hidden: !canAdjust || user.id === me?.id,
+            },
             {
               key: "status",
               group: 1,
@@ -191,6 +220,10 @@ function UsersContent() {
         destructive={statusTarget?.isActive}
         onConfirm={toggleStatus}
       />
+
+      {adjustTarget && (
+        <AdjustBalanceDialog user={adjustTarget} onClose={() => setAdjustTarget(null)} onSaved={refetch} />
+      )}
     </div>
   );
 }

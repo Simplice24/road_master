@@ -5,6 +5,7 @@ import { CurrentAbility } from '../casl/decorators/current-ability.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AppAbility } from '../casl/casl-ability.factory';
 import { TopUpDto } from './dto/topup.dto';
+import { AdjustBalanceDto } from './dto/adjust-balance.dto';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -27,6 +28,21 @@ export class TransactionsController {
   ) {
     const user = userParam as Express.User;
     return this.transactionsService.topUp(
+      user.id,
+      data,
+      abilityParam as AppAbility,
+    );
+  }
+
+  @Post('adjust')
+  @RequirePermission('create', 'Transaction')
+  adjust(
+    @Body() data: AdjustBalanceDto,
+    @CurrentUser() userParam: unknown,
+    @CurrentAbility() abilityParam: unknown,
+  ) {
+    const user = userParam as Express.User;
+    return this.transactionsService.adjust(
       user.id,
       data,
       abilityParam as AppAbility,

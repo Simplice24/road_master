@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ExamAttemptsController } from './exam-attempts.controller';
 import { ExamAttemptsService } from './exam-attempts.service';
-import { TransactionsModule } from '../transactions/transactions.module';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
-  imports: [TransactionsModule],
+  imports: [SubscriptionsModule],
   controllers: [ExamAttemptsController],
   providers: [ExamAttemptsService],
 })

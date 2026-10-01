@@ -16,6 +16,8 @@ import { CategoryModule } from './category/category.module';
 import { QuestionModule } from './question/question.module';
 import { ExamConfigModule } from './exam-config/exam-config.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { SubscriptionPlansModule } from './subscription-plans/subscription-plans.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { TransactionsModule } from './transactions/transactions.module';
     CategoryModule,
     QuestionModule,
     ExamConfigModule,
+    SubscriptionsModule,
+    SubscriptionPlansModule,
   ],
   controllers: [AppController],
   providers: [

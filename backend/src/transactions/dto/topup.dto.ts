@@ -1,8 +1,10 @@
-import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, IsString, Max } from 'class-validator';
 
 export class TopUpDto {
-  @IsNumber()
+  // Whole RWF only — the frontend already enforced this; now the API does too.
+  @IsInt()
   @IsPositive()
+  @Max(99_999_999)
   amount!: number;
 
   @IsOptional()

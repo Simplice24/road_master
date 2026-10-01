@@ -49,7 +49,11 @@ export default tseslint.config(
       'src/question/**/*.ts',
       'src/exam-config/**/*.ts',
       'src/transactions/**/*.ts',
+      'src/subscriptions/**/*.ts',
+      'src/subscription-plans/**/*.ts',
+      'src/access/access.policies.spec.ts',
       'test/rbac-bootstrap.e2e-spec.ts',
+      'test/subscriptions.e2e-spec.ts',
     ],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
