@@ -14,7 +14,7 @@
     "ctaSecondary": "Log in"
   },
   "TrustStrip": {
-    "questions": "319 practice questions",
+    "questions": "400+ practice questions",
     "categories": "5 topic areas",
     "timed": "Timed, exam-realistic conditions"
   },
@@ -61,7 +61,7 @@
     },
     "cat5": {
       "name": "Highway Code — General Knowledge",
-      "description": "319 questions covering the full provisional driving code."
+      "description": "400+ questions covering the full provisional driving code."
     }
   },
   "Pricing": {

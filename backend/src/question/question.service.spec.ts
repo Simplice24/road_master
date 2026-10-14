@@ -230,3 +230,28 @@ describe('QuestionImageStorage.save', () => {
     await expect(storage.save(undefined)).rejects.toThrow(/Attach an image/);
   });
 });
+
+describe('QuestionImageStorage base URL', () => {
+  const original = process.env.PUBLIC_BASE_URL;
+  afterEach(() => {
+    process.env.PUBLIC_BASE_URL = original;
+  });
+  const png = {
+    buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    mimetype: 'image/png',
+    size: 8,
+  };
+
+  it('refuses to upload when PUBLIC_BASE_URL is not an absolute http(s) URL', async () => {
+    process.env.PUBLIC_BASE_URL =
+      "//  in production to the backend's public address";
+    const storage = new QuestionImageStorage({} as unknown as PrismaService);
+    await expect(storage.save(png)).rejects.toThrow(/PUBLIC_BASE_URL/);
+  });
+
+  it('skips cleanup instead of failing a save when PUBLIC_BASE_URL is invalid', async () => {
+    process.env.PUBLIC_BASE_URL = 'not a url';
+    const storage = new QuestionImageStorage({} as unknown as PrismaService);
+    await expect(storage.deleteIfUnreferenced(['x'])).resolves.toBeUndefined();
+  });
+});

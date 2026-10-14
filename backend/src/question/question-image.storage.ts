@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import { join } from 'path';
@@ -63,11 +68,30 @@ export class QuestionImageStorage {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Validated so a misconfigured PUBLIC_BASE_URL fails the upload with a clear message instead
+   * of storing the file and returning a link the question DTOs then reject as "not a URL".
+   */
   private get baseUrl() {
-    return (
-      process.env.PUBLIC_BASE_URL ??
+    const raw = (
+      process.env.PUBLIC_BASE_URL?.trim() ||
       `http://localhost:${process.env.PORT ?? 3000}`
     ).replace(/\/$/, '');
+    let parsed: URL | null = null;
+    try {
+      parsed = new URL(raw);
+    } catch {
+      parsed = null;
+    }
+    if (!parsed || !['http:', 'https:'].includes(parsed.protocol)) {
+      this.logger.error(
+        `PUBLIC_BASE_URL must be an absolute http(s) URL such as http://localhost:3000 (got "${raw}")`,
+      );
+      throw new InternalServerErrorException(
+        'Image uploads are misconfigured on the server (PUBLIC_BASE_URL is not a valid URL)',
+      );
+    }
+    return raw;
   }
 
   async save(file: UploadedImage | undefined): Promise<{ url: string }> {
@@ -84,10 +108,11 @@ export class QuestionImageStorage {
       );
     }
 
+    const baseUrl = this.baseUrl; // validate config before writing anything to disk
     const name = `${randomUUID()}.${detected.ext}`;
     await fs.mkdir(join(UPLOADS_ROOT, QUESTIONS_DIR), { recursive: true });
     await fs.writeFile(join(UPLOADS_ROOT, QUESTIONS_DIR, name), file.buffer);
-    return { url: `${this.baseUrl}/uploads/${QUESTIONS_DIR}/${name}` };
+    return { url: `${baseUrl}/uploads/${QUESTIONS_DIR}/${name}` };
   }
 
   /**
@@ -97,7 +122,12 @@ export class QuestionImageStorage {
   async deleteIfUnreferenced(
     urls: (string | null | undefined)[],
   ): Promise<void> {
-    const prefix = `${this.baseUrl}/uploads/${QUESTIONS_DIR}/`;
+    let prefix: string;
+    try {
+      prefix = `${this.baseUrl}/uploads/${QUESTIONS_DIR}/`;
+    } catch {
+      return; // misconfigured base URL (already logged) — skip cleanup, never fail the save
+    }
     for (const url of new Set(urls)) {
       if (!url || !url.startsWith(prefix)) continue;
       const name = url.slice(prefix.length);

@@ -17,6 +17,15 @@ export class ExamAttemptsController {
     return this.examAttemptsService.listAttempts(abilityParam as AppAbility);
   }
 
+  // Gated on starting an attempt, not on reading ExamConfig: candidates need to pick an exam
+  // without holding the staff-facing examConfig.view permission. Declared before `:id` so the
+  // literal path isn't captured as an attempt id.
+  @Get('available-configs')
+  @RequirePermission('create', 'ExamAttempt')
+  listAvailableConfigs() {
+    return this.examAttemptsService.listAvailableConfigs();
+  }
+
   @Get(':id')
   @RequirePermission('read', 'ExamAttempt')
   getAttempt(@Param('id') id: string, @CurrentAbility() abilityParam: unknown) {

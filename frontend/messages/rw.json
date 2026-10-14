@@ -10,19 +10,19 @@
   "Hero": {
     "eyebrow": "Kwitegura Ikizamini cy'Uruhushya rw'Agateganyo",
     "headline": "Tsinda ikizamini cy'uruhushya rw'agateganyo witonze",
-    "subheadline": "Witoze mu buryo bw'igihe nyacyo, nk'uko byaba mu kizamini nyakuri, ku mategeko yose y'umuhanda y'u Rwanda. Ikizamini cyawe cya mbere ni ubuntu rwose.",
+    "subheadline": "Witoze mu buryo bw'igihe nyacyo, nk'uko bigenda mu kizamini nyakuri, ku mategeko yose y'umuhanda y'u Rwanda. Ikizamini cyawe cya mbere ni ubuntu rwose.",
     "ctaPrimary": "Tangira ikizamini cyawe cy'ubuntu",
     "ctaSecondary": "Injira"
   },
   "TrustStrip": {
-    "questions": "Ibibazo 319 byo kwitoza",
-    "categories": "Ibyiciro 5 by'isomo",
+    "questions": "Ibibazo 400+ byo kwitoza",
+    "categories": "Ibyiciro 5 by'ibibazo",
     "timed": "Igihe nyacyo, nk'ikizamini nyakuri"
   },
   "HowItWorks": {
     "eyebrow": "Gutangira",
     "title": "Uko bikorwa",
-    "subtitle": "Intambwe enye zoroshye, guhera ku iyandikisha kugeza ku manota yawe ya mbere yo kwitoza.",
+    "subtitle": "Intambwe enye zoroshye, guhera wiyandikisha kugeza ku manota yawe ya mbere yo kwitoza.",
     "stepLabel": "Intambwe {number}",
     "step1": {
       "title": "Iyandikishe",
@@ -34,7 +34,7 @@
     },
     "step3": {
       "title": "Witoze",
-      "description": "Subiza mu gihe nyacyo cy'igenzura — nk'uko byaba ku munsi w'ikizamini."
+      "description": "Subiza mu gihe ntarengwa — nk’uko bigenda ku munsi w’ikizamini."
     },
     "step4": {
       "title": "Suzuma",
@@ -50,7 +50,7 @@
     },
     "cat2": {
       "name": "Uburenganzira bwo Gutambuka Mbere",
-      "description": "Kumenya uwagombye gutambuka mbere ku masangano, ku nzibacyuho, no aho hari ibinyabiziga by'ubutabazi."
+      "description": "Kumenya uwagombye gutambuka mbere ku masangano, ku nzibacyuho, nahari ibinyabiziga by'ubutabazi."
     },
     "cat3": {
       "name": "Kunyuranaho no Guhindura Icyerekezo",
@@ -62,7 +62,7 @@
     },
     "cat5": {
       "name": "Amategeko Rusange y'Umuhanda",
-      "description": "Ibibazo 319 birimo amategeko yose y'agateganyo agenga umuhanda."
+      "description": "Ibibazo 400+ birimo amategeko yose y'agateganyo agenga umuhanda."
     }
   },
   "Pricing": {
@@ -84,11 +84,11 @@
     "title": "Ibibazo Bikunze Kubazwa",
     "subtitle": "Ibibazo bikunze kubazwa ku biciro, ibizamini, n'uko kwitoza bikorwa.",
     "q1": {
-      "question": "Bihenda angahe?",
+      "question": "Ikiguzi ni angahe?",
       "answer": "Ikizamini cyawe cya mbere cyo kwitoza ni ubuntu rwose. Nyuma, ongeramo amafaranga muri konti yawe ukomeze ku giciro gito kuri buri kizamini."
     },
     "q2": {
-      "question": "Ese nanze, nkora iki?",
+      "question": "Bigenda gute iyo ntsinzwe?",
       "answer": "Nta n'imwe ku bwinshi bw'ibizamini wemerewe kwitoza — ongeramo amafaranga wongere ugerageze incuro nyinshi uko ushaka, kugeza ubona witeguye."
     },
     "q3": {
@@ -666,7 +666,7 @@
     "attemptLimit": "Ibizamini",
     "durationDays": "Rimara",
     "daysShort": "iminsi",
-    "mostPopular": "Bikunzwe cyane",
+    "mostPopular": "Ikunzwe cyane",
     "mostPopularDescription": "Rishyira iri fatabuguzi imbere. Rimwe gusa ni ryo rishobora kubigira — kubishyiraho bibikura ku yandi.",
     "active": "Rirakora",
     "activeDescription": "Amafatabuguzi adakora ntagaragara ku biciro ariko agumana mu mateka y'ibyaguzwe.",

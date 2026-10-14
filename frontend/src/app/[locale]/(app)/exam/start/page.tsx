@@ -44,7 +44,7 @@ function StartExamForm() {
   const canBuy = can("subscriptions.purchaseOwn");
 
   const { data: examConfigs, isLoading: loadingConfigs } =
-    useApi<ExamConfig[]>("/exam-config");
+    useApi<ExamConfig[]>("/exam-attempts/available-configs");
   const { data: categories, isLoading: loadingCategoriesRequest } =
     useApi<Category[]>(canPickCategory ? "/category" : null);
   const loadingCategories = canPickCategory && loadingCategoriesRequest;
@@ -304,7 +304,7 @@ function SummaryRow({ label, mono = false, children }: { label: string; mono?: b
 
 export default function StartExamPage() {
   return (
-    <RequirePermission allOf={["examAttempts.start", "examConfig.view"]}>
+    <RequirePermission anyOf={["examAttempts.start"]}>
       <StartExamContent />
     </RequirePermission>
   );

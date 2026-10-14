@@ -50,7 +50,7 @@ export async function Categories() {
                     </span>
                     {isFullyStocked && (
                       <Badge variant="outline" className="border-landing-primary/30 text-landing-primary">
-                        319
+                        400+
                       </Badge>
                     )}
                   </div>

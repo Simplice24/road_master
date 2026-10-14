@@ -15,7 +15,7 @@
     "ctaSecondary": "Se connecter"
   },
   "TrustStrip": {
-    "questions": "319 questions d'entraînement",
+    "questions": "400+ questions d'entraînement",
     "categories": "5 domaines thématiques",
     "timed": "Conditions chronométrées, proches de l'examen réel"
   },
@@ -62,7 +62,7 @@
     },
     "cat5": {
       "name": "Code de la route — Connaissances générales",
-      "description": "319 questions couvrant l'ensemble du code de la route provisoire."
+      "description": "400+ questions couvrant l'ensemble du code de la route provisoire."
     }
   },
   "Pricing": {

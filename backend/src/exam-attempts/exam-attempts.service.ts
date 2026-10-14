@@ -49,6 +49,14 @@ export class ExamAttemptsService {
     return this.prisma.examAttempt.findMany({ where });
   }
 
+  /** Active exam configs a candidate can start — the same filter startAttempt enforces. */
+  async listAvailableConfigs() {
+    return this.prisma.examConfig.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' },
+    });
+  }
+
   async getAttempt(id: string, ability: AppAbility) {
     const where: Prisma.ExamAttemptWhereInput = {
       AND: [{ id }, accessibleBy(ability, 'read').ofType('ExamAttempt')],
