@@ -1,14 +1,6 @@
-import Image from "next/image";
-import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
-
-/**
- * Optional photo/illustration behind the brand panel (agasekestore.com-style auth layout).
- * To use your own image: put it in `frontend/public/images/` and set this to its path, e.g.
- * "/images/auth-panel.jpg". While null, the panel uses the landing page's dark grid treatment.
- */
-const AUTH_PANEL_IMAGE: string | null = null;
+import { AuthBrandPanel } from "@/components/auth/auth-brand-panel";
 
 function Logo({ className }: { className?: string }) {
   return (
@@ -20,40 +12,13 @@ function Logo({ className }: { className?: string }) {
   );
 }
 
-export default async function AuthLayout({ children }: LayoutProps<"/[locale]">) {
-  const t = await getTranslations("Auth");
-
+export default function AuthLayout({ children }: LayoutProps<"/[locale]">) {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Brand panel — desktop only; on mobile it collapses to the compact header in the form panel. */}
-      <aside className="relative hidden overflow-hidden bg-landing-dark text-white lg:flex">
-        {AUTH_PANEL_IMAGE ? (
-          <>
-            <Image src={AUTH_PANEL_IMAGE} alt="" fill priority sizes="50vw" className="object-cover" />
-            <div className="absolute inset-0 bg-landing-dark/75" aria-hidden />
-          </>
-        ) : (
-          <>
-            <div className="landing-grid-bg absolute inset-0" aria-hidden />
-            <div
-              className="absolute top-1/2 left-1/2 size-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl"
-              aria-hidden
-            />
-          </>
-        )}
-        <div className="relative flex w-full flex-col items-center justify-center px-12 text-center">
-          <Link
-            href="/"
-            aria-label="Road Master"
-            className="rounded focus-visible:ring-3 focus-visible:ring-white/50 focus-visible:outline-none"
-          >
-            <Logo className="size-16 text-2xl shadow-lg shadow-primary/30" />
-          </Link>
-          <h2 className="mt-8 max-w-md font-display text-5xl leading-tight font-semibold tracking-tight">
-            {t("brandTitle")}
-          </h2>
-          <p className="mt-5 max-w-md text-lg text-white/75">{t("brandTagline")}</p>
-        </div>
+      {/* Brand panel: desktop only; on mobile it collapses to the compact header in the form panel.
+          Sticky at viewport height so the road signs stay in view while a long form scrolls. */}
+      <aside className="sticky top-0 hidden h-screen self-start bg-surface-muted p-4 lg:flex">
+        <AuthBrandPanel />
       </aside>
 
       {/* Form panel */}
