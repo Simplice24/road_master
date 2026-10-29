@@ -76,7 +76,7 @@ export function AccessStatusPill({ access }: { access: AccessSummary }) {
         PILL_TONE[line.tone],
       )}
     >
-      <span className="text-[11px] text-muted-foreground">{t("label")}</span>
+      <span className="text-[9px] text-muted-foreground">{t("label")}</span>
       <span className="truncate font-mono text-xs font-medium text-foreground tabular-nums sm:text-sm">
         {line.primary}
         {line.secondary && (

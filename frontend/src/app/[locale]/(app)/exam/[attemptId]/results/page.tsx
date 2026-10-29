@@ -130,7 +130,7 @@ function ExamResultsContent() {
                   const outcome = outcomeOf(item);
                   return (
                     <AccordionItem key={item.question.id} value={item.question.id} className="border-border">
-                      <AccordionTrigger className="items-center gap-3 py-4 text-left text-[15px] font-medium hover:no-underline [&_[data-slot=accordion-trigger-icon]]:hidden">
+                      <AccordionTrigger className="items-center gap-3 py-4 text-left text-[12px] font-medium hover:no-underline [&_[data-slot=accordion-trigger-icon]]:hidden">
                         <span className="w-7 shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
                           {String(item.order).padStart(2, "0")}
                         </span>

@@ -130,7 +130,7 @@ export function AppShell({ children, footer }: { children: ReactNode; footer?: R
               <AccessStatusPill access={user.access} />
               <div className="hidden items-stretch rounded border border-border bg-background sm:flex">
                 <div className="flex flex-col justify-center py-1 pr-2 pl-2.5 leading-tight">
-                  <span className="text-[11px] text-muted-foreground">{t("wallet")}</span>
+                  <span className="text-[9px] text-muted-foreground">{t("wallet")}</span>
                   <span className="font-mono text-xs font-medium whitespace-nowrap text-foreground tabular-nums sm:text-sm">
                     {formatRwf(user.walletBalance)}
                   </span>
@@ -243,7 +243,7 @@ export function AppShell({ children, footer }: { children: ReactNode; footer?: R
 }
 
 // Full-width rows with hairline dividers, after the cloud.strettch.com account popover.
-const MENU_ROW = "min-h-12 rounded-none px-4 text-[15px] text-foreground focus:bg-surface-muted";
+const MENU_ROW = "min-h-12 rounded-none px-4 text-[12px] text-foreground focus:bg-surface-muted";
 
 function AccountMenu({
   fullName,
@@ -286,14 +286,14 @@ function AccountMenu({
             <AvatarFallback className="bg-primary/10 text-base text-primary-text">{initials(fullName)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-[15px] font-medium text-foreground">{fullName}</p>
+            <p className="truncate text-[12px] font-medium text-foreground">{fullName}</p>
             <p className="truncate font-mono text-sm text-muted-foreground">{phone}</p>
             {roles.length > 0 && (
               <p className="mt-1 flex flex-wrap gap-1">
                 {roles.map((role) => (
                   <span
                     key={role}
-                    className="rounded-sm border border-border bg-surface-muted px-1.5 py-px text-[11px] text-muted-foreground"
+                    className="rounded-sm border border-border bg-surface-muted px-1.5 py-px text-[9px] text-muted-foreground"
                   >
                     {role}
                   </span>
@@ -313,7 +313,7 @@ function AccountMenu({
             reference uses for its theme toggle. Radio items keep it reachable with arrow keys and
             announce the selected language by name. */}
         <div className="flex flex-col gap-2 px-4 py-3">
-          <span className="text-[15px] text-foreground">{tLanguage("label")}</span>
+          <span className="text-[12px] text-foreground">{tLanguage("label")}</span>
           <DropdownMenuRadioGroup
             value={locale}
             onValueChange={(next) => router.replace(pathname, { locale: next as string })}

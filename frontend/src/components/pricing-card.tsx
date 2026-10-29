@@ -47,7 +47,7 @@ export function PricingCard({
       )}
     >
       {featured && (
-        <span className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-gradient-to-b from-landing-primary to-landing-primary-2 px-4 py-1.5 font-mono text-[11px] font-medium whitespace-nowrap text-white uppercase">
+        <span className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-gradient-to-b from-landing-primary to-landing-primary-2 px-4 py-1.5 font-mono text-[9px] font-medium whitespace-nowrap text-white uppercase">
           {featuredLabel}
         </span>
       )}

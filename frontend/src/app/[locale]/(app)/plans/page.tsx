@@ -135,7 +135,7 @@ function PlansContent() {
         <span className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{nameOf(plan)}</span>
           {plan.isMostPopular && (
-            <span className="rounded-sm bg-primary/10 px-1.5 font-mono text-[10px] text-primary-text uppercase">
+            <span className="rounded-sm bg-primary/10 px-1.5 font-mono text-[8px] text-primary-text uppercase">
               {t("mostPopular")}
             </span>
           )}

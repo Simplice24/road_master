@@ -4,6 +4,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Type scale at 80% of Tailwind's defaults — shrinks text app-wide without touching spacing. */
+@theme {
+  --text-xs: 0.6rem;
+  --text-sm: 0.7rem;
+  --text-base: 0.8rem;
+  --text-lg: 0.9rem;
+  --text-xl: 1rem;
+  --text-2xl: 1.2rem;
+  --text-3xl: 1.5rem;
+  --text-4xl: 1.8rem;
+  --text-5xl: 2.4rem;
+  --text-6xl: 3rem;
+  --text-7xl: 3.6rem;
+  --text-8xl: 4.8rem;
+  --text-9xl: 6.4rem;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -192,7 +209,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-base;
   }
   html {
     /* Keeps "/#section" anchors clear of the fixed marketing header (h-16). */

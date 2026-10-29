@@ -31,7 +31,7 @@ export function AuthField({ icon: Icon, label, id, type, className, ...props }: 
           className={cn(
             // White with a hairline border so the field stands out on the grey auth panel. The focus
             // state (1px brand border, no glow) now comes from the shared Input.
-            "h-12 rounded-lg border-border bg-background pl-11 pr-4 text-[15px] shadow-none transition-colors",
+            "h-12 rounded-lg border-border bg-background pl-11 pr-4 text-[12px] shadow-none transition-colors",
             isPassword && "pr-11",
             className,
           )}

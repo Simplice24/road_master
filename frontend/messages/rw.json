@@ -45,28 +45,28 @@
     "title": "Witoze ukurikije icyiciro",
     "subtitle": "Ibyiciro bitanu birimo ibibazo byose byerekeye uruhushya rw'agateganyo.",
     "cat1": {
-      "name": "Ibyapa n'Ibimenyetso byo mu Muhanda",
+      "name": "Ibyapa n'ibimenyetso byo mu muhanda",
       "description": "Kumenya no gusobanukirwa ibyapa, imirongo, n'ibimenyetso byo mu muhanda."
     },
     "cat2": {
-      "name": "Uburenganzira bwo Gutambuka Mbere",
-      "description": "Kumenya uwagombye gutambuka mbere ku masangano, ku nzibacyuho, nahari ibinyabiziga by'ubutabazi."
+      "name": "Uburenganzira bwo gutambuka mbere",
+      "description": "Kumenya uwakagombye gutambuka mbere ku masangano, ku nzibacyuho, nahari ibinyabiziga by'ubutabazi."
     },
     "cat3": {
-      "name": "Kunyuranaho no Guhindura Icyerekezo",
+      "name": "Kunyuranaho no guhindura icyerekezo",
       "description": "Kunyuranaho, guhindura umurongo, guhindukira, guhagarara, no guparika."
     },
     "cat4": {
-      "name": "Umuvuduko Ntarengwa n'Ibipimo by'Ibinyabiziga",
+      "name": "Umuvuduko ntarengwa n'ibipimo by'ibinyabiziga",
       "description": "Umuvuduko ntarengwa n'amategeko y'ibipimo n'uburemere nk'uko amategeko y'u Rwanda abiteganya."
     },
     "cat5": {
-      "name": "Amategeko Rusange y'Umuhanda",
+      "name": "Amategeko rusange y'umuhanda",
       "description": "Ibibazo 400+ birimo amategeko yose y'agateganyo agenga umuhanda."
     }
   },
   "Pricing": {
-    "title": "Ibiciro Byoroshye kandi Bigaragara",
+    "title": "Ibiciro byoroshye kandi bigaragara",
     "subtitle": "Hitamo igurishwa rihuye n'uko ushaka kwitoza kenshi.",
     "mostPopular": "Bikunzwe cyane",
     "perBundle": "kwishyura rimwe",
@@ -137,7 +137,7 @@
   "Auth": {
     "registerTitle": "Fungura konti yawe",
     "registerSubtitle": "Tangira n'ikizamini cyo kwitoza cy'ubuntu — nta kwishyura bisabwa.",
-    "loginTitle": "Ikaze wagarutse",
+    "loginTitle": "Murakaza neza",
     "loginSubtitle": "Injira kugira ngo ukomeze kwitoza.",
     "fullName": "Amazina yombi",
     "fullNamePlaceholder": "urugero: Jean Uwimana",

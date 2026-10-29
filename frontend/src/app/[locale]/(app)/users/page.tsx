@@ -74,7 +74,7 @@ function UsersContent() {
         <span className="flex items-center gap-2">
           {user.fullName}
           {user.id === me?.id && (
-            <span className="rounded-sm bg-primary/10 px-1.5 font-mono text-[10px] text-primary-text uppercase">
+            <span className="rounded-sm bg-primary/10 px-1.5 font-mono text-[8px] text-primary-text uppercase">
               {t("you")}
             </span>
           )}

@@ -51,7 +51,7 @@ export async function HowItWorks() {
                 )}
               />
               <Icon className="size-7 text-landing-primary" />
-              <span className="btn-tint w-fit rounded px-2.5 py-1 text-[11px]">
+              <span className="btn-tint w-fit rounded px-2.5 py-1 text-[9px]">
                 {t("stepLabel", { number: String(index + 1).padStart(2, "0") })}
               </span>
               <h3 className="font-display text-lg font-normal text-foreground">{step.title}</h3>

@@ -15,7 +15,7 @@ export async function Hero() {
       />
 
       <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 pt-40 pb-24 text-center sm:px-6 sm:pt-48 sm:pb-32 lg:px-8">
-        <h1 className="mt-6 font-display text-[40px] leading-[1.04] font-normal tracking-[-0.02em] text-white sm:text-[48px] md:text-[56px]">
+        <h1 className="mt-6 font-display text-[32px] leading-[1.04] font-normal tracking-[-0.02em] text-white sm:text-[38px] md:text-[45px]">
           {t("headline")}
         </h1>
 

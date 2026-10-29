@@ -88,7 +88,7 @@ export function RowActionsMenu({ rowLabel, actions }: RowActionsMenuProps) {
             </>
           );
           const itemClassName = cn(
-            "min-h-11 gap-3 rounded-none px-4 py-2.5 text-[15px] focus:bg-surface-muted",
+            "min-h-11 gap-3 rounded-none px-4 py-2.5 text-[12px] focus:bg-surface-muted",
             action.destructive && "text-red-600 focus:text-red-600 dark:text-red-400",
           );
           return (
