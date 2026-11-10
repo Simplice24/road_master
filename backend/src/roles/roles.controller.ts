@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { AttachPermissionDto } from './dto/attach-permission.dto';
+import { ListRolesQuery } from './dto/list-roles.query';
 import { RequirePermission } from '../casl/decorators/check-policies.decorator';
 
 // Per-route checks map onto the roles.* permissions in access.config.ts (view/create/update/
@@ -27,8 +29,8 @@ export class RolesController {
 
   @Get()
   @RequirePermission('read', 'Role')
-  findAll() {
-    return this.rolesService.findAll();
+  findAll(@Query() query: ListRolesQuery) {
+    return this.rolesService.findAll(query);
   }
 
   @Get(':id')

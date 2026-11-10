@@ -25,9 +25,12 @@ interface AuthContextValue {
   user: CurrentUser | null;
   token: string | null;
   isLoading: boolean;
-  login: (phone: string, password: string) => Promise<void>;
+  /** `identifier` is a phone number or an email. */
+  login: (identifier: string, password: string) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
+  /** Swaps in the fresh token the backend returns, since the change signs out every older one. */
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   refreshUser: () => Promise<void>;
   /** UX-only permission check (SuperAdmin → always true). The backend enforces for real. */
   can: (permission: Permission) => boolean;
@@ -78,10 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const login = useCallback(
-    async (phone: string, password: string) => {
+    async (identifier: string, password: string) => {
       const { accessToken } = await apiFetch<{ accessToken: string }>(
         "/auth/login",
-        { method: "POST", body: { phone, password } },
+        { method: "POST", body: { identifier, password } },
       );
       await applyToken(accessToken);
     },
@@ -97,6 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await applyToken(accessToken);
     },
     [applyToken],
+  );
+
+  const changePassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      const { accessToken } = await apiFetch<{ accessToken: string }>(
+        "/auth/change-password",
+        { method: "POST", token, body: { currentPassword, newPassword } },
+      );
+      await applyToken(accessToken);
+    },
+    [token, applyToken],
   );
 
   const logout = useCallback(() => {
@@ -122,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, login, register, logout, refreshUser, can, canAny }}
+      value={{ user, token, isLoading, login, register, logout, changePassword, refreshUser, can, canAny }}
     >
       {children}
     </AuthContext.Provider>

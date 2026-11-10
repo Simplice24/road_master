@@ -158,6 +158,13 @@ export interface Transaction {
   isReversed: boolean;
   provider: string | null;
   providerRef: string | null;
+  /** Top-up payer details (reconciliation): phone for mobile money, masked card otherwise. */
+  payerPhone: string | null;
+  cardHolderName: string | null;
+  cardBrand: string | null;
+  cardLast4: string | null;
+  cardExpiryMonth: number | null;
+  cardExpiryYear: number | null;
   note: string | null;
   createdAt: string;
   updatedAt: string;

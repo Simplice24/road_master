@@ -72,7 +72,7 @@ describe('RBAC bootstrap (e2e)', () => {
   it('gives the first created user a SuperAdmin role with full access and zero Permission rows', async () => {
     const firstUser = await usersService.create({
       fullName: 'First User',
-      email: 'first@example.com',
+      email: 'first@gmail.com',
       phone: '0000000001',
       password: 'password123',
     });
@@ -99,7 +99,7 @@ describe('RBAC bootstrap (e2e)', () => {
   it("gives every user after the first the DefaultRole role, scoped to that role's permissions", async () => {
     const secondUser = await usersService.create({
       fullName: 'Second User',
-      email: 'second@example.com',
+      email: 'second@gmail.com',
       phone: '0000000002',
       password: 'password123',
     });

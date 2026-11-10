@@ -159,7 +159,30 @@
     "registering": "Gufungura konti…",
     "brandTitle": "Murakaza neza kuri Road Master",
     "brandTagline": "Itoze ikizamini cy'uruhushya rw'agateganyo rwo gutwara mu buryo nyabwo kandi bufite igihe — mu Cyongereza, Ikinyarwanda cyangwa Igifaransa.",
-    "backToHome": "Subira ahabanza"
+    "backToHome": "Subira ahabanza",
+    "forgotPasswordLink": "Wibagiwe ijambo ry'ibanga?",
+    "forgotTitle": "Wibagiwe ijambo ry'ibanga?",
+    "forgotSubtitle": "Andika imeri iri kuri konti yawe, tukoherereze umurongo wo guhindura ijambo ry'ibanga.",
+    "emailPlaceholder": "wowe@gmail.com",
+    "forgotCta": "Ohereza umurongo",
+    "sendingLink": "Kohereza…",
+    "forgotSentTitle": "Reba imeri yawe",
+    "forgotSent": "Niba hari konti ifite {email}, twayoherereje umurongo wo guhindura ijambo ry'ibanga. Uzarangira mu minota 30.",
+    "forgotNoEmailHint": "Konti yawe nta imeri ifite? Vugana n'ubufasha kugira ngo usubirane konti yawe.",
+    "resendLink": "Koresha indi imeri",
+    "rememberPassword": "Wibutse ijambo ry'ibanga?",
+    "resetTitle": "Shyiraho ijambo ry'ibanga rishya",
+    "resetSubtitle": "Hitamo ijambo ry'ibanga rishya rya konti yawe.",
+    "newPassword": "Ijambo ry'ibanga rishya",
+    "confirmPassword": "Emeza ijambo ry'ibanga rishya",
+    "passwordsMismatch": "Amagambo y'ibanga ntahura.",
+    "resetCta": "Hindura ijambo ry'ibanga",
+    "resetting": "Guhindura…",
+    "resetSuccess": "Ijambo ry'ibanga ryawe ryahinduwe. Injira ukoresheje irishya.",
+    "resetInvalidLink": "Uyu murongo ntubaho cyangwa ntukora. Saba undi mushya.",
+    "requestNewLink": "Saba undi murongo",
+    "phoneOrEmail": "Numero ya telefone cyangwa imeri",
+    "phoneOrEmailPlaceholder": "07XXXXXXXX cyangwa wowe@gmail.com"
   },
   "AppNav": {
     "dashboard": "Imbonerahamwe",
@@ -352,11 +375,23 @@
     "rolesDescription": "Ibyo ushobora kugeraho kuri Road Master.",
     "rolesHint": "Inshingano zigenwa n'umuyobozi wa sisitemu.",
     "noRoles": "Nta nshingano uhawe.",
+    "passwordTitle": "Ijambo ry'ibanga",
+    "passwordDescription": "Hindura ijambo ry'ibanga ukoresha winjira.",
+    "passwordHint": "Nibura inyuguti 8. Ibindi bikoresho bizasohorwa.",
+    "currentPassword": "Ijambo ry'ibanga risanzwe",
+    "newPassword": "Ijambo ry'ibanga rishya",
+    "confirmPassword": "Emeza ijambo ry'ibanga rishya",
+    "changePassword": "Hindura ijambo ry'ibanga",
+    "changingPassword": "Birimo guhindurwa…",
+    "passwordChanged": "Ijambo ry'ibanga ryahinduwe. Izindi nshuro winjiye zasohowe.",
     "errors": {
       "nameLength": "Koresha inyuguti ziri hagati ya {min} na {max}.",
       "phoneRequired": "Andika nimero ya telefoni yawe.",
       "phoneLength": "Koresha inyuguti {max} ntarengwa.",
-      "emailInvalid": "Andika imeri yemewe."
+      "emailInvalid": "Andika imeri yemewe.",
+      "passwordLength": "Koresha nibura inyuguti {min}.",
+      "passwordSame": "Hitamo ijambo ry'ibanga ritandukanye n'irisanzwe.",
+      "passwordsMismatch": "Amagambo y'ibanga ntahura."
     }
   },
   "ExamAttemptStatus": {
@@ -417,7 +452,11 @@
     "statusUpdated": "Uko bihagaze byahinduwe.",
     "superAdminRoleLocked": "SuperAdmin wenyine ni we ushobora gutanga cyangwa kwambura iyi nshingano.",
     "balance": "Amafaranga",
-    "adjustBalance": "Hindura amafaranga"
+    "adjustBalance": "Hindura amafaranga",
+    "searchPlaceholder": "Shakisha ukoresheje izina cyangwa telefoni…",
+    "allRoles": "Inshingano zose",
+    "noRole": "Nta nshingano",
+    "anyStatus": "Imiterere yose"
   },
   "Roles": {
     "title": "Inshingano",
@@ -461,7 +500,8 @@
     "unsavedChanges": "{count, plural, one {Impinduka # itarabikwa} other {Impinduka # zitarabikwa}}",
     "allSaved": "Impinduka zose zabitswe.",
     "discard": "Reka impinduka",
-    "permissionsSaved": "Uburenganzira bwabitswe."
+    "permissionsSaved": "Uburenganzira bwabitswe.",
+    "searchPlaceholder": "Shakisha inshingano…"
   },
   "ExamConfig": {
     "title": "Imiterere y'ikizamini",
@@ -888,5 +928,42 @@
       "optionEmpty": "Ongeramo inyandiko cyangwa ifoto.",
       "optionTooLong": "Inyuguti {max} ntarengwa."
     }
+  },
+  "PaymentMethod": {
+    "MTN_MOMO": "MTN MoMo",
+    "AIRTEL_MONEY": "Airtel Money",
+    "CARD": "Ikarita",
+    "VISA": "Visa",
+    "MASTERCARD": "Mastercard"
+  },
+  "TopUpPayment": {
+    "title": "Urifuza kwishyura ute?",
+    "description": "Hitamo uburyo bwo kwishyura kugira ngo wongere {amount}.",
+    "mtn": "MTN Mobile Money",
+    "airtel": "Airtel Money",
+    "card": "Ikarita ya banki (Debit / Credit)",
+    "pay": "Ishyura {amount}",
+    "processing": "Birimo gukorwa…",
+    "mtnPhoneLabel": "Andika nimero yawe ya MTN MoMo",
+    "airtelPhoneLabel": "Andika nimero yawe ya Airtel Money",
+    "mtnPhoneError": "Andika nimero ya MTN yemewe (078 cyangwa 079, imibare 10).",
+    "airtelPhoneError": "Andika nimero ya Airtel yemewe (072 cyangwa 073, imibare 10).",
+    "mtnPrompt": "Nyuma yo gukanda Ishyura, uzasabwa kwinjiza PIN ya Mobile Money kuri telefoni yawe kugira ngo urangize kwishyura.",
+    "airtelPrompt": "Nyuma yo gukanda Ishyura, uzasabwa kwinjiza PIN ya Airtel Money kuri telefoni yawe kugira ngo urangize kwishyura.",
+    "cardHeading": "Andika amakuru y'ikarita yawe:",
+    "holder": "Amazina ari ku ikarita",
+    "holderPlaceholder": "Andika amazina ari ku ikarita",
+    "holderError": "Andika amazina ari ku ikarita.",
+    "cardNumber": "Nimero y'ikarita",
+    "cardNumberError": "Andika nimero y'ikarita yemewe.",
+    "cardBrandError": "Hemewe Visa na Mastercard gusa.",
+    "expiry": "Itariki irangiriraho",
+    "expiryMonth": "Ukwezi irangiriraho",
+    "expiryYear": "Umwaka irangiriraho",
+    "expiryError": "Andika itariki yemewe irangiriraho.",
+    "expiredError": "Iyi karita yararangiye.",
+    "cvv": "CVV",
+    "cvvError": "Andika imibare 3 iri inyuma y'ikarita.",
+    "cardSecurityNote": "Tubika gusa ubwoko bw'ikarita, imibare 4 ya nyuma n'itariki irangiriraho — ntitubika nimero yose cyangwa CVV."
   }
 }

@@ -12,7 +12,6 @@ import type { Category, QuestionDetail } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SearchableSelect } from "@/components/ui/searchable-select";
@@ -381,9 +380,10 @@ export function QuestionForm({ question, categories, onSaved }: QuestionFormProp
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
                       <label className="flex cursor-pointer items-center gap-2 text-sm">
                         {draft.allowMultiple ? (
-                          <Checkbox
+                          <Switch
+                            size="lg"
                             checked={option.isCorrect}
-                            onCheckedChange={(checked) => setCorrect(option.key, checked === true)}
+                            onCheckedChange={(checked) => setCorrect(option.key, checked)}
                             aria-label={t("markCorrect", { label })}
                           />
                         ) : (

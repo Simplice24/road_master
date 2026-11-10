@@ -159,7 +159,30 @@
     "registering": "Création du compte…",
     "brandTitle": "Bienvenue sur Road Master",
     "brandTagline": "Entraînez-vous à l'examen du permis provisoire en conditions réelles et chronométrées — en anglais, en kinyarwanda ou en français.",
-    "backToHome": "Retour à l'accueil"
+    "backToHome": "Retour à l'accueil",
+    "forgotPasswordLink": "Mot de passe oublié ?",
+    "forgotTitle": "Mot de passe oublié ?",
+    "forgotSubtitle": "Saisissez l'e-mail de votre compte et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "emailPlaceholder": "vous@exemple.com",
+    "forgotCta": "Envoyer le lien",
+    "sendingLink": "Envoi…",
+    "forgotSentTitle": "Consultez vos e-mails",
+    "forgotSent": "Si un compte associé à {email} existe, nous avons envoyé un lien de réinitialisation. Il expire dans 30 minutes.",
+    "forgotNoEmailHint": "Aucun e-mail sur votre compte ? Contactez le support pour récupérer l'accès.",
+    "resendLink": "Utiliser un autre e-mail",
+    "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
+    "resetTitle": "Nouveau mot de passe",
+    "resetSubtitle": "Choisissez un nouveau mot de passe pour votre compte.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmez le nouveau mot de passe",
+    "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+    "resetCta": "Réinitialiser le mot de passe",
+    "resetting": "Réinitialisation…",
+    "resetSuccess": "Votre mot de passe a été réinitialisé. Connectez-vous avec votre nouveau mot de passe.",
+    "resetInvalidLink": "Ce lien de réinitialisation est manquant ou invalide. Demandez-en un nouveau.",
+    "requestNewLink": "Demander un nouveau lien",
+    "phoneOrEmail": "Numéro de téléphone ou e-mail",
+    "phoneOrEmailPlaceholder": "07XXXXXXXX ou vous@exemple.com"
   },
   "AppNav": {
     "dashboard": "Tableau de bord",
@@ -352,11 +375,23 @@
     "rolesDescription": "Ce à quoi vous avez accès dans Road Master.",
     "rolesHint": "Les rôles sont gérés par un administrateur.",
     "noRoles": "Aucun rôle ne vous est attribué.",
+    "passwordTitle": "Mot de passe",
+    "passwordDescription": "Modifiez le mot de passe que vous utilisez pour vous connecter.",
+    "passwordHint": "8 caractères minimum. Vos autres appareils seront déconnectés.",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmez le nouveau mot de passe",
+    "changePassword": "Changer le mot de passe",
+    "changingPassword": "Modification…",
+    "passwordChanged": "Mot de passe modifié. Les autres sessions ont été déconnectées.",
     "errors": {
       "nameLength": "Utilisez entre {min} et {max} caractères.",
       "phoneRequired": "Saisissez votre numéro de téléphone.",
       "phoneLength": "{max} caractères maximum.",
-      "emailInvalid": "Saisissez une adresse e-mail valide."
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "passwordLength": "Utilisez au moins {min} caractères.",
+      "passwordSame": "Choisissez un mot de passe différent de l'actuel.",
+      "passwordsMismatch": "Les mots de passe ne correspondent pas."
     }
   },
   "ExamAttemptStatus": {
@@ -417,7 +452,11 @@
     "statusUpdated": "Statut mis à jour.",
     "superAdminRoleLocked": "Seul un SuperAdmin peut attribuer ou retirer ce rôle.",
     "balance": "Solde",
-    "adjustBalance": "Ajuster le solde"
+    "adjustBalance": "Ajuster le solde",
+    "searchPlaceholder": "Rechercher par nom ou téléphone…",
+    "allRoles": "Tous les rôles",
+    "noRole": "Aucun rôle",
+    "anyStatus": "Tous les statuts"
   },
   "Roles": {
     "title": "Rôles",
@@ -461,7 +500,8 @@
     "unsavedChanges": "{count, plural, one {# modification non enregistrée} other {# modifications non enregistrées}}",
     "allSaved": "Toutes les modifications sont enregistrées.",
     "discard": "Annuler les modifications",
-    "permissionsSaved": "Permissions enregistrées."
+    "permissionsSaved": "Permissions enregistrées.",
+    "searchPlaceholder": "Rechercher un rôle…"
   },
   "ExamConfig": {
     "title": "Configuration d'examen",
@@ -888,5 +928,42 @@
       "optionEmpty": "Ajoutez un texte ou une image.",
       "optionTooLong": "{max} caractères maximum."
     }
+  },
+  "PaymentMethod": {
+    "MTN_MOMO": "MTN MoMo",
+    "AIRTEL_MONEY": "Airtel Money",
+    "CARD": "Carte",
+    "VISA": "Visa",
+    "MASTERCARD": "Mastercard"
+  },
+  "TopUpPayment": {
+    "title": "Comment souhaitez-vous payer ?",
+    "description": "Choisissez un moyen de paiement pour recharger {amount}.",
+    "mtn": "MTN Mobile Money",
+    "airtel": "Airtel Money",
+    "card": "Carte de débit / crédit",
+    "pay": "Payer {amount}",
+    "processing": "Traitement…",
+    "mtnPhoneLabel": "Saisissez votre numéro MTN MoMo",
+    "airtelPhoneLabel": "Saisissez votre numéro Airtel Money",
+    "mtnPhoneError": "Saisissez un numéro MTN valide (078 ou 079, 10 chiffres).",
+    "airtelPhoneError": "Saisissez un numéro Airtel valide (072 ou 073, 10 chiffres).",
+    "mtnPrompt": "Après avoir appuyé sur Payer, vous serez invité à saisir votre code PIN Mobile Money sur votre téléphone pour finaliser le paiement.",
+    "airtelPrompt": "Après avoir appuyé sur Payer, vous serez invité à saisir votre code PIN Airtel Money sur votre téléphone pour finaliser le paiement.",
+    "cardHeading": "Saisissez les informations de votre carte :",
+    "holder": "Nom du titulaire",
+    "holderPlaceholder": "Nom figurant sur la carte",
+    "holderError": "Saisissez le nom figurant sur la carte.",
+    "cardNumber": "Numéro de carte",
+    "cardNumberError": "Saisissez un numéro de carte valide.",
+    "cardBrandError": "Seules les cartes Visa et Mastercard sont acceptées.",
+    "expiry": "Date d'expiration",
+    "expiryMonth": "Mois d'expiration",
+    "expiryYear": "Année d'expiration",
+    "expiryError": "Saisissez une date d'expiration valide.",
+    "expiredError": "Cette carte a expiré.",
+    "cvv": "CVV",
+    "cvvError": "Saisissez le code à 3 chiffres au dos de la carte.",
+    "cardSecurityNote": "Nous conservons uniquement la marque, les 4 derniers chiffres et la date d'expiration de la carte — jamais le numéro complet ni le CVV."
   }
 }

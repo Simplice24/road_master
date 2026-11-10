@@ -1,22 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Pencil, Plus, ToggleRight, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, ToggleRight, Trash2 } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useApi } from "@/lib/use-api";
 import { apiFetch, ApiError } from "@/lib/api-client";
-import type { PermissionCatalogModule, Role } from "@/lib/api-types";
+import type { Paginated, PermissionCatalogModule, Role } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PageHeader } from "@/components/app/page-header";
 import { DataTable, type DataTableColumn } from "@/components/app/data-table";
+import { Pagination } from "@/components/app/pagination";
 import { StatusBadge } from "@/components/app/status-badge";
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
 import { RoleFormDialog } from "@/components/app/role-form-dialog";
 import { RowActionsMenu } from "@/components/app/row-actions-menu";
 import { RequirePermission } from "@/components/app/require-permission";
+
+const PAGE_SIZE = 20;
 
 function RolesContent() {
   const t = useTranslations("Roles");
@@ -28,13 +33,28 @@ function RolesContent() {
   const canUpdate = can("roles.update");
   const canDelete = can("roles.delete");
 
-  const { data: roles, isLoading, refetch } = useApi<Role[]>("/roles");
   const { data: catalog } = useApi<PermissionCatalogModule[]>("/permissions/catalog");
   const total = catalog?.reduce((sum, module) => sum + module.actions.length, 0);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Role | undefined>();
   const [deleting, setDeleting] = useState<Role | null>(null);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  // Server-side, name-only search: wait for typing to pause, and go back to page 1.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const query = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
+  if (debouncedSearch) query.set("search", debouncedSearch);
+  const { data, error, isLoading, refetch } = useApi<Paginated<Role>>(`/roles?${query}`);
 
   function openCreate() {
     setEditing(undefined);
@@ -160,14 +180,45 @@ function RolesContent() {
         }
       />
 
-      <DataTable
-        columns={columns}
-        rows={roles ?? []}
-        getRowKey={(role) => role.id}
-        isLoading={isLoading}
-        caption={t("title")}
-        emptyMessage={t("noRoles")}
-      />
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex flex-col gap-4">
+        <div className="relative w-full sm:max-w-sm">
+          <Search
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
+            className="h-10 bg-background pl-9"
+          />
+        </div>
+        <DataTable
+          columns={columns}
+          rows={data?.items ?? []}
+          getRowKey={(role) => role.id}
+          isLoading={isLoading}
+          caption={t("title")}
+          emptyMessage={debouncedSearch ? tCommon("noMatches") : t("noRoles")}
+        />
+        {data && (
+          <Pagination
+            page={data.page}
+            pageSize={data.pageSize}
+            total={data.total}
+            onPageChange={setPage}
+            disabled={isLoading}
+          />
+        )}
+      </div>
 
       <RoleFormDialog
         open={formOpen}

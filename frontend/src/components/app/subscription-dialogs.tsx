@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { apiFetch, ApiError } from "@/lib/api-client";
@@ -8,11 +8,11 @@ import { useAuth } from "@/lib/auth-context";
 import { useApi } from "@/lib/use-api";
 import { formatRwf } from "@/lib/format";
 import { PLAN_LIMITS, localized, validateWholeNumber, type PlanFieldError } from "@/lib/plans";
-import type { ManagedPlan, ManagedUser, PlanAccessType, UserSubscription } from "@/lib/api-types";
+import type { ManagedPlan, ManagedUser, Paginated, PlanAccessType, UserSubscription } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SearchableSelect } from "@/components/ui/searchable-select";
@@ -158,12 +158,12 @@ export function RevokeSubscriptionDialog({
       }}
     >
       {refundable && (
-        <label className="flex items-start gap-3 rounded-lg border border-border px-3 py-2.5">
-          <Checkbox checked={refund} onCheckedChange={(checked) => setRefund(checked === true)} className="mt-0.5" />
+        <label className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-2.5">
           <span className="flex flex-col gap-0.5">
             <span className="text-sm font-medium">{t("refundLabel", { amount: formatRwf(subscription.price) })}</span>
             <span className="text-xs text-muted-foreground">{t("refundDescription")}</span>
           </span>
+          <Switch size="lg" checked={refund} onCheckedChange={setRefund} />
         </label>
       )}
     </AdminDialog>
@@ -242,7 +242,17 @@ export function GrantSubscriptionDialog({ onClose, onSaved }: { onClose: () => v
   const tErrors = useTranslations("PlanForm.errors");
   const locale = useLocale();
   const { token, can } = useAuth();
-  const { data: users } = useApi<ManagedUser[]>("/users");
+  // Server-side search, so the picker works however many users there are.
+  const [userSearch, setUserSearch] = useState("");
+  const [debouncedUserSearch, setDebouncedUserSearch] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedUserSearch(userSearch.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [userSearch]);
+  const userQuery = new URLSearchParams({ pageSize: "20" });
+  if (debouncedUserSearch) userQuery.set("search", debouncedUserSearch);
+  const { data: users } = useApi<Paginated<ManagedUser>>(`/users?${userQuery}`);
+  const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null);
   const { data: plans } = useApi<ManagedPlan[]>(can("plans.view") ? "/plans/manage" : null);
 
   const [userId, setUserId] = useState("");
@@ -251,10 +261,13 @@ export function GrantSubscriptionDialog({ onClose, onSaved }: { onClose: () => v
   const [amount, setAmount] = useState("");
   const [showErrors, setShowErrors] = useState(false);
 
-  const userOptions = useMemo(
-    () => (users ?? []).map((user) => ({ value: user.id, label: user.fullName, description: user.phone })),
-    [users],
-  );
+  const userOptions = useMemo(() => {
+    const matches = users?.items ?? [];
+    // Keep the chosen user listed (so the trigger still shows it) after the search moves on.
+    const list =
+      selectedUser && !matches.some((user) => user.id === selectedUser.id) ? [selectedUser, ...matches] : matches;
+    return list.map((user) => ({ value: user.id, label: user.fullName, description: user.phone }));
+  }, [users, selectedUser]);
   const planOptions = useMemo(
     () => [
       { value: CUSTOM, label: t("customAllowance") },
@@ -298,7 +311,11 @@ export function GrantSubscriptionDialog({ onClose, onSaved }: { onClose: () => v
         <SearchableSelect
           id="grant-user"
           value={userId}
-          onValueChange={setUserId}
+          onValueChange={(id) => {
+            setUserId(id);
+            setSelectedUser((prev) => users?.items.find((user) => user.id === id) ?? (prev?.id === id ? prev : null));
+          }}
+          onSearchChange={setUserSearch}
           aria-describedby={showErrors && userError ? "grant-user-error" : undefined}
           options={userOptions}
           placeholder={t("chooseUser")}
@@ -340,7 +357,9 @@ export function GrantSubscriptionDialog({ onClose, onSaved }: { onClose: () => v
             <SettingsField
               id="grant-amount"
               label={accessType === "TIME" ? t("days") : t("attempts")}
-              error={(showErrors || amount !== "") && amountError ? tErrors(amountError.key, amountError.values) : undefined}
+              error={
+                (showErrors || amount !== "") && amountError ? tErrors(amountError.key, amountError.values) : undefined
+              }
             >
               <Input
                 id="grant-amount"

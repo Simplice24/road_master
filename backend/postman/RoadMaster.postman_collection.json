@@ -33,7 +33,7 @@
                   "const body = pm.response.json();",
                   "pm.environment.set('superAdminToken', body.accessToken);",
                   "pm.environment.set('superAdminPhone', pm.environment.get('runId') + '01');",
-                  "pm.environment.set('superAdminEmail', 'admin' + pm.environment.get('runId') + '@example.com');",
+                  "pm.environment.set('superAdminEmail', 'admin' + pm.environment.get('runId') + '@gmail.com');",
                   "function decodeJwtPayload(token) {",
                   "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
                   "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
@@ -49,7 +49,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Ada Admin\",\n  \"email\": \"admin{{runId}}@example.com\",\n  \"phone\": \"{{runId}}01\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"fullName\": \"Ada Admin\",\n  \"email\": \"admin{{runId}}@gmail.com\",\n  \"phone\": \"{{runId}}01\",\n  \"password\": \"password123\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
             "description": "Only produces a SuperAdmin if the database is completely empty of users. If you've already registered a user against this database, this becomes an ordinary client-role registration instead — wipe the users/roles tables (or point at a fresh DB) if you need a real SuperAdmin bootstrap."
@@ -67,7 +67,7 @@
                   "const body = pm.response.json();",
                   "pm.environment.set('clientToken', body.accessToken);",
                   "pm.environment.set('clientPhone', pm.environment.get('runId') + '02');",
-                  "pm.environment.set('clientEmail', 'client' + pm.environment.get('runId') + '@example.com');",
+                  "pm.environment.set('clientEmail', 'client' + pm.environment.get('runId') + '@gmail.com');",
                   "function decodeJwtPayload(token) {",
                   "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
                   "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
@@ -83,7 +83,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Chris Client\",\n  \"email\": \"client{{runId}}@example.com\",\n  \"phone\": \"{{runId}}02\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"fullName\": \"Chris Client\",\n  \"email\": \"client{{runId}}@gmail.com\",\n  \"phone\": \"{{runId}}02\",\n  \"password\": \"password123\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
             "description": "Requires prisma/seed.ts to have been run first so a DefaultRole row exists — otherwise registration throws a 500 ('No default role is configured')."
@@ -115,10 +115,10 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{superAdminPhone}}\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"identifier\": \"{{superAdminPhone}}\",\n  \"password\": \"password123\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
-            "description": "LoginDto authenticates by `phone`, not email (AuthService#login calls usersService.findByPhone). Re-login helper for after {{superAdminToken}} expires — refreshes it and {{superAdminUserId}}.\n\nNote: this endpoint's DTO had `@IsEmail()` on the `phone` field, which rejected every real phone number and made login unusable — fixed to `@IsString()` alongside this collection update (src/auth/dto/login.dto.ts)."
+            "description": "LoginDto takes `identifier` (phone number or email — treated as an email when it contains `@`) + `password`. Re-login helper for after {{superAdminToken}} expires — refreshes it and {{superAdminUserId}}."
           }
         },
         {
@@ -147,11 +147,33 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{clientPhone}}\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"identifier\": \"{{clientPhone}}\",\n  \"password\": \"password123\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
             "description": "Refreshes {{clientToken}}/{{clientUserId}} after expiry, without re-registering (which would create a brand new user)."
           }
+        },
+        {
+          "name": "Login - Admin by email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"identifier\": \"{{superAdminEmail}}\",\n  \"password\": \"password123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "Same endpoint as the phone logins above: an `identifier` containing `@` is looked up as the account email instead of the phone number."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('logged in by email', () => pm.response.to.have.status(201));",
+                  "pm.test('returns a token', () => pm.expect(pm.response.json().accessToken).to.be.a('string'));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Me (current user + effective permissions)",
@@ -171,6 +193,73 @@
                   "const me = pm.response.json();",
                   "pm.test('no password hash', () => pm.expect(me).to.not.have.property('passwordHash'));",
                   "pm.test('has permission names', () => pm.expect(me.permissions).to.include('examAttempts.start'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password (no account enumeration)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"nobody-{{runId}}@gmail.com\",\n  \"locale\": \"en\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["auth", "forgot-password"] },
+            "description": "Public. Emails a one-time reset link (30 min TTL, 60 s per-account resend cooldown) to the active account with this email. The response is identical whether or not the email is registered, and the lookup + send run in the background so response timing doesn't leak it either. `locale` (en|rw|fr, default en) picks the email language and the frontend route the link opens (`{FRONTEND_URL}/{locale}/reset-password?token=...`). With no SMTP_HOST configured the email is written to the backend log instead of sent."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('always 200', () => pm.response.to.have.status(200));",
+                  "pm.test('generic message', () => pm.expect(pm.response.json().message).to.match(/If an account with that email exists/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reset Password - invalid token → 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"0000000000000000000000000000000000000000000000000000000000000000\",\n  \"password\": \"newpassword123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["auth", "reset-password"] },
+            "description": "Public. Body: `token` (the 64-hex token from the emailed link) + `password` (min 8). On success: 200 `{ message }`, the new password is set, the token is consumed (single use) and every JWT issued before the reset stops working. Unknown, used or expired tokens → 400. The happy path needs the raw token from the email, so it isn't runnable unattended in this collection."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('rejected', () => pm.response.to.have.status(400));",
+                  "pm.test('message', () => pm.expect(pm.response.json().message).to.eql('This reset link is invalid or has expired'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Change Password - wrong current password → 400",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{superAdminToken}}" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"definitely-not-my-password\",\n  \"newPassword\": \"newpassword123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/change-password", "host": ["{{baseUrl}}"], "path": ["auth", "change-password"] },
+            "description": "Authenticated, no permission required (any active user, for their own account). Body: `currentPassword` + `newPassword` (min 8, must differ from the current one). On success: 200 `{ accessToken }` — a fresh token for this session; every token issued before the change (other devices/sessions) stops working, and any unused reset links are retired. Wrong current password → 400 (not 401, so clients don't treat it as a sign-out). The happy path would invalidate `superAdminToken` for the rest of the run, so only the rejection is exercised here."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('rejected', () => pm.response.to.have.status(400));",
+                  "pm.test('message', () => pm.expect(pm.response.json().message).to.eql('Current password is incorrect'));"
                 ]
               }
             }
@@ -384,7 +473,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 1000,\n  \"provider\": \"MTN_MOMO\",\n  \"providerRef\": \"TESTREF-{{runId}}-1\"\n}"
+              "raw": "{\n  \"amount\": 1000,\n  \"provider\": \"MTN_MOMO\",\n  \"payerPhone\": \"0788123456\",\n  \"providerRef\": \"TESTREF-{{runId}}-1\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/transactions/topup", "host": ["{{baseUrl}}"], "path": ["transactions", "topup"] },
             "description": "Funds the client's wallet with 1000 — enough to cover two 500-priced exam fees below (attempt #1 is free regardless, so this really funds attempts #2 and #3)."
@@ -691,7 +780,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 1000,\n  \"provider\": \"CARD\",\n  \"providerRef\": \"TESTREF-{{runId}}-2\"\n}"
+              "raw": "{\n  \"amount\": 1000,\n  \"provider\": \"CARD\",\n  \"cardHolderName\": \"Test Candidate\",\n  \"cardBrand\": \"VISA\",\n  \"cardLast4\": \"4242\",\n  \"cardExpiryMonth\": 12,\n  \"cardExpiryYear\": 2030,\n  \"providerRef\": \"TESTREF-{{runId}}-2\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/transactions/topup", "host": ["{{baseUrl}}"], "path": ["transactions", "topup"] }
           }
@@ -918,7 +1007,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('ok', () => pm.response.to.have.status(200));",
-                  "const users = pm.response.json();",
+                  "const users = pm.response.json().items;",
                   "pm.test('only sees own row', () => {",
                   "  pm.expect(users.length).to.eql(1);",
                   "  pm.expect(users[0].id).to.eql(pm.environment.get('clientUserId'));",
@@ -1110,7 +1199,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{superAdminPhone}}\",\n  \"password\": \"definitely-not-the-password\"\n}"
+              "raw": "{\n  \"identifier\": \"{{superAdminPhone}}\",\n  \"password\": \"definitely-not-the-password\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
           },

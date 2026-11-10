@@ -17,6 +17,7 @@ import {
 } from '../access/access.config';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ListUsersQuery } from './dto/list-users.query';
 
 export interface CreateUserInput {
   fullName: string;
@@ -149,10 +150,13 @@ export class UsersService {
   }
 
   /** The one query allowed to read the password hash (opting out of the global omit) — used
-   * only by AuthService to verify a login. */
-  findCredentialsByPhone(phone: string) {
+   * only by AuthService to verify a login. `identifier` is an email if it contains "@", a phone
+   * number otherwise — one deterministic rule, so one account's phone can never match another
+   * account's email. */
+  findCredentialsByLogin(identifier: string) {
+    const value = identifier.trim();
     return this.prisma.user.findUnique({
-      where: { phone },
+      where: value.includes('@') ? { email: value } : { phone: value },
       select: { id: true, passwordHash: true, isActive: true },
     });
   }
@@ -246,19 +250,46 @@ export class UsersService {
     }
   }
 
-  async listUsers(ability: AppAbility) {
-    const where: Prisma.UserWhereInput = accessibleBy(ability, 'read').ofType(
-      'User',
-    );
-    const users = await this.prisma.user.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: { userRoles: { include: { role: ROLE_SUMMARY } } },
-    });
-    return users.map(({ userRoles, ...user }) => ({
-      ...user,
-      roles: userRoles.map(({ role }) => role),
-    }));
+  /** Admin user browser: paginated, newest first. `roleId: 'none'` finds users with no role. */
+  async listUsers(query: ListUsersQuery, ability: AppAbility) {
+    const filters: Prisma.UserWhereInput[] = [
+      accessibleBy(ability, 'read').ofType('User'),
+    ];
+    const search = query.search?.trim();
+    if (search) {
+      filters.push({
+        OR: [
+          { fullName: { contains: search } },
+          { phone: { contains: search } },
+        ],
+      });
+    }
+    if (query.roleId === 'none') filters.push({ userRoles: { none: {} } });
+    else if (query.roleId) {
+      filters.push({ userRoles: { some: { roleId: query.roleId } } });
+    }
+    if (query.status) filters.push({ isActive: query.status === 'active' });
+    const where: Prisma.UserWhereInput = { AND: filters };
+
+    const [total, users] = await Promise.all([
+      this.prisma.user.count({ where }),
+      this.prisma.user.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+        include: { userRoles: { include: { role: ROLE_SUMMARY } } },
+      }),
+    ]);
+    return {
+      items: users.map(({ userRoles, ...user }) => ({
+        ...user,
+        roles: userRoles.map(({ role }) => role),
+      })),
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+    };
   }
 
   /** Activates/deactivates a user. Nobody can change their own status (no self-lockout, and an

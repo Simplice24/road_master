@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
@@ -14,6 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SetUserRolesDto } from './dto/set-user-roles.dto';
 import { SetUserStatusDto } from './dto/set-user-status.dto';
+import { ListUsersQuery } from './dto/list-users.query';
 import { RequirePermission } from '../casl/decorators/check-policies.decorator';
 import { CurrentAbility } from '../casl/decorators/current-ability.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -25,8 +27,11 @@ export class UsersController {
 
   @Get()
   @RequirePermission('read', 'User')
-  listUsers(@CurrentAbility() abilityParam: unknown) {
-    return this.usersService.listUsers(abilityParam as AppAbility);
+  listUsers(
+    @Query() query: ListUsersQuery,
+    @CurrentAbility() abilityParam: unknown,
+  ) {
+    return this.usersService.listUsers(query, abilityParam as AppAbility);
   }
 
   @Post()

@@ -9,7 +9,6 @@ import type { ManagedUser, Role } from "@/lib/api-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -194,10 +193,11 @@ function UserForm({ open, onOpenChange, user, roles, onSaved }: UserFormDialogPr
                   return (
                     <label
                       key={role.id}
-                      className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-surface-muted has-disabled:cursor-not-allowed has-disabled:opacity-60"
+                      className="flex items-center gap-3 rounded-sm px-2 py-1.5 text-sm hover:bg-surface-muted has-disabled:cursor-not-allowed has-disabled:opacity-60"
                       title={locked ? t("superAdminRoleLocked") : undefined}
                     >
-                      <Checkbox
+                      <Switch
+                        size="lg"
                         checked={roleIds.includes(role.id)}
                         onCheckedChange={(checked) => toggleRole(role.id, checked)}
                         disabled={locked}
@@ -213,7 +213,7 @@ function UserForm({ open, onOpenChange, user, roles, onSaved }: UserFormDialogPr
           {!isEdit && (
             <label className="flex items-center justify-between gap-4 rounded-lg border border-border px-3 py-2.5">
               <span className="text-sm font-medium">{t("activeLabel")}</span>
-              <Switch checked={isActive} onCheckedChange={setIsActive} />
+              <Switch size="lg" checked={isActive} onCheckedChange={setIsActive} />
             </label>
           )}
 

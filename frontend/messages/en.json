@@ -158,7 +158,30 @@
     "registering": "Creating account…",
     "brandTitle": "Welcome to Road Master",
     "brandTagline": "Practice for your provisional driving licence exam under real, timed conditions — in English, Kinyarwanda or French.",
-    "backToHome": "Back to home"
+    "backToHome": "Back to home",
+    "forgotPasswordLink": "Forgot password?",
+    "forgotTitle": "Forgot your password?",
+    "forgotSubtitle": "Enter the email on your account and we'll send you a link to reset your password.",
+    "emailPlaceholder": "you@gmail.com",
+    "forgotCta": "Send reset link",
+    "sendingLink": "Sending…",
+    "forgotSentTitle": "Check your email",
+    "forgotSent": "If an account with {email} exists, we've sent a password reset link. It expires in 30 minutes.",
+    "forgotNoEmailHint": "No email on your account? Contact support to recover access.",
+    "resendLink": "Use a different email",
+    "rememberPassword": "Remembered your password?",
+    "resetTitle": "Set a new password",
+    "resetSubtitle": "Choose a new password for your account.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordsMismatch": "The passwords don't match.",
+    "resetCta": "Reset password",
+    "resetting": "Resetting…",
+    "resetSuccess": "Your password has been reset. Log in with your new password.",
+    "resetInvalidLink": "This reset link is missing or invalid. Request a new one.",
+    "requestNewLink": "Request a new link",
+    "phoneOrEmail": "Phone number or email",
+    "phoneOrEmailPlaceholder": "07XXXXXXXX or you@gmail.com"
   },
   "AppNav": {
     "dashboard": "Dashboard",
@@ -351,11 +374,23 @@
     "rolesDescription": "What you can access in Road Master.",
     "rolesHint": "Roles are managed by an administrator.",
     "noRoles": "You have no roles assigned.",
+    "passwordTitle": "Password",
+    "passwordDescription": "Change the password you use to log in.",
+    "passwordHint": "At least 8 characters. Other devices will be signed out.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "changePassword": "Change password",
+    "changingPassword": "Changing…",
+    "passwordChanged": "Password changed. Other sessions have been signed out.",
     "errors": {
       "nameLength": "Use between {min} and {max} characters.",
       "phoneRequired": "Enter your phone number.",
       "phoneLength": "Use at most {max} characters.",
-      "emailInvalid": "Enter a valid email address."
+      "emailInvalid": "Enter a valid email address.",
+      "passwordLength": "Use at least {min} characters.",
+      "passwordSame": "Choose a password different from your current one.",
+      "passwordsMismatch": "The passwords don't match."
     }
   },
   "ExamAttemptStatus": {
@@ -416,7 +451,11 @@
     "statusUpdated": "Status updated.",
     "superAdminRoleLocked": "Only a SuperAdmin can assign or remove this role.",
     "balance": "Balance",
-    "adjustBalance": "Adjust balance"
+    "adjustBalance": "Adjust balance",
+    "searchPlaceholder": "Search by name or phone…",
+    "allRoles": "All roles",
+    "noRole": "No role",
+    "anyStatus": "Any status"
   },
   "Roles": {
     "title": "Roles",
@@ -460,7 +499,8 @@
     "unsavedChanges": "{count, plural, one {# unsaved change} other {# unsaved changes}}",
     "allSaved": "All changes saved.",
     "discard": "Discard",
-    "permissionsSaved": "Permissions saved."
+    "permissionsSaved": "Permissions saved.",
+    "searchPlaceholder": "Search roles…"
   },
   "ExamConfig": {
     "title": "Exam config",
@@ -887,5 +927,42 @@
       "optionEmpty": "Add text or an image.",
       "optionTooLong": "At most {max} characters."
     }
+  },
+  "PaymentMethod": {
+    "MTN_MOMO": "MTN MoMo",
+    "AIRTEL_MONEY": "Airtel Money",
+    "CARD": "Card",
+    "VISA": "Visa",
+    "MASTERCARD": "Mastercard"
+  },
+  "TopUpPayment": {
+    "title": "How would you like to pay?",
+    "description": "Choose a payment method to top up {amount}.",
+    "mtn": "MTN Mobile Money",
+    "airtel": "Airtel Money",
+    "card": "Debit / Credit card",
+    "pay": "Pay {amount}",
+    "processing": "Processing…",
+    "mtnPhoneLabel": "Enter your MTN MoMo phone number",
+    "airtelPhoneLabel": "Enter your Airtel Money phone number",
+    "mtnPhoneError": "Enter a valid MTN number (078 or 079, 10 digits).",
+    "airtelPhoneError": "Enter a valid Airtel number (072 or 073, 10 digits).",
+    "mtnPrompt": "After you press pay, you will be prompted to submit your Mobile Money PIN on your phone to complete the payment.",
+    "airtelPrompt": "After you press pay, you will be prompted to submit your Airtel Money PIN on your phone to complete the payment.",
+    "cardHeading": "Enter your card details to pay:",
+    "holder": "Card holder's name",
+    "holderPlaceholder": "Enter the name on card",
+    "holderError": "Enter the name shown on the card.",
+    "cardNumber": "Card number",
+    "cardNumberError": "Enter a valid card number.",
+    "cardBrandError": "Only Visa and Mastercard are accepted.",
+    "expiry": "Expiry date",
+    "expiryMonth": "Expiry month",
+    "expiryYear": "Expiry year",
+    "expiryError": "Enter a valid expiry date.",
+    "expiredError": "This card has expired.",
+    "cvv": "CVV",
+    "cvvError": "Enter the 3-digit code on the back of the card.",
+    "cardSecurityNote": "We only keep the card brand, last 4 digits and expiry for your records — never the full card number or CVV."
   }
 }

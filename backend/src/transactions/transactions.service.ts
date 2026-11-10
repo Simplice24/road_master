@@ -12,10 +12,20 @@ import {
   assertCanCreate,
   assertFieldsAllowed,
 } from '../casl/policy-assertions';
-import { TopUpDto } from './dto/topup.dto';
+import { MOBILE_MONEY_PREFIXES, TopUpDto } from './dto/topup.dto';
 import { AdjustBalanceDto } from './dto/adjust-balance.dto';
 
-const TRANSACTION_FIELDS = ['amount', 'provider', 'providerRef'];
+const TRANSACTION_FIELDS = [
+  'amount',
+  'provider',
+  'providerRef',
+  'payerPhone',
+  'cardHolderName',
+  'cardBrand',
+  'cardLast4',
+  'cardExpiryMonth',
+  'cardExpiryYear',
+];
 const ADJUST_FIELDS = ['userId', 'amount', 'note'];
 
 /** Machine-readable code on the 400 the frontend uses to offer a wallet top-up. */
@@ -49,7 +59,10 @@ export class TransactionsService {
       amount: data.amount,
       type: 'TOPUP',
     });
+    const payer = this.payerDetails(data);
 
+    // No payment gateway yet: the top-up is credited immediately. Once one is wired in, this
+    // becomes a PENDING row (gateway push/charge here) credited by the gateway's callback.
     return this.prisma.$transaction(async (tx) => {
       const transaction = await tx.transaction.create({
         data: {
@@ -59,6 +72,7 @@ export class TransactionsService {
           amount: data.amount,
           provider: data.provider,
           providerRef: data.providerRef,
+          ...payer,
         },
       });
 
@@ -187,6 +201,47 @@ export class TransactionsService {
         },
       });
     });
+  }
+
+  /**
+   * Picks only the payer fields that belong to the chosen provider (a card top-up never stores
+   * a stray payerPhone, and vice versa) and enforces what the DTO can't express on its own.
+   */
+  private payerDetails(
+    data: TopUpDto,
+  ): Pick<
+    Prisma.TransactionUncheckedCreateInput,
+    | 'payerPhone'
+    | 'cardHolderName'
+    | 'cardBrand'
+    | 'cardLast4'
+    | 'cardExpiryMonth'
+    | 'cardExpiryYear'
+  > {
+    if (data.provider === 'CARD') {
+      const now = new Date();
+      const expiry = data.cardExpiryYear! * 12 + data.cardExpiryMonth!;
+      if (expiry < now.getFullYear() * 12 + now.getMonth() + 1) {
+        throw new BadRequestException('Card has expired');
+      }
+      return {
+        cardHolderName: data.cardHolderName,
+        cardBrand: data.cardBrand,
+        cardLast4: data.cardLast4,
+        cardExpiryMonth: data.cardExpiryMonth,
+        cardExpiryYear: data.cardExpiryYear,
+      };
+    }
+
+    const prefixes = MOBILE_MONEY_PREFIXES[data.provider];
+    if (!prefixes.some((prefix) => data.payerPhone!.startsWith(prefix))) {
+      throw new BadRequestException(
+        data.provider === 'MTN_MOMO'
+          ? 'payerPhone must be an MTN number (078/079)'
+          : 'payerPhone must be an Airtel number (072/073)',
+      );
+    }
+    return { payerPhone: data.payerPhone };
   }
 
   private mapPrismaError(error: unknown, notFoundMessage: string): Error {

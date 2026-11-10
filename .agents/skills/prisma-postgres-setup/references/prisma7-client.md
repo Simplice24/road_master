@@ -48,7 +48,7 @@ const prisma = new PrismaClient({ adapter })
 
 // Create
 const user = await prisma.user.create({
-  data: { email: 'alice@example.com', name: 'Alice' },
+  data: { email: 'alice@gmail.com', name: 'Alice' },
 })
 
 // Read with relations

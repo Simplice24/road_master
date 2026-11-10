@@ -10,6 +10,7 @@ import { PermissionSyncService } from '../access/permission-sync.service';
 import { isPermissionName } from '../access/access.config';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { ListRolesQuery } from './dto/list-roles.query';
 import { Prisma } from '../../generated/prisma/client';
 
 const ROLE_INCLUDE = {
@@ -52,12 +53,28 @@ export class RolesService {
     }
   }
 
-  async findAll() {
-    const roles = await this.prisma.role.findMany({
-      include: ROLE_INCLUDE,
-      orderBy: { createdAt: 'asc' },
-    });
-    return roles.map((role) => this.shape(role));
+  /** Paginated, oldest first (so the seeded SuperAdmin role leads). */
+  async findAll(query: ListRolesQuery) {
+    const search = query.search?.trim();
+    const where: Prisma.RoleWhereInput = search
+      ? { name: { contains: search } }
+      : {};
+    const [total, roles] = await Promise.all([
+      this.prisma.role.count({ where }),
+      this.prisma.role.findMany({
+        where,
+        include: ROLE_INCLUDE,
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+      }),
+    ]);
+    return {
+      items: roles.map((role) => this.shape(role)),
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+    };
   }
 
   async findOne(id: string) {

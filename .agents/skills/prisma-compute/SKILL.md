@@ -30,7 +30,7 @@ The CLI has a built-in feedback channel. Use it whenever a command crashes (`UNE
 
 ```bash
 bunx @prisma/cli@latest feedback "app deploy crashed: <first error line>"
-bunx @prisma/cli@latest feedback "love the deploy flow" --email you@example.com
+bunx @prisma/cli@latest feedback "love the deploy flow" --email you@gmail.com
 ```
 
 Crash output points here on its own: `--json` crash envelopes carry the exact pre-filled command as a `recover` entry in `nextActions` (run it verbatim), and human crash output ends with a `Tell us what happened:` hint. Feedback is anonymous unless `--email` is passed and attaches only the CLI version, node version, and OS platform/arch. Never include secrets, connection URLs, or user data in the message.

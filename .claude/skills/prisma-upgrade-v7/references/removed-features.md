@@ -225,6 +225,6 @@ const user = await prisma.user.findUniqueOrThrow({
 })
 
 const user = await prisma.user.findFirstOrThrow({
-  where: { email: 'test@example.com' },
+  where: { email: 'test@gmail.com' },
 })
 ```

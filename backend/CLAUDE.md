@@ -33,6 +33,34 @@ npm run seed                  # seed the default "client" role (by config permis
 ```
 
 There is no `.env.example`; `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN` are read from `.env` via `dotenv/config`.
+Email (password reset) uses `SMTP_HOST`, `SMTP_PORT` (default 587; 465 = implicit TLS), `SMTP_USER`,
+`SMTP_PASS`, `SMTP_FROM`, plus `FRONTEND_URL` (default `http://localhost:3001`) for the link. With no
+`SMTP_HOST`, `MailService` logs emails instead of sending them — grab reset links from the server log in dev.
+
+### Password reset (`src/auth/password-reset.service.ts`)
+
+Email-only (no SMS integration yet — so accounts registered without an
+email can't self-reset).
+`POST /auth/forgot-password` always returns the same 200 and does the lookup/issue/send in the
+background, so neither body nor timing reveals whether an email is registered. Only the SHA-256
+of the token is stored (`PasswordResetToken`), issuing a link deletes older unused ones, and
+there's a 60 s per-account resend cooldown. `POST /auth/reset-password` claims the token with a
+conditional `updateMany` (CAS, same pattern as below) and sets `User.passwordChangedAt`;
+`JwtStrategy` rejects any token whose `iat` predates it, so a reset logs out every session.
+
+`POST /auth/change-password` (authenticated, no permission — own account only, in
+`AuthService#changePassword`) re-checks `currentPassword`, rejects reusing it, writes the new hash
+with a CAS on the old hash, sets `passwordChangedAt` and retires unused reset tokens — then returns
+a fresh `accessToken`, so the caller stays signed in while every other session is logged out.
+
+### Wallet top-ups (`src/transactions/`)
+
+`POST /transactions/topup` requires `provider` (`MTN_MOMO` | `AIRTEL_MONEY` | `CARD`) plus the
+payer details kept on the `Transaction` row for reconciliation: `payerPhone` (normalized to
+`07XXXXXXXX`, network prefix checked) for mobile money; `cardHolderName`, `cardBrand`,
+`cardLast4`, `cardExpiryMonth/Year` for cards. **Never accept or store a full card number or
+CVV** — that would put this API in PCI DSS cardholder-data scope; the gateway should tokenize
+cards. No gateway is wired in yet, so top-ups are credited immediately as `SUCCESS`.
 
 ## Architecture
 
@@ -63,7 +91,8 @@ be deactivated.
 every request with an existing token, and get an empty ability from `CaslAbilityFactory`.
 
 **`passwordHash` is omitted globally** (`GLOBAL_OMIT` in `src/prisma/prisma.service.ts`, typed so
-user rows don't carry it); only `UsersService#findCredentialsByPhone` opts back in, for login.
+user rows don't carry it); only `UsersService#findCredentialsByLogin` (login — `identifier` is an email if it
+contains "@", a phone number otherwise) and `AuthService#changePassword` select it back in.
 
 - `Permission` rows: `name` (config key, unique; null only for legacy rows) + `action` (`create|read|update|delete|manage`) + `subject` (any
   `Prisma.ModelName`, or `all`) + optional `conditions` (CASL-style JSON, supports

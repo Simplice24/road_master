@@ -24,6 +24,9 @@ interface SearchableSelectProps {
   className?: string
   "aria-label"?: string
   "aria-describedby"?: string
+  /** Server-side search: called with the typed text, and local filtering is turned off — the
+   * caller swaps `options` for the matches. */
+  onSearchChange?: (query: string) => void
 }
 
 /**
@@ -44,6 +47,7 @@ function SearchableSelect({
   className,
   "aria-label": ariaLabel,
   "aria-describedby": ariaDescribedBy,
+  onSearchChange,
 }: SearchableSelectProps) {
   const items = React.useMemo(
     () =>
@@ -64,6 +68,10 @@ function SearchableSelect({
         if (next != null) onValueChange(next as string)
       }}
       disabled={disabled}
+      {...(onSearchChange && {
+        filter: null,
+        onInputValueChange: (query: string) => onSearchChange(query),
+      })}
     >
       <Combobox.Trigger
         id={id}

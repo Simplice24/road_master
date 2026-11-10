@@ -74,7 +74,11 @@ model User {
   // Deactivated users can't log in, and an existing token stops working on the next request
   // (JwtStrategy + CaslAbilityFactory both check it). There is no user deletion.
   isActive         Boolean  @default(true)
+  // Set whenever the password changes (reset). JwtStrategy rejects tokens issued before it, so
+  // a password reset logs out every existing session.
+  passwordChangedAt DateTime?
   userRoles        UserRole[]
+  passwordResetTokens PasswordResetToken[]
 
   walletBalance    Decimal  @default(0) @db.Decimal(10, 2)
   hasUsedFreeExam  Boolean  @default(false)
@@ -91,6 +95,21 @@ model User {
   updatedAt        DateTime @updatedAt
 
   @@map("users")
+}
+
+// One-time, short-lived password-reset links sent by email. Only the SHA-256 of the token is
+// stored, so a database leak can't be turned into account takeovers.
+model PasswordResetToken {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique @db.Char(64)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("password_reset_tokens")
 }
 
 // -----------------------------
@@ -193,6 +212,15 @@ model Transaction {
 
   provider      String?            // e.g. MTN_MOMO, CARD, AIRTEL_MONEY
   providerRef   String?            // gateway transaction reference
+
+  // TOPUP payer details, kept for reconciliation against gateway statements. Cards never store
+  // the full number or CVV (PCI DSS) — only what a receipt shows.
+  payerPhone      String?          @db.VarChar(20)  // MTN_MOMO / AIRTEL_MONEY, as 07XXXXXXXX
+  cardHolderName  String?          @db.VarChar(100)
+  cardBrand       String?          @db.VarChar(20)  // VISA / MASTERCARD
+  cardLast4       String?          @db.Char(4)
+  cardExpiryMonth Int?             @db.TinyInt
+  cardExpiryYear  Int?             @db.SmallInt
 
   examAttempt   ExamAttempt?       // if this transaction paid for an exam (legacy EXAM_FEE)
   userSubscription UserSubscription? // if this transaction paid for a plan (PLAN_PURCHASE)

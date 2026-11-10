@@ -14,6 +14,8 @@ import { FULL_BLEED, SettingsField, SettingsSection } from "@/components/app/set
 
 // Mirrors backend UpdateUserDto (fullName MinLength 2) and CreateUserDto (≤100 chars, phone ≤32).
 const LIMITS = { fullName: { min: 2, max: 100 }, phoneMax: 32 } as const;
+// Mirrors backend ChangePasswordDto (newPassword MinLength 8).
+const PASSWORD_MIN = 8;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function initials(fullName: string) {
@@ -29,13 +31,17 @@ export default function ProfilePage() {
   const t = useTranslations("Profile");
   const tAccess = useTranslations("Access");
   const locale = useLocale();
-  const { user, token, refreshUser, can } = useAuth();
+  const { user, token, refreshUser, changePassword, can } = useAuth();
   // Without users.updateOwn every field is read-only (the backend would reject the save anyway).
   const canEdit = can("users.updateOwn");
 
   const [fullName, setFullName] = useState(user?.fullName ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // Keep the drafts in step with the signed-in user (e.g. after a save refreshes it).
   const [syncedUser, setSyncedUser] = useState(user);
@@ -59,6 +65,26 @@ export default function ProfilePage() {
       ? t("errors.phoneLength", { max: LIMITS.phoneMax })
       : undefined;
   const emailError = email.trim() && !EMAIL_PATTERN.test(email.trim()) ? t("errors.emailInvalid") : undefined;
+
+  // Only flag a password field once something is typed in it, so the empty card isn't all red.
+  const newPasswordError =
+    !newPassword
+      ? undefined
+      : newPassword.length < PASSWORD_MIN
+        ? t("errors.passwordLength", { min: PASSWORD_MIN })
+        : newPassword === currentPassword
+          ? t("errors.passwordSame")
+          : undefined;
+  const confirmPasswordError =
+    confirmPassword && confirmPassword !== newPassword ? t("errors.passwordsMismatch") : undefined;
+
+  async function savePassword() {
+    await changePassword(currentPassword, newPassword);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    toast.success(t("passwordChanged"));
+  }
 
   async function save(body: Record<string, string | null>) {
     if (!token || !user) return;
@@ -173,6 +199,68 @@ export default function ProfilePage() {
                     autoComplete="email"
                   />
                 </SettingsField>
+              </div>
+            </SettingsSection>
+
+            {/* Not gated on users.updateOwn: anyone signed in may change their own password. */}
+            <SettingsSection
+              title={t("passwordTitle")}
+              description={t("passwordDescription")}
+              hint={t("passwordHint")}
+              dirty={!!currentPassword && !!newPassword && !!confirmPassword}
+              valid={!newPasswordError && !confirmPasswordError}
+              onSave={savePassword}
+              submitLabel={t("changePassword")}
+              submittingLabel={t("changingPassword")}
+            >
+              {/* Lets password managers tie the new password to the right account. */}
+              <input
+                type="text"
+                name="username"
+                autoComplete="username"
+                value={user.email ?? user.phone}
+                readOnly
+                hidden
+              />
+              {/* 12 columns from sm up: current password on a half-width row, new + confirm side by side. */}
+              <div className="grid max-w-2xl grid-cols-1 gap-5 sm:grid-cols-12">
+                <div className="sm:col-span-6">
+                  <SettingsField id="profile-current-password" label={t("currentPassword")}>
+                    <Input
+                      id="profile-current-password"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(event) => setCurrentPassword(event.target.value)}
+                      autoComplete="current-password"
+                    />
+                  </SettingsField>
+                </div>
+                <div className="sm:col-span-6 sm:col-start-1">
+                  <SettingsField id="profile-new-password" label={t("newPassword")} error={newPasswordError}>
+                    <Input
+                      id="profile-new-password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      aria-invalid={!!newPasswordError}
+                      aria-describedby={newPasswordError ? "profile-new-password-error" : undefined}
+                      autoComplete="new-password"
+                    />
+                  </SettingsField>
+                </div>
+                <div className="sm:col-span-6">
+                  <SettingsField id="profile-confirm-password" label={t("confirmPassword")} error={confirmPasswordError}>
+                    <Input
+                      id="profile-confirm-password"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      aria-invalid={!!confirmPasswordError}
+                      aria-describedby={confirmPasswordError ? "profile-confirm-password-error" : undefined}
+                      autoComplete="new-password"
+                    />
+                  </SettingsField>
+                </div>
               </div>
             </SettingsSection>
 

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Phone, Lock } from "lucide-react";
+import { User, Lock } from "lucide-react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api-client";
@@ -17,7 +17,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const [phone, setPhone] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +27,7 @@ export default function LoginPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await login(phone, password);
+      await login(identifier, password);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : tCommon("error"));
@@ -57,14 +57,14 @@ export default function LoginPage() {
         )}
 
         <AuthField
-          id="phone"
-          icon={Phone}
-          label={t("phone")}
-          type="tel"
-          autoComplete="tel"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          placeholder={t("phonePlaceholder")}
+          id="identifier"
+          icon={User}
+          label={t("phoneOrEmail")}
+          type="text"
+          autoComplete="username"
+          value={identifier}
+          onChange={(event) => setIdentifier(event.target.value)}
+          placeholder={t("phoneOrEmailPlaceholder")}
           required
           autoFocus
         />
@@ -80,6 +80,13 @@ export default function LoginPage() {
           placeholder={t("password")}
           required
         />
+
+        <Link
+          href="/forgot-password"
+          className="-mt-1 self-end text-sm text-muted-foreground hover:text-foreground hover:underline"
+        >
+          {t("forgotPasswordLink")}
+        </Link>
 
         <Button
           type="submit"
